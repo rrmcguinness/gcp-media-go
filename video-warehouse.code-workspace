@@ -1,0 +1,36 @@
+{
+    "folders": [
+        {
+            "name": "API",
+            "path": "api"
+        },
+        {
+            "name": "Commands",
+            "path": "cmd"
+        },
+        {
+            "name": "Packages",
+            "path": "pkg"
+        },
+        {
+            "name": "Web",
+            "path": "web"
+        },
+        {
+            "name": "Third Party",
+            "path": "third_party"
+        },
+        {
+            "name": "Project Root",
+            "path": "."
+        }
+    ],
+    "extensions": {
+        "recommendations": [
+            "BazelBuild.vscode-bazel", "golang.go", "googlecloudtools.cloudcode", "trunk.io"
+        ]
+    },
+    "settings": {
+        "editor.tabSize": 2,
+    }
+}

@@ -1,0 +1,53 @@
+# Copyright 2024 Google, LLC
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     https://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+load("//:build/copy_file_groups.bzl", "copy_file_groups")
+
+copy_file_groups(
+  name = "copy_ffmpeg",
+  prefix = "bin",
+  srcs = select({
+      "//:linux_x86_64": [
+        "//third_party/ffmpeg/linux_x86_64:ffmpeg_export",
+      ],
+      "//:linux_arm": [
+        "//third_party/ffmpeg/linux_arm64:ffmpeg_export",
+      ],
+      "//:apple_silicon": [
+        "//third_party/ffmpeg/darwin_arm64:ffmpeg_export",
+      ],
+      "//:apple_legacy": [
+        "//third_party/ffmpeg/darwin_arm64:ffmpeg_export",
+      ],
+  })
+)
+
+go_library(
+    name = "pipeline",
+    srcs = ["video_transformer.go"],
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline",
+    visibility = ["//visibility:public"],
+    deps = [
+       "@com_github_stretchr_testify//assert",
+    ],
+    data = [
+      "copy_ffmpeg",
+    ]
+)
+
+go_test(
+    name = "pipeline_test",
+    srcs = ["video_transformer_test.go"],
+    embed = [":pipeline"],
+)
