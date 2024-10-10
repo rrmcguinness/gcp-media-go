@@ -17,7 +17,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
 go_library(
     name = "model",
     srcs = [
+        "chain_context.go",
+        "chain.go",
         "config.go",
+        "constants.go",
         "domain_model.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/model",

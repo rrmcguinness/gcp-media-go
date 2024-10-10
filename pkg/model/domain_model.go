@@ -38,11 +38,3 @@ type TriggerMediaWrite struct {
 	Crc32c                  string                 `json:"crc32c"`
 	ETag                    string                 `json:"etag"`
 }
-
-type TransformerConfig struct {
-	TopicSubscriptionName string
-	InputBucket           string
-	InputFile             string
-	TargetBucket          string
-	TargetWidth           int16
-}

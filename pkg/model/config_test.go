@@ -12,34 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package model
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestVideoTransformer(t *testing.T) {
+const test_config_file = "configs/app-test.yaml"
 
-	path, err := os.Getwd()
+func TestConfig(t *testing.T) {
+	config, err := ReadConfig(test_config_file)
 	if err != nil {
-		fmt.Println("Error getting current path:", err)
-		return
+		t.Errorf("Error reading config file: %v", err)
 	}
-
-	fmt.Println("Current path:", path)
-
-	fmt.Print("Yo")
-	cmd := exec.Command("bin/ffmpeg", "-help")
-	out, err := cmd.Output()
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-	assert.NotNil(t, out)
-	fmt.Println("Output:", string(out))
+	assert.Nil(t, err)
+	assert.NotNil(t, config)
+	assert.Equal(t, "test", config.Project.Id)
+	assert.Equal(t, "test", config.Project.Location)
+	assert.Equal(t, "test", config.HighResSubscription.Id)
+	assert.Equal(t, "test", config.HighResToLowResCommand.Bucket)
+	assert.Equal(t, "240", config.HighResToLowResCommand.Width)
+	assert.Equal(t, "mp4", config.HighResToLowResCommand.Format)
+	assert.Equal(t, 1, len(config.HighResToLowResCommand.AdditionalArgs))
 }

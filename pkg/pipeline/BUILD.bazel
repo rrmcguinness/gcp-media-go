@@ -35,7 +35,7 @@ copy_file_groups(
 
 go_library(
     name = "pipeline",
-    srcs = ["video_transformer.go", "message_handler.go"],
+    srcs = ["ffmpeg_command.go", "pubsub_listener.go"],
     data = [
         "copy_ffmpeg",
         "//configs:app.yaml",
@@ -44,24 +44,16 @@ go_library(
     visibility = ["//visibility:public"],
     deps = [
         "//pkg/model:model",
+        "@com_google_cloud_go_storage//:go_default_library",
         "@com_google_cloud_go_pubsub//:go_default_library",
     ],
 )
 
-go_test(
-    name = "pipeline_test",
-    srcs = ["video_transformer_test.go"],
-    embed = [":pipeline"],
-    rundir = ".",
-    deps = [
-        "@com_github_stretchr_testify//assert",
-    ],
-)
 
 go_test(
-    name = "message_handler_test",
+    name = "pubsub_listener_test",
     size = "small",
-    srcs = ["message_handler_test.go"],
+    srcs = ["pubsub_listener_test.go"],
     embed = [":pipeline"],
     rundir = ".",
     deps = [
