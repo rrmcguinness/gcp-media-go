@@ -1,23 +1,27 @@
 {
     "folders": [
         {
-            "name": "API",
+            "name": "configs",
+            "path": "configs"
+        },
+        {
+            "name": "api",
             "path": "api"
         },
         {
-            "name": "Commands",
+            "name": "cmd",
             "path": "cmd"
         },
         {
-            "name": "Packages",
+            "name": "pkg",
             "path": "pkg"
         },
         {
-            "name": "Web",
+            "name": "web",
             "path": "web"
         },
         {
-            "name": "Third Party",
+            "name": "third_party",
             "path": "third_party"
         },
         {
@@ -32,5 +36,9 @@
     },
     "settings": {
         "editor.tabSize": 2,
+        "cSpell.words": [
+            "metageneration",
+            "rmcguinness"
+        ],
     }
 }

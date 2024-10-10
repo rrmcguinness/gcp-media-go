@@ -1,6 +1,7 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
 
-# gazelle:prefix github.com/bazelbuild/rules_go/examples/basic-gazelle
+# gazelle:prefix github.com/GoogleCloudPlatform/solutions/media
+
 gazelle(name = "gazelle")
 
 # adding rule to update deps
