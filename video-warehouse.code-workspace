@@ -21,6 +21,10 @@
             "path": "web"
         },
         {
+            "name": "test",
+            "path": "test"
+        },
+        {
             "name": "third_party",
             "path": "third_party"
         },
