@@ -31,11 +31,16 @@ copy_file_groups(
         ],
     }),
     prefix = "bin",
+    visibility = ["//visibility:public"],
 )
 
 go_library(
     name = "pipeline",
-    srcs = ["ffmpeg_command.go", "pubsub_listener.go"],
+    srcs = [
+        "ffmpeg_command.go",
+        "gemini_command.go",
+        "pubsub_listener.go",
+    ],
     data = [
         "copy_ffmpeg",
         "//configs:app.yaml",
@@ -43,8 +48,9 @@ go_library(
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/model:model",
-        "@com_google_cloud_go_storage//:go_default_library",
+        "//pkg/model",
+        "@com_github_google_generative_ai_go//genai:go_default_library",
         "@com_google_cloud_go_pubsub//:go_default_library",
+        "@com_google_cloud_go_storage//:go_default_library",
     ],
 )

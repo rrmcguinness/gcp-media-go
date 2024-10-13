@@ -20,7 +20,6 @@ high_res_subscription:
   id: test
   
 high_res_to_low_res_command:
-  additional_args: [ -v ]
   bucket: test
   format: mp4
   width: 240

@@ -1,19 +1,17 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
-
+gazelle(name = "gazelle")
 # gazelle:prefix github.com/GoogleCloudPlatform/solutions/media
 
-gazelle(name = "gazelle")
-
 # adding rule to update deps
-gazelle(
-    name = "gazelle-update-repos",
-    args = [
-        "-from_file=go.mod",
-        "-to_macro=deps.bzl%go_dependencies",
-        "-prune",
-    ],
-    command = "update-repos",
-)
+# gazelle(
+#     name = "gazelle-update-repos",
+#     args = [
+#         "-from_file=go.mod",
+#         "-to_macro=deps.bzl%go_dependencies",
+#         "-prune",
+#     ],
+#     command = "update-repos",
+# )
 
 config_setting(
     name = "linux_x86_64",

@@ -16,6 +16,7 @@ package model
 const (
 	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
 
-	CTX_MESSAGE = "message"
-	CTX_CONFIG  = "config"
+	CTX_WAIT_GROUP = "__wait_group__"
+	CTX_MESSAGE    = "__message__"
+	CTX_CONFIG     = "__config__"
 )

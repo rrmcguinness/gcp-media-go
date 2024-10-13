@@ -16,8 +16,11 @@ package pipeline
 
 import (
 	"context"
+	"fmt"
 	"io"
+	"os"
 	"os/exec"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
@@ -25,97 +28,92 @@ import (
 
 type FFMpegStreamingCommand struct {
 	model.Command
+	client              *storage.Client
 	executableCommand   string
-	executableArguments []string
-	inputSource         string
+	executableArguments string
 	destinationBucket   string
 }
 
+func (c *FFMpegStreamingCommand) GetExecutableCommandString() string {
+	return c.executableCommand + " " + c.executableArguments
+}
+
 func NewFFMpegStreamingCommand(
+	ctx context.Context,
 	executableCommand string,
-	executableArguments []string,
-	outputDestination string,
+	destinationBucket string,
+	format string,
+	width string,
 ) *FFMpegStreamingCommand {
 
-	var args []string
-	args = append(args, "-i", "pipe:0")
-	args = append(args, executableArguments...)
-	args = append(args, "pipe:1")
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	scale := fmt.Sprintf("scale=w=%s:h=trunc(ow/a/2)*2", width)
 
 	return &FFMpegStreamingCommand{
+		client:              client,
 		executableCommand:   executableCommand,
-		executableArguments: args,
-		destinationBucket:   outputDestination,
+		executableArguments: "-analyzeduration 0 -probesize 5000000 -y -hide_banner -i %s -filter:v " + scale + " -f mp4 %s",
+		destinationBucket:   destinationBucket,
 	}
+}
+
+func (c *FFMpegStreamingCommand) Close() {
+	c.client.Close()
 }
 
 func (c *FFMpegStreamingCommand) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(model.CTX_MESSAGE).(model.TriggerMediaWrite).Kind == model.EVENT_STORAGE_BUCKET_WRITE
+	return chCtx.Get(model.CTX_MESSAGE).(*model.TriggerMediaWrite).Kind == model.EVENT_STORAGE_BUCKET_WRITE
 }
 
 func (c *FFMpegStreamingCommand) Execute(chCtx model.ChainContext) {
-	model := chCtx.Get(model.CTX_MESSAGE).(model.TriggerMediaWrite)
 
-	cmd := exec.Command(c.executableCommand, c.executableArguments...)
-
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		panic(err)
-	}
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		panic(err)
-	}
-
+	//#############################################################################
+	// Create a processing context, and get the message from the context and create temp files
+	//#############################################################################
 	ctx := context.Background()
+	msg := chCtx.Get(model.CTX_MESSAGE).(*model.TriggerMediaWrite)
 
-	storageClient, err := storage.NewClient(ctx)
+	originalFile, err := os.CreateTemp("", "tmp-vid-in-")
+	defer os.Remove(originalFile.Name())
+
+	outputFile, err := os.CreateTemp("", "tmp-vid-out-")
+	defer os.Remove(outputFile.Name())
+
+	//#############################################################################
+	// Download the original file to a temp file
+	//#############################################################################
+	readerBucket := c.client.Bucket(msg.Bucket)
+	obj := readerBucket.Object(msg.Name)
+	reader, err := obj.NewReader(ctx)
 	if err != nil {
-		chCtx.AddError(err)
+		chCtx.AddError(fmt.Errorf("error creating GCS reader: %w", err))
 		return
 	}
-	defer storageClient.Close()
+	defer reader.Close()
+	io.Copy(originalFile, reader)
 
-	// Create the source Reader
-	sourceBucket := storageClient.Bucket(model.Bucket)
-	sourceObject := sourceBucket.Object(model.Name)
+	//#############################################################################
+	// Execute FFMpeg which will write to the temp file
+	//#############################################################################
+	args := fmt.Sprintf(c.executableArguments, originalFile.Name(), outputFile.Name())
+	cmd := exec.Command(c.executableCommand, strings.Split(args, " ")...)
+	cmd.Stderr = os.Stderr
 
-	sourceReader, err := sourceObject.NewReader(ctx)
-	if err != nil {
-		chCtx.AddError(err)
+	if err := cmd.Run(); err != nil {
+		chCtx.AddError(fmt.Errorf("error running ffmpeg: %w", err))
 		return
 	}
-	defer sourceReader.Close()
 
-	// Create the destination writer
-	destBucket := storageClient.Bucket(c.destinationBucket)
-	destObject := destBucket.Object(model.Name)
-
-	// Create a writer for the destination file.
-	destWriter := destObject.NewWriter(ctx)
-	defer destWriter.Close()
-
-	// Start ffmpeg.
-	if err := cmd.Start(); err != nil {
-		panic(err)
-	}
-
-	// Copy the source file to ffmpeg's standard input.
-	go func() {
-		defer stdin.Close()
-		if _, err := io.Copy(stdin, sourceReader); err != nil {
-			panic(err)
-		}
-	}()
-
-	// Copy ffmpeg's standard output to the destination file.
-	if _, err := io.Copy(destWriter, stdout); err != nil {
-		panic(err)
-	}
-
-	// Wait for ffmpeg to finish.
-	if err := cmd.Wait(); err != nil {
-		panic(err)
-	}
-
+	//#############################################################################
+	// Copy the contents of the output file to the bucket.
+	//#############################################################################
+	writerBucket := c.client.Bucket(c.destinationBucket) // Use the destination bucket from the command
+	obj = writerBucket.Object(msg.Name)
+	writer := obj.NewWriter(ctx)
+	defer writer.Close()
+	io.Copy(writer, outputFile)
 }
