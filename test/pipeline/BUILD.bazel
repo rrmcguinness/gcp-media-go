@@ -1,0 +1,77 @@
+# Copyright 2024 Google, LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+load("@io_bazel_rules_go//go:def.bzl", "go_library", "go_test")
+
+go_test(
+    name = "pubsub_listener_test",
+    size = "small",
+    srcs = [
+        "pubsub_listener_test.go",
+        "testharness.go",
+    ],
+    rundir = ".",
+    data = [
+        "//configs:app.yaml",
+    ],
+    deps = [
+        "//pkg/model",
+        "//pkg/pipeline",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
+
+go_test(
+    name = "ffmpeg_command_test",
+    size = "small",
+    srcs = [
+        "ffmpeg_command_test.go",
+        "testharness.go",
+    ],
+    data = [
+        "//configs:app.yaml",
+        "//pkg/pipeline:copy_ffmpeg",
+    ],
+    rundir = ".",
+    deps = [
+        "//pkg/model",
+        "//pkg/pipeline",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
+
+go_library(
+    name = "pipeline",
+    srcs = ["testharness.go"],
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/test/pipeline",
+    visibility = ["//visibility:public"],
+    deps = ["//pkg/model"],
+)
+
+go_test(
+    name = "pipeline_test",
+    srcs = [
+        "ffmpeg_command_test.go",
+        "pubsub_listener_test.go",
+    ],
+    embed = [":pipeline"],
+    rundir = ".",
+    data = [
+        "//configs:app.yaml",
+    ],
+    deps = [
+        "//pkg/model",
+        "//pkg/pipeline",
+        "@com_github_stretchr_testify//assert:go_default_library",
+    ],
+)
