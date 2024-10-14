@@ -59,7 +59,7 @@ func TestMediaReviewCommand(t *testing.T) {
 	Review the attached movie and fulfill the following instructions and response in JSON format:
 	- Identify the movie's Title, Director, Producers, Cinematographers, and Actors.
 	- Write a creative and detailed summary that matches the tone of the movie.
-	- Identify all of the scenes in the movie start and end timestamps.
+	- Identify all of the scenes in the movie start and end timestamps in the format of HH:mm:ss where hours (HH), minutes (mm), and seconds (ss) are only two digits.
 
 	Example:
 		{
