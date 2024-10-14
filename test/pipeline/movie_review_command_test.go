@@ -78,7 +78,7 @@ func TestMediaReviewCommand(t *testing.T) {
 	`
 	genModel := cloudClients.AgentModels["creative-flash"]
 	assert.NotNil(t, genModel)
-	movieReviewCommand, err := p.NewMovieReviewCommand(genModel, promptTemplate)
+	movieReviewCommand, err := p.NewMovieReviewCommand(cloudClients.GenAIClient, cloudClients.StorageClient, genModel, promptTemplate)
 	test.HandleErr(err, t)
 
 	assert.True(t, movieReviewCommand.IsExecutable(chainCtx))

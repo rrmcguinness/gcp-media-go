@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
@@ -87,15 +88,11 @@ func (c *FFMPegDownloadAndResizeCommand) Execute(chCtx model.ChainContext) {
 	//#############################################################################
 	// Download the original file to a temp file
 	//#############################################################################
-	readerBucket := c.client.Bucket(msg.Bucket)
-	obj := readerBucket.Object(msg.Name)
-	reader, err := obj.NewReader(ctx)
+	err = cloud.CopyFromGcsToTmp(ctx, c.client, originalFile, msg.Bucket, msg.Name)
 	if err != nil {
-		chCtx.AddError(fmt.Errorf("error creating GCS reader: %w", err))
+		chCtx.AddError(err)
 		return
 	}
-	defer reader.Close()
-	io.Copy(originalFile, reader)
 
 	//#############################################################################
 	// Execute FFMpeg which will write to the temp file
@@ -113,7 +110,7 @@ func (c *FFMPegDownloadAndResizeCommand) Execute(chCtx model.ChainContext) {
 	// Copy the contents of the output file to the bucket.
 	//#############################################################################
 	writerBucket := c.client.Bucket(c.destinationBucket) // Use the destination bucket from the command
-	obj = writerBucket.Object(msg.Name)
+	obj := writerBucket.Object(msg.Name)
 	writer := obj.NewWriter(ctx)
 	defer writer.Close()
 	io.Copy(writer, outputFile)

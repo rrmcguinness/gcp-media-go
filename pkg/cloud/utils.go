@@ -19,10 +19,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
 
+	"cloud.google.com/go/storage"
 	"github.com/BurntSushi/toml"
 	"github.com/google/generative-ai-go/genai"
 )
@@ -127,6 +129,24 @@ func GenerateTextEmbeddingAsFloat32(model genai.EmbeddingModel, in string, count
 	}
 
 	return initialValues
+}
+
+func CopyFromGcsToTmp(
+	ctx context.Context,
+	client *storage.Client,
+	outputFile *os.File,
+	bucketName string,
+	objectName string) (err error) {
+
+	readerBucket := client.Bucket(bucketName)
+	obj := readerBucket.Object(objectName)
+	reader, err := obj.NewReader(ctx)
+	if err != nil {
+		return errors.New(fmt.Sprintf("error creating GCS reader: %w", err))
+	}
+	defer reader.Close()
+	io.Copy(outputFile, reader)
+	return nil
 }
 
 func RemoveMarkdownJsonNotations(in string) string {
