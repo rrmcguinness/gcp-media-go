@@ -26,7 +26,13 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
-type FFMpegStreamingCommand struct {
+const FFMPEG_DYNAMIC_SCALE_FMT = "scale=w=%s:h=trunc(ow/a/2)*2"
+
+// FFMPegDownloadAndResizeCommand is a simple command used for
+// downloading a media file embedded in the message, resizing it
+// and uploading the resized version to the destination bucket.
+// The scale uses a dynamic scale to keep the aspect ratio of the original.
+type FFMPegDownloadAndResizeCommand struct {
 	model.Command
 	client              *storage.Client
 	executableCommand   string
@@ -34,26 +40,24 @@ type FFMpegStreamingCommand struct {
 	destinationBucket   string
 }
 
-func (c *FFMpegStreamingCommand) GetExecutableCommandString() string {
+// GetExecutableCommandString is used for debugging purposes to determine which
+// command is being executed with which parameters.
+func (c *FFMPegDownloadAndResizeCommand) GetExecutableCommandString() string {
 	return c.executableCommand + " " + c.executableArguments
 }
 
-func NewFFMpegStreamingCommand(
-	ctx context.Context,
+// NewFFMPegDownloadAndResizeCommand a constructor for the FMPegDownloadAndResizeCommand struct
+func NewFFMPegDownloadAndResizeCommand(
+	client *storage.Client,
 	executableCommand string,
 	destinationBucket string,
 	format string,
 	width string,
-) *FFMpegStreamingCommand {
+) *FFMPegDownloadAndResizeCommand {
 
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		panic(err)
-	}
+	scale := fmt.Sprintf(FFMPEG_DYNAMIC_SCALE_FMT, width)
 
-	scale := fmt.Sprintf("scale=w=%s:h=trunc(ow/a/2)*2", width)
-
-	return &FFMpegStreamingCommand{
+	return &FFMPegDownloadAndResizeCommand{
 		client:              client,
 		executableCommand:   executableCommand,
 		executableArguments: "-analyzeduration 0 -probesize 5000000 -y -hide_banner -i %s -filter:v " + scale + " -f mp4 %s",
@@ -61,16 +65,13 @@ func NewFFMpegStreamingCommand(
 	}
 }
 
-func (c *FFMpegStreamingCommand) Close() {
-	c.client.Close()
-}
-
-func (c *FFMpegStreamingCommand) IsExecutable(chCtx model.ChainContext) bool {
+// IsExecutable determines if the command should execute
+func (c *FFMPegDownloadAndResizeCommand) IsExecutable(chCtx model.ChainContext) bool {
 	return chCtx.Get(model.CTX_MESSAGE).(*model.TriggerMediaWrite).Kind == model.EVENT_STORAGE_BUCKET_WRITE
 }
 
-func (c *FFMpegStreamingCommand) Execute(chCtx model.ChainContext) {
-
+// Execute executes the business logic of the command
+func (c *FFMPegDownloadAndResizeCommand) Execute(chCtx model.ChainContext) {
 	//#############################################################################
 	// Create a processing context, and get the message from the context and create temp files
 	//#############################################################################

@@ -38,19 +38,19 @@ go_library(
     name = "pipeline",
     srcs = [
         "ffmpeg_command.go",
-        "gemini_command.go",
-        "pubsub_listener.go",
+        "movie_review_command.go",
     ],
     data = [
         "copy_ffmpeg",
-        "//configs:app.yaml",
+        "//configs:.env.test.toml",
+        "//configs:.env.toml",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/cloud",
         "//pkg/model",
-        "@com_github_google_generative_ai_go//genai:go_default_library",
-        "@com_google_cloud_go_pubsub//:go_default_library",
-        "@com_google_cloud_go_storage//:go_default_library",
+        "@com_github_google_generative_ai_go//genai",
+        "@com_google_cloud_go_storage//:storage",
     ],
 )

@@ -19,13 +19,9 @@ go_library(
     srcs = [
         "chain.go",
         "chain_context.go",
-        "config.go",
         "constants.go",
         "messages.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/model",
     visibility = ["//visibility:public"],
-    deps = [
-        "@in_gopkg_yaml_v3//:go_default_library",
-    ],
 )

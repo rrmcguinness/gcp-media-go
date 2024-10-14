@@ -14,6 +14,8 @@
 
 package model
 
+import "fmt"
+
 type CloudConfig struct {
 	ProjectId string
 }
@@ -37,4 +39,8 @@ type TriggerMediaWrite struct {
 	MetaData                map[string]interface{} `json:"metadata"`
 	Crc32c                  string                 `json:"crc32c"`
 	ETag                    string                 `json:"etag"`
+}
+
+func (t *TriggerMediaWrite) GetGSUri() string {
+	return fmt.Sprintf("gs://%s/%s", t.Bucket, t.Name)
 }

@@ -16,7 +16,9 @@ package model
 const (
 	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
 
-	CTX_WAIT_GROUP = "__wait_group__"
-	CTX_MESSAGE    = "__message__"
-	CTX_CONFIG     = "__config__"
+	CTX_WAIT_GROUP  = "__wait_group__"
+	CTX_MESSAGE     = "__message__"
+	CTX_CONFIG      = "__config__"
+	CTX_PROMPT_VARS = "__prompt_vars__"
+	CTX_PROMPT_RESP = "__prompt_resp__"
 )

@@ -27,7 +27,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFFMpegCommand(t *testing.T) {
+func TestMediaReviewCommand(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	// This deferral will automatically close the client that was build from
 	// the same context
@@ -36,13 +36,13 @@ func TestFFMpegCommand(t *testing.T) {
 	// Get the config file
 	config := test.GetConfig(t)
 
-	cloud, err := cloud.NewCloudServiceClients(ctx, config)
+	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
 	test.HandleErr(err, t)
-	defer cloud.Close()
+	defer cloudClients.Close()
 
 	// Create a "fake" message
 	var out model.TriggerMediaWrite
-	err = json.Unmarshal([]byte(test.GetTestHighResMessageText()), &out)
+	err = json.Unmarshal([]byte(test.GetTestLowResMessageText()), &out)
 	test.HandleErr(err, t)
 
 	// Basic assertions on nil and type
@@ -53,21 +53,44 @@ func TestFFMpegCommand(t *testing.T) {
 	chainCtx := model.NewChainContext()
 	chainCtx.Add(model.CTX_MESSAGE, &out)
 
-	// Create the command
-	cmd := p.NewFFMPegDownloadAndResizeCommand(
-		cloud.StorageClient,
-		"pkg/pipeline/bin/ffmpeg",
-		"media_low_res_resources",
-		"mp4",
-		"240")
+	chainCtx.Add(model.CTX_PROMPT_VARS, make(map[string]interface{}))
 
-	// This assertion insures the command can be executed
-	assert.True(t, cmd.IsExecutable(chainCtx))
-	cmd.Execute(chainCtx)
+	promptTemplate := `
+	Review the attached movie and fulfill the following instructions and response in JSON format:
+	- Identify the movie's Title, Director, Producers, Cinematographers, and Actors.
+	- Write a creative and detailed summary that matches the tone of the movie.
+	- Identify all of the scenes in the movie start and end timestamps.
+
+	Example:
+		{
+			"title": "",
+			"summary": "",
+			"duration_in_minutes": 60,
+			"director": "",
+			"executive_producers": [""],
+			"producers": [""],
+			"cinematographers": [""],
+			"actors": [""],
+			"scenes": [
+				{"start": "00:00:00", "end": "00:00:00" }
+			]
+		}
+	`
+	genModel := cloudClients.AgentModels["creative-flash"]
+	assert.NotNil(t, genModel)
+	movieReviewCommand, err := p.NewMovieReviewCommand(genModel, promptTemplate)
+	test.HandleErr(err, t)
+
+	assert.True(t, movieReviewCommand.IsExecutable(chainCtx))
+
+	movieReviewCommand.Execute(chainCtx)
 
 	for _, err := range chainCtx.GetErrors() {
 		fmt.Println(err.Error())
 	}
 
 	assert.False(t, chainCtx.HasErrors())
+
+	fmt.Println(chainCtx.Get(model.CTX_PROMPT_RESP))
+
 }

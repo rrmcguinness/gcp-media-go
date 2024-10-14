@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package test
 
 import (
+	"os"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 )
 
 type StateManager struct {
-	config *model.Config
+	config *cloud.CloudConfig
 }
 
 var state = &StateManager{}
@@ -55,15 +56,43 @@ func GetTestHighResMessageText() string {
 	}`
 }
 
-func GetConfig(t *testing.T) *model.Config {
+func GetTestLowResMessageText() string {
+	return `{
+  "kind": "storage#object",
+  "id": "media_low_res_resources/test-trailer-001.mp4/1728615848664286",
+  "selfLink": "https://www.googleapis.com/storage/v1/b/media_low_res_resources/o/test-trailer-001.mp4",
+  "name": "test-trailer-001.mp4",
+  "bucket": "media_low_res_resources",
+  "generation": "1728615848664286",
+  "metageneration": "1",
+  "contentType": "video/mp4",
+  "timeCreated": "2024-10-11T03:04:08.672Z",
+  "updated": "2024-10-11T03:04:08.672Z",
+  "storageClass": "STANDARD",
+  "timeStorageClassUpdated": "2024-10-11T03:04:08.672Z",
+  "size": "259348037",
+  "md5Hash": "67c1rAU+1RYZzK5zp8iBkA==",
+  "mediaLink": "https://storage.googleapis.com/download/storage/v1/b/media_low_res_resources/o/test-trailer-001.mp4?generation=1728615848664286&alt=media",
+  "metadata": { "touch": "18" },
+  "crc32c": "IYeSTw==",
+  "etag": "CN658+yrhYkDEAE="
+}
+`
+}
 
+func SetupOS() {
+	os.Setenv(cloud.ENV_CONFIG_FILE_PREFIX, "configs")
+	os.Setenv(cloud.ENV_CONFIG_RUNTIME, "test")
+}
+
+func GetConfig(t *testing.T) *cloud.CloudConfig {
 	if state.config == nil {
-		testConfig, err := model.ReadConfig("configs/app.yaml")
-		if err != nil {
-			t.Error(err)
-		}
-		state.config = testConfig
+		SetupOS()
+		// Create a default cloud config
+		config := cloud.NewCloudConfig()
+		// Load it from the TOML files
+		cloud.LoadConfig(&config)
+		state.config = config
 	}
-
 	return state.config
 }

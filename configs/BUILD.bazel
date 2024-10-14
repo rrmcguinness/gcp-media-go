@@ -14,14 +14,15 @@
 
 exports_files(
     [
-        "app.yaml",
-        "app-test.yaml",
+        ".env.toml",
+        ".env.local.toml",
+        ".env.test.toml",
     ],
     ["//visibility:public"],
 )
 
 filegroup(
     name = "configs",
-    srcs = ["app.yaml"],
+    srcs = [".env.toml"],
     visibility = ["//visibility:public"],
 )

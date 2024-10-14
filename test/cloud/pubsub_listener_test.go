@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package cloud
 
 import (
 	"context"
@@ -22,8 +22,9 @@ import (
 	"testing"
 	"time"
 
+	cloud "github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
-	p "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline"
+	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -41,22 +42,28 @@ func (c *MediaMessageCommand) Execute(context model.ChainContext) {
 }
 
 func TestMessageHandler(t *testing.T) {
-	config := GetConfig(t)
-
 	ctx, cancel := context.WithCancel(context.Background())
+	config := test.GetConfig(t)
+
+	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
+	test.HandleErr(err, t)
+	defer cloudClients.Close()
 
 	// Create the external controller group.
 	var wg sync.WaitGroup
+	wg.Add(1)
 
-	pubsubListener, err := p.NewPubSubListener(&wg, ctx, config.Project.Id, config.HighResSubscription.Id, &MediaMessageCommand{})
-	assert.Nil(t, err)
+	pubsubListener := cloudClients.PubSubListeners["HiResTopic"]
+	pubsubListener.SetCommand(&MediaMessageCommand{})
+
 	assert.NotNil(t, pubsubListener)
-	pubsubListener.Listen()
+	pubsubListener.Listen(ctx)
 
 	go func() {
 		time.Sleep(10 * time.Second)
 		// By calling cancel here, we shut down the Message Listener
 		// which in turn signals the WaitGroup that the work is complete.
+		wg.Done()
 		cancel()
 	}()
 

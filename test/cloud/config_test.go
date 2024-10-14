@@ -12,28 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package cloud
 
 import (
 	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
 const test_config_file = "configs/app-test.yaml"
 
+// TestConfig is used to test the validity of the hierarchy loader.
+// First load is .env.toml, then .env.test.toml (set in test.SetupOS)
+// any value redefined in .env.test.toml will overwrite .env.toml allowing
+// the environment to take precedence over the defaults.
 func TestConfig(t *testing.T) {
-	config, err := model.ReadConfig(test_config_file)
-	if err != nil {
-		t.Errorf("Error reading config file: %v", err)
-	}
-	assert.Nil(t, err)
+	config := test.GetConfig(t)
+	// Uncomment this to see the final configuration structure
+	// cloud.PrintConfig(config)
+
 	assert.NotNil(t, config)
-	assert.Equal(t, "test", config.Project.Id)
-	assert.Equal(t, "test", config.Project.Location)
-	assert.Equal(t, "test", config.HighResSubscription.Id)
-	assert.Equal(t, "test", config.HighResToLowResCommand.Bucket)
-	assert.Equal(t, "240", config.HighResToLowResCommand.Width)
-	assert.Equal(t, "mp4", config.HighResToLowResCommand.Format)
+	assert.Equal(t, 2, len(config.TopicSubscriptions))
+	assert.Equal(t, 2, len(config.EmbeddingModels))
+	assert.Equal(t, 4, len(config.AgentModels))
 }

@@ -2,3 +2,5 @@ bazel-bin
 bazel-out
 bazel-testlogs
 bazel-video-warehouse-go
+
+configs/.env.*.toml
