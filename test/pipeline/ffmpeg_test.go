@@ -16,7 +16,6 @@ package pipeline
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -40,30 +39,15 @@ func TestFFMpegCommand(t *testing.T) {
 	test.HandleErr(err, t)
 	defer cloud.Close()
 
-	// Create a "fake" message
-	var out model.TriggerMediaWrite
-	err = json.Unmarshal([]byte(test.GetTestHighResMessageText()), &out)
-	test.HandleErr(err, t)
-
-	// Basic assertions on nil and type
-	assert.NotNil(t, out)
-	assert.Equal(t, model.EVENT_STORAGE_BUCKET_WRITE, out.Kind)
-
 	// Create the context
 	chainCtx := model.NewChainContext()
-	chainCtx.Add(model.CTX_MESSAGE, &out)
+	chainCtx.Add(model.CTX_IN, test.GetTestHighResMessageText())
 
-	// Create the command
-	cmd := p.NewFFMPegDownloadAndResizeCommand(
-		cloud.StorageClient,
-		"pkg/pipeline/bin/ffmpeg",
-		"media_low_res_resources",
-		"mp4",
-		"240")
+	chain := p.NewFFMpegChain("pkg/pipeline/bin/ffmpeg", &model.VideoFormat{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
 
 	// This assertion insures the command can be executed
-	assert.True(t, cmd.IsExecutable(chainCtx))
-	cmd.Execute(chainCtx)
+	assert.True(t, chain.IsExecutable(chainCtx))
+	chain.Execute(chainCtx)
 
 	for _, err := range chainCtx.GetErrors() {
 		fmt.Println(err.Error())

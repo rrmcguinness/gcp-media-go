@@ -14,9 +14,39 @@
 
 package model
 
+import "fmt"
+
+const (
+	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
+	CTX_IN                     = "__IN__"
+	CTX_OUT                    = "__OUT__"
+	CTX_PROMPT_VARS            = "__PROMPT_VARS__"
+)
+
 type Command interface {
+	GetInputParam() string
+	GetOutputParam() string
 	IsExecutable(chCtx ChainContext) bool
 	Execute(chCtx ChainContext)
+}
+
+type BaseCommand struct {
+	InputParamName  string
+	OutputParamName string
+}
+
+func (c *BaseCommand) GetInputParam() string {
+	if len(c.InputParamName) == 0 {
+		return CTX_IN
+	}
+	return c.InputParamName
+}
+
+func (c *BaseCommand) GetOutputParam() string {
+	if len(c.OutputParamName) == 0 {
+		return CTX_OUT
+	}
+	return c.OutputParamName
 }
 
 type Chain interface {
@@ -26,6 +56,7 @@ type Chain interface {
 }
 
 type BaseChain struct {
+	BaseCommand
 	continueOnFailure bool
 	commands          []Command
 }
@@ -45,11 +76,20 @@ func (c *BaseChain) IsExecutable(context ChainContext) bool {
 }
 
 func (c *BaseChain) Execute(chCtx ChainContext) {
-	for _, command := range c.commands {
+	defer chCtx.Close()
+	for i, command := range c.commands {
+		// Ensure that the next parameter is callable in a pipe stack
+		fmt.Printf("%d\n%v\n", i, chCtx)
+
 		if chCtx.HasErrors() && !c.continueOnFailure {
 			break
 		} else if command.IsExecutable(chCtx) {
 			command.Execute(chCtx)
 		}
+		fmt.Printf("%d\n%v\n", i, chCtx)
+		// Chain the output
+		chCtx.Remove(CTX_IN)
+		chCtx.Add(CTX_IN, chCtx.Get(CTX_OUT))
+		chCtx.Remove(CTX_OUT)
 	}
 }

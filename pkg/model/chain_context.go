@@ -14,6 +14,8 @@
 
 package model
 
+import "os"
+
 type ChainContext interface {
 	Add(key string, value interface{}) ChainContext
 	AddError(err error)
@@ -21,23 +23,43 @@ type ChainContext interface {
 	Get(key string) interface{}
 	Remove(key string)
 	HasErrors() bool
+	AddTempFile(file string)
+	GetTempFiles() []string
+	Close()
 }
 
 type BaseChainContext struct {
-	data   map[string]interface{}
-	errors []error
+	data      map[string]interface{}
+	errors    []error
+	tempFiles []string
 }
 
 func NewChainContext() ChainContext {
 	return &BaseChainContext{
-		data:   make(map[string]interface{}),
-		errors: make([]error, 0),
+		data:      make(map[string]interface{}),
+		errors:    make([]error, 0),
+		tempFiles: make([]string, 0),
+	}
+}
+
+func (c *BaseChainContext) Close() {
+	// Clean up any temp files created along the way
+	for _, file := range c.GetTempFiles() {
+		os.Remove(file)
 	}
 }
 
 func (c *BaseChainContext) Add(key string, value interface{}) ChainContext {
 	c.data[key] = value
 	return c
+}
+
+func (c *BaseChainContext) AddTempFile(file string) {
+	c.tempFiles = append(c.tempFiles, file)
+}
+
+func (c *BaseChainContext) GetTempFiles() []string {
+	return c.tempFiles
 }
 
 func (c *BaseChainContext) AddError(err error) {

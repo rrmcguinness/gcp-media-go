@@ -904,12 +904,6 @@ def go_dependencies():
         version = "v1.12.0",
     )
     go_repository(
-        name = "com_google_cloud_go_vertexai",
-        importpath = "cloud.google.com/go/vertexai",
-        sum = "h1:E6I+eA6vNQxz7/rb0wdILdKg4hFmMNWZLp+dSy9DnEo=",
-        version = "v0.13.1",
-    )
-    go_repository(
         name = "com_google_cloud_go_video",
         importpath = "cloud.google.com/go/video",
         sum = "h1:DTnNFkbpmPunk+V3WKmjs46EbdW5QevSy0KJ9JmlUus=",

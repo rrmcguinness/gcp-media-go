@@ -13,21 +13,39 @@
 # limitations under the License.
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
-# gazelle:ignore
 go_test(
-    name = "pipeline",
+    name = "ffmpeg_test",
     size = "small",
-    srcs = [
-        "movie_review_command_test.go",
-    ],
+    srcs = ["ffmpeg_test.go"],
     data = [
-        "//configs:.env.toml",
         "//configs:.env.test.toml",
+        "//configs:.env.toml",
         "//pkg/pipeline:copy_ffmpeg",
     ],
     rundir = ".",
     deps = [
         "//pkg/cloud",
+        "//pkg/commands",
+        "//pkg/model",
+        "//pkg/pipeline",
+        "//test",
+        "@com_github_stretchr_testify//assert",
+    ],
+)
+
+go_test(
+    name = "movie_test",
+    size = "small",
+    srcs = ["movie_test.go"],
+    data = [
+        "//configs:.env.test.toml",
+        "//configs:.env.toml",
+        "//pkg/pipeline:copy_ffmpeg",
+    ],
+    rundir = ".",
+    deps = [
+        "//pkg/cloud",
+        "//pkg/commands",
         "//pkg/model",
         "//pkg/pipeline",
         "//test",

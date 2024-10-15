@@ -16,7 +16,6 @@ package cloud
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 
 	"cloud.google.com/go/pubsub"
@@ -62,19 +61,12 @@ func (m *PubSubListener) SetCommand(command model.Command) {
 func (m *PubSubListener) Listen(ctx context.Context) {
 	go func() {
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-			var out model.TriggerMediaWrite
-			err := json.Unmarshal(msg.Data, &out)
-			if err == nil {
-				chainCtx := model.NewChainContext()
-				chainCtx.Add("message", out)
-				m.command.Execute(chainCtx)
-				// Only take the message from the topic if the chain executes successfully
-				if !chainCtx.HasErrors() {
-					msg.Ack()
-				}
-			} else {
-				log.Println(err)
-				log.Printf("failed to json decode object: %s", string(msg.Data))
+			chainCtx := model.NewChainContext()
+			chainCtx.Add(model.CTX_IN, string(msg.Data))
+			m.command.Execute(chainCtx)
+			// Only take the message from the topic if the chain executes successfully
+			if !chainCtx.HasErrors() {
+				msg.Ack()
 			}
 		})
 		if err != nil {

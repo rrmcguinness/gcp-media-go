@@ -14,12 +14,11 @@
 
 package model
 
-import "fmt"
-
 type CloudConfig struct {
 	ProjectId string
 }
 
+// TriggerMediaWrite is the topic inbound type for GCS changes.
 type TriggerMediaWrite struct {
 	Kind                    string                 `json:"kind"`
 	ID                      string                 `json:"id"`
@@ -41,6 +40,14 @@ type TriggerMediaWrite struct {
 	ETag                    string                 `json:"etag"`
 }
 
-func (t *TriggerMediaWrite) GetGSUri() string {
-	return fmt.Sprintf("gs://%s/%s", t.Bucket, t.Name)
+// GCSObject is a simplified struct for dealing with bucket objects
+type GCSObject struct {
+	Bucket   string
+	Name     string
+	MIMEType string
+}
+
+type VideoFormat struct {
+	Format string
+	Width  string
 }

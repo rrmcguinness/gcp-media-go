@@ -1,3 +1,5 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_library")
+
 # Copyright 2024 Google, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,17 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-
 go_library(
-    name = "cmd_lib",
-    srcs = ["pipeline.go"],
-    importpath = "github.com/GoogleCloudPlatform/solutions/media/cmd",
-    visibility = ["//visibility:private"],
-)
-
-go_binary(
-    name = "cmd",
-    embed = [":cmd_lib"],
+    name = "commands",
+    srcs = [
+        "ffmpeg.go",
+        "gcs_to_tmpfs.go",
+        "gcs_upload.go",
+        "media_prompt.go",
+        "media_trigger_reader.go",
+        "video_upload.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/commands",
     visibility = ["//visibility:public"],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/model",
+        "@com_github_google_generative_ai_go//genai",
+        "@com_google_cloud_go_storage//:storage",
+    ],
 )
