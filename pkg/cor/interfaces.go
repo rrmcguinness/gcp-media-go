@@ -1,0 +1,55 @@
+// Copyright 2024 Google, LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package cor
+
+const (
+	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
+	CTX_IN                     = "__IN__"
+	CTX_OUT                    = "__OUT__"
+	CTX_PROMPT_VARS            = "__PROMPT_VARS__"
+)
+
+// Context is an opinionated runtime context for Go Lang.
+// It's a bit more complex than other language versions due to the nature
+// of Filesystem behaviors.
+type Context interface {
+	Add(key string, value interface{}) Context
+	AddError(err error)
+	GetErrors() []error
+	Get(key string) interface{}
+	Remove(key string)
+	HasErrors() bool
+	AddTempFile(file string)
+	GetTempFiles() []string
+	Close()
+}
+
+// Command is a simple interface that ensures an atomic unit of work.
+// The principals of a Command are: 1) Atomic, 2) Testable, and 3) Thread Safe
+type Command interface {
+	GetInputParam() string
+	GetOutputParam() string
+	IsExecutable(context Context) bool
+	Execute(context Context)
+}
+
+// Chain is a collection of commands that ensure the serial or parallel execution
+// of the commands. The Chain is a command and therefore inherits the principals of the command
+// and in addition each Chain implements it's own execution strategy.
+type Chain interface {
+	Command
+	ContinueOnFailure(bool) Chain
+	AddCommand(command Command) Chain
+}
