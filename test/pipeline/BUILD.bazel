@@ -24,6 +24,7 @@ go_test(
     ],
     rundir = ".",
     deps = [
+        "//pkg/cor",
         "//pkg/cloud",
         "//pkg/commands",
         "//pkg/model",
@@ -44,6 +45,7 @@ go_test(
     ],
     rundir = ".",
     deps = [
+        "//pkg/cor",
         "//pkg/cloud",
         "//pkg/commands",
         "//pkg/model",

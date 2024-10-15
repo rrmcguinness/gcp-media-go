@@ -18,29 +18,30 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type MediaTriggerToGCSObject struct {
-	model.BaseCommand
+	cor.BaseCommand
 }
 
-func (c *MediaTriggerToGCSObject) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(c.GetInputParam()) != nil
+func (c *MediaTriggerToGCSObject) IsExecutable(context cor.Context) bool {
+	return context != nil && context.Get(c.GetInputParam()) != nil
 }
 
-func (c *MediaTriggerToGCSObject) Execute(chCtx model.ChainContext) {
-	in := chCtx.Get(c.GetInputParam()).(string)
+func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
+	in := context.Get(c.GetInputParam()).(string)
 	var out model.TriggerMediaWrite
 	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 
 	fmt.Printf("-------------- %s", c.GetOutputParam())
 
 	msg := &model.GCSObject{Bucket: out.Bucket, Name: out.Name, MIMEType: out.ContentType}
-	chCtx.Add("__GCS_OBJ__", msg)
-	chCtx.Add(c.GetOutputParam(), msg)
+	context.Add("__GCS_OBJ__", msg)
+	context.Add(c.GetOutputParam(), msg)
 }

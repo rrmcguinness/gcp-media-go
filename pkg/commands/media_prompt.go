@@ -16,42 +16,42 @@ package commands
 
 import (
 	"bytes"
-	"context"
+	go_ctx "context"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
 )
 
 type MediaPromptCommand struct {
-	model.BaseCommand
+	cor.BaseCommand
 	GenaiClient        *genai.Client
 	GenaiModel         *genai.GenerativeModel
 	PromptTemplate     string
 	TemplateParamsName string
 }
 
-func (t *MediaPromptCommand) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(t.GetInputParam()) != nil
+func (t *MediaPromptCommand) IsExecutable(context cor.Context) bool {
+	return context != nil && context.Get(t.GetInputParam()) != nil
 }
 
-func (t *MediaPromptCommand) Execute(chCtx model.ChainContext) {
+func (t *MediaPromptCommand) Execute(context cor.Context) {
 
-	ctx := context.Background()
+	ctx := go_ctx.Background()
 
-	videoFile := chCtx.Get(t.GetInputParam()).(*genai.File)
-	params := chCtx.Get(t.TemplateParamsName).(map[string]interface{})
+	videoFile := context.Get(t.GetInputParam()).(*genai.File)
+	params := context.Get(t.TemplateParamsName).(map[string]interface{})
 	template, err := template.New("why").Parse(t.PromptTemplate)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 
 	var buffer bytes.Buffer
 	err = template.Execute(&buffer, params)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 
@@ -61,9 +61,9 @@ func (t *MediaPromptCommand) Execute(chCtx model.ChainContext) {
 
 	out, err := cloud.GenerateMultiModalResponse(ctx, 0, t.GenaiModel, parts...)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 
-	chCtx.Add(t.GetOutputParam(), out)
+	context.Add(t.GetOutputParam(), out)
 }

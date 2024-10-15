@@ -19,7 +19,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
 )
 
@@ -28,9 +28,9 @@ func MovieChain(
 	genaiModel *genai.GenerativeModel,
 	storageClient *storage.Client,
 	summaryPromptTemplate string,
-) model.Chain {
+) cor.Chain {
 
-	out := &model.BaseChain{}
+	out := &cor.BaseChain{}
 
 	// Convert the Message to an Object
 	out.AddCommand(&commands.MediaTriggerToGCSObject{})
@@ -44,11 +44,11 @@ func MovieChain(
 	// Generate Summary
 	out.AddCommand(
 		&commands.MediaPromptCommand{
-			BaseCommand:        model.BaseCommand{OutputParamName: "DOC_SUMMARY"},
+			BaseCommand:        cor.BaseCommand{OutputParamName: "DOC_SUMMARY"},
 			GenaiClient:        genaiClient,
 			GenaiModel:         genaiModel,
 			PromptTemplate:     summaryPromptTemplate,
-			TemplateParamsName: model.CTX_PROMPT_VARS,
+			TemplateParamsName: cor.CTX_PROMPT_VARS,
 		})
 
 	return out

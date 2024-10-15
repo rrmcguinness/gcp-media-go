@@ -27,6 +27,7 @@ go_library(
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/commands",
     visibility = ["//visibility:public"],
     deps = [
+        "//pkg/cor",
         "//pkg/cloud",
         "//pkg/model",
         "@com_github_google_generative_ai_go//genai",

@@ -15,35 +15,36 @@
 package commands
 
 import (
-	"context"
+	go_ctx "context"
 	"io"
 	"os"
 	"path/filepath"
 
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type GCSFileUpload struct {
-	model.BaseCommand
+	cor.BaseCommand
 	Client storage.Client
 	Bucket string
 }
 
-func (c *GCSFileUpload) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(c.GetInputParam()) != nil
+func (c *GCSFileUpload) IsExecutable(context cor.Context) bool {
+	return context.Get(c.GetInputParam()) != nil
 }
 
-func (c *GCSFileUpload) Execute(chCtx model.ChainContext) {
-	ctx := context.Background()
-	path := chCtx.Get(c.GetInputParam()).(string)
+func (c *GCSFileUpload) Execute(context cor.Context) {
+	ctx := go_ctx.Background()
+	path := context.Get(c.GetInputParam()).(string)
 	name := filepath.Base(path)
 
-	original := chCtx.Get("__GCS_OBJ__").(*model.GCSObject)
+	original := context.Get("__GCS_OBJ__").(*model.GCSObject)
 
 	dat, err := os.Open(path)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 	defer os.Remove(path)

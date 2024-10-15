@@ -23,20 +23,21 @@ import (
 	"time"
 
 	cloud "github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
 type MediaMessageCommand struct {
-	model.Command
+	cor.Command
 }
 
-func (c *MediaMessageCommand) IsExecutable(context model.ChainContext) bool {
-	return context.Get("message").(model.TriggerMediaWrite).Kind == "storage#object"
+func (c *MediaMessageCommand) IsExecutable(context cor.Context) bool {
+	return context != nil && context.Get("message").(model.TriggerMediaWrite).Kind == "storage#object"
 }
 
-func (c *MediaMessageCommand) Execute(context model.ChainContext) {
+func (c *MediaMessageCommand) Execute(context cor.Context) {
 	model := context.Get("message").(model.TriggerMediaWrite)
 	log.Println(fmt.Sprintf("Message:\n%v\n", model))
 }

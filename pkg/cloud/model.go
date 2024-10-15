@@ -19,7 +19,7 @@ import (
 	"log"
 
 	"cloud.google.com/go/pubsub"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
 )
 
@@ -29,14 +29,14 @@ import (
 type PubSubListener struct {
 	client       *pubsub.Client
 	subscription *pubsub.Subscription
-	command      model.Command
+	command      cor.Command
 }
 
 // NewPubSubListener the constructor for PubSubListener
 func NewPubSubListener(
 	pubsubClient *pubsub.Client,
 	subscriptionID string,
-	command model.Command,
+	command cor.Command,
 ) (cmd *PubSubListener, err error) {
 
 	sub := pubsubClient.Subscription(subscriptionID)
@@ -49,7 +49,7 @@ func NewPubSubListener(
 	return cmd, nil
 }
 
-func (m *PubSubListener) SetCommand(command model.Command) {
+func (m *PubSubListener) SetCommand(command cor.Command) {
 	if m.command == nil {
 		m.command = command
 	}
@@ -61,8 +61,8 @@ func (m *PubSubListener) SetCommand(command model.Command) {
 func (m *PubSubListener) Listen(ctx context.Context) {
 	go func() {
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
-			chainCtx := model.NewChainContext()
-			chainCtx.Add(model.CTX_IN, string(msg.Data))
+			chainCtx := cor.NewBaseContext()
+			chainCtx.Add(cor.CTX_IN, string(msg.Data))
 			m.command.Execute(chainCtx)
 			// Only take the message from the topic if the chain executes successfully
 			if !chainCtx.HasErrors() {

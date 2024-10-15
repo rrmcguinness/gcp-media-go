@@ -20,7 +20,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 )
 
 const DEFAULT_FFMPEG_ARGS = "-analyzeduration 0 -probesize 5000000 -y -hide_banner -i %s -filter:v scale=w=%s:h=trunc(ow/a/2)*2 -f mp4 %s"
@@ -30,22 +30,22 @@ const DEFAULT_FFMPEG_ARGS = "-analyzeduration 0 -probesize 5000000 -y -hide_bann
 // and uploading the resized version to the destination bucket.
 // The scale uses a dynamic scale to keep the aspect ratio of the original.
 type FFMpegCommand struct {
-	model.BaseCommand
+	cor.BaseCommand
 	ExecutableCommand string
 	TargetWidth       string
 }
 
 // IsExecutable determines if the command should execute
-func (c *FFMpegCommand) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(c.GetInputParam()) != nil
+func (c *FFMpegCommand) IsExecutable(context cor.Context) bool {
+	return context.Get(c.GetInputParam()) != nil
 }
 
 // Execute executes the business logic of the command
-func (c *FFMpegCommand) Execute(chCtx model.ChainContext) {
-	inputFileName := chCtx.Get(c.GetInputParam()).(string)
+func (c *FFMpegCommand) Execute(context cor.Context) {
+	inputFileName := context.Get(c.GetInputParam()).(string)
 	file, err := os.Open(inputFileName)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 	tempFile, err := os.CreateTemp("", "ffmpeg-output-")
@@ -55,9 +55,9 @@ func (c *FFMpegCommand) Execute(chCtx model.ChainContext) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		chCtx.AddError(fmt.Errorf("error running ffmpeg: %w", err))
+		context.AddError(fmt.Errorf("error running ffmpeg: %w", err))
 		return
 	}
-	chCtx.AddTempFile(tempFile.Name())
-	chCtx.Add(model.CTX_OUT, tempFile.Name())
+	context.AddTempFile(tempFile.Name())
+	context.Add(cor.CTX_OUT, tempFile.Name())
 }

@@ -15,33 +15,34 @@
 package commands
 
 import (
-	"context"
+	go_ctx "context"
 	"time"
 
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/google/generative-ai-go/genai"
 )
 
 type VideoUploadCommand struct {
-	model.BaseCommand
+	cor.BaseCommand
 	GenaiClient      *genai.Client
 	TimeoutInSeconds time.Duration
 }
 
-func (v *VideoUploadCommand) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx.Get(v.GetInputParam()) != nil
+func (v *VideoUploadCommand) IsExecutable(context cor.Context) bool {
+	return context != nil && context.Get(v.GetInputParam()) != nil
 }
 
-func (v *VideoUploadCommand) Execute(chCtx model.ChainContext) {
-	ctx, cancel := context.WithTimeout(context.Background(), v.TimeoutInSeconds)
+func (v *VideoUploadCommand) Execute(context cor.Context) {
+	ctx, cancel := go_ctx.WithTimeout(go_ctx.Background(), v.TimeoutInSeconds)
 	defer cancel()
 
-	gcsFile := chCtx.Get("__GCS_OBJ__").(*model.GCSObject)
-	fileName := chCtx.Get(v.GetInputParam()).(string)
+	gcsFile := context.Get("__GCS_OBJ__").(*model.GCSObject)
+	fileName := context.Get(v.GetInputParam()).(string)
 
 	genFil, err := v.GenaiClient.UploadFileFromPath(ctx, fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 		return
 	}
 
@@ -50,10 +51,10 @@ func (v *VideoUploadCommand) Execute(chCtx model.ChainContext) {
 		time.Sleep(5 * time.Second)
 		var err error
 		if genFil, err = v.GenaiClient.GetFile(ctx, genFil.Name); err != nil {
-			chCtx.AddError(err)
+			context.AddError(err)
 		}
 	}
 
-	chCtx.Add("__Video_Upload__", genFil)
-	chCtx.Add(v.GetOutputParam(), genFil)
+	context.Add("__Video_Upload__", genFil)
+	context.Add(v.GetOutputParam(), genFil)
 }

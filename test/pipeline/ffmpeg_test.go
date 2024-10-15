@@ -20,6 +20,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	p "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
@@ -40,8 +41,8 @@ func TestFFMpegCommand(t *testing.T) {
 	defer cloud.Close()
 
 	// Create the context
-	chainCtx := model.NewChainContext()
-	chainCtx.Add(model.CTX_IN, test.GetTestHighResMessageText())
+	chainCtx := cor.NewBaseContext()
+	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
 
 	chain := p.NewFFMpegChain("pkg/pipeline/bin/ffmpeg", &model.VideoFormat{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
 

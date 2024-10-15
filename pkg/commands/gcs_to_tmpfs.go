@@ -15,16 +15,17 @@
 package commands
 
 import (
-	"context"
+	go_ctx "context"
 	"io"
 	"os"
 
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type GCSToTempFileCommand struct {
-	model.BaseCommand
+	cor.BaseCommand
 	Client *storage.Client
 }
 
@@ -37,29 +38,29 @@ func NewGCSToTempFileCommand(client *storage.Client) *GCSToTempFileCommand {
 	}
 }
 
-func (c *GCSToTempFileCommand) IsExecutable(chCtx model.ChainContext) bool {
-	if chCtx != nil && chCtx.Get(c.GetInputParam()) != nil {
+func (c *GCSToTempFileCommand) IsExecutable(context cor.Context) bool {
+	if context != nil && context.Get(c.GetInputParam()) != nil {
 		return true
 	}
 	return false
 }
 
-func (c *GCSToTempFileCommand) Execute(chCtx model.ChainContext) {
-	ctx := context.Background()
+func (c *GCSToTempFileCommand) Execute(context cor.Context) {
+	ctx := go_ctx.Background()
 
-	msg := chCtx.Get(c.GetInputParam()).(*model.GCSObject)
+	msg := context.Get(c.GetInputParam()).(*model.GCSObject)
 
 	readerBucket := c.Client.Bucket(msg.Bucket)
 	obj := readerBucket.Object(msg.Name)
 	reader, err := obj.NewReader(ctx)
 	if err != nil {
-		chCtx.AddError(err)
+		context.AddError(err)
 	}
 	defer reader.Close()
 	tempFile, err := os.CreateTemp("", "gcs-to-tmp-fs")
 	io.Copy(tempFile, reader)
 	// Add to the temp files to clean up after execution in a chain
-	chCtx.AddTempFile(tempFile.Name())
+	context.AddTempFile(tempFile.Name())
 	// Make the variable available if needed
-	chCtx.Add(c.GetOutputParam(), tempFile.Name())
+	context.Add(c.GetOutputParam(), tempFile.Name())
 }

@@ -19,6 +19,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
@@ -29,7 +30,7 @@ func NewFFMpegChain(
 	ffmpegCommand string,
 	videoFormat *model.VideoFormat,
 	storageClient *storage.Client,
-	outputBucketName string) model.Chain {
+	outputBucketName string) cor.Chain {
 
 	if storageClient == nil {
 		panic("FFMPegChain requires a valid storage client")
@@ -46,7 +47,7 @@ func NewFFMpegChain(
 		videoWidth = videoFormat.Width
 	}
 
-	out := &model.BaseChain{}
+	out := &cor.BaseChain{}
 
 	// Convert the Message to an Object
 	out.AddCommand(&commands.MediaTriggerToGCSObject{})

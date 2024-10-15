@@ -20,7 +20,7 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	p "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
@@ -66,9 +66,9 @@ func TestMediaChain(t *testing.T) {
 
 	chain := p.MovieChain(cloudClients.GenAIClient, genModel, cloudClients.StorageClient, DEFAULT_PROMPT)
 
-	chainCtx := model.NewChainContext()
-	chainCtx.Add(model.CTX_IN, test.GetTestLowResMessageText())
-	chainCtx.Add(model.CTX_PROMPT_VARS, make(map[string]interface{}))
+	chainCtx := cor.NewBaseContext()
+	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())
+	chainCtx.Add(cor.CTX_PROMPT_VARS, make(map[string]interface{}))
 
 	assert.True(t, chain.IsExecutable(chainCtx))
 

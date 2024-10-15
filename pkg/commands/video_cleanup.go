@@ -15,23 +15,23 @@
 package commands
 
 import (
-	"context"
+	go_ctx "context"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
 )
 
 type VideoCleanupCommand struct {
-	model.BaseCommand
+	cor.BaseCommand
 	GenaiClient genai.Client
 }
 
-func (v *VideoCleanupCommand) IsExecutable(chCtx model.ChainContext) bool {
-	return chCtx != nil && chCtx.Get("__Video_Upload__") != nil && chCtx.Get("__Video_Upload__").(*genai.File) != nil
+func (v *VideoCleanupCommand) IsExecutable(context cor.Context) bool {
+	return context != nil && context.Get("__Video_Upload__") != nil && context.Get("__Video_Upload__").(*genai.File) != nil
 }
 
-func (v *VideoCleanupCommand) Execute(chCtx model.ChainContext) {
-	ctx := context.Background()
-	fil := chCtx.Get("__Video_Upload__").(*genai.File)
+func (v *VideoCleanupCommand) Execute(context cor.Context) {
+	ctx := go_ctx.Background()
+	fil := context.Get("__Video_Upload__").(*genai.File)
 	v.GenaiClient.DeleteFile(ctx, fil.Name)
 }
