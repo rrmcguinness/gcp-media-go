@@ -12,17 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package chains
 
 import (
 	"context"
 	"fmt"
 	"testing"
 
+	parent_chains "github.com/GoogleCloudPlatform/solutions/media/pkg/chains"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
-	p "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -44,7 +44,7 @@ func TestFFMpegCommand(t *testing.T) {
 	chainCtx := cor.NewBaseContext()
 	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
 
-	chain := p.NewFFMpegChain("pkg/pipeline/bin/ffmpeg", &model.VideoFormat{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
+	chain := parent_chains.MovieResizeChain("pkg/chains/bin/ffmpeg", &model.VideoFormatFilter{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
 
 	// This assertion insures the command can be executed
 	assert.True(t, chain.IsExecutable(chainCtx))

@@ -40,7 +40,7 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 	path := context.Get(c.GetInputParam()).(string)
 	name := filepath.Base(path)
 
-	original := context.Get("__GCS_OBJ__").(*model.GCSObject)
+	original := context.Get(model.GetGCSObjectName()).(*model.GCSObject)
 
 	dat, err := os.Open(path)
 	if err != nil {

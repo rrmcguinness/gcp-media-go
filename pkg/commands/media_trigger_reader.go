@@ -16,7 +16,6 @@ package commands
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
@@ -32,16 +31,14 @@ func (c *MediaTriggerToGCSObject) IsExecutable(context cor.Context) bool {
 
 func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	in := context.Get(c.GetInputParam()).(string)
-	var out model.TriggerMediaWrite
+	var out model.GCSObjectMessage
 	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
 		context.AddError(err)
 		return
 	}
 
-	fmt.Printf("-------------- %s", c.GetOutputParam())
-
 	msg := &model.GCSObject{Bucket: out.Bucket, Name: out.Name, MIMEType: out.ContentType}
-	context.Add("__GCS_OBJ__", msg)
+	context.Add(model.GetGCSObjectName(), msg)
 	context.Add(c.GetOutputParam(), msg)
 }

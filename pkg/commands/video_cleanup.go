@@ -23,15 +23,16 @@ import (
 
 type VideoCleanupCommand struct {
 	cor.BaseCommand
-	GenaiClient genai.Client
+	GenaiClient *genai.Client
 }
 
 func (v *VideoCleanupCommand) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get("__Video_Upload__") != nil && context.Get("__Video_Upload__").(*genai.File) != nil
+	return context != nil && context.Get(GetVideoUploadFileParameterName()) != nil &&
+		context.Get(GetVideoUploadFileParameterName()).(*genai.File) != nil
 }
 
 func (v *VideoCleanupCommand) Execute(context cor.Context) {
 	ctx := go_ctx.Background()
-	fil := context.Get("__Video_Upload__").(*genai.File)
+	fil := context.Get(GetVideoUploadFileParameterName()).(*genai.File)
 	v.GenaiClient.DeleteFile(ctx, fil.Name)
 }

@@ -15,20 +15,37 @@
 package pipeline
 
 import (
-	"time"
+	"strings"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/google/generative-ai-go/genai"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
-func MovieChain(
-	genaiClient *genai.Client,
-	genaiModel *genai.GenerativeModel,
+const DEFAULT_FFMPEG_COMMAND = "ffmpeg"
+const DEFAULT_WIDTH = "240"
+
+func MovieResizeChain(
+	ffmpegCommand string,
+	videoFormat *model.VideoFormatFilter,
 	storageClient *storage.Client,
-	summaryPromptTemplate string,
-) cor.Chain {
+	outputBucketName string) cor.Chain {
+
+	if storageClient == nil {
+		panic("FFMPegChain requires a valid storage client")
+	}
+
+	// Ensure the FFMPegCommand is set, otherwise use the default
+	if len(strings.Trim(ffmpegCommand, " ")) == 0 {
+		ffmpegCommand = DEFAULT_FFMPEG_COMMAND
+	}
+
+	// Set the default width
+	videoWidth := DEFAULT_WIDTH
+	if videoFormat != nil {
+		videoWidth = videoFormat.Width
+	}
 
 	out := &cor.BaseChain{}
 
@@ -36,20 +53,13 @@ func MovieChain(
 	out.AddCommand(&commands.MediaTriggerToGCSObject{})
 
 	// Write a temp file
-	out.AddCommand(&commands.GCSToTempFileCommand{Client: storageClient})
+	out.AddCommand(&commands.GCSToTempFileCommand{Client: storageClient, TempFilePrefix: "ffmpeg-tmp-"})
 
-	// Upload the file to file service
-	out.AddCommand(&commands.VideoUploadCommand{GenaiClient: genaiClient, TimeoutInSeconds: 300 * time.Second})
+	// Run FFMpeg
+	out.AddCommand(&commands.FFMpegCommand{ExecutableCommand: ffmpegCommand, TargetWidth: videoWidth})
 
-	// Generate Summary
-	out.AddCommand(
-		&commands.MediaPromptCommand{
-			BaseCommand:        cor.BaseCommand{OutputParamName: "DOC_SUMMARY"},
-			GenaiClient:        genaiClient,
-			GenaiModel:         genaiModel,
-			PromptTemplate:     summaryPromptTemplate,
-			TemplateParamsName: cor.CTX_PROMPT_VARS,
-		})
+	// Write to a GCS Bucket
+	out.AddCommand(&commands.GCSFileUpload{Client: *storageClient, Bucket: outputBucketName})
 
 	return out
 }

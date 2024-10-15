@@ -17,7 +17,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "model",
     srcs = [
-        "messages.go",
+        "gcs_object.go",
+        "gcs_object_message.go",
+        "interfaces.go",
+        "video_format_filter.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/model",
     visibility = ["//visibility:public"],

@@ -26,15 +26,17 @@ import (
 
 type GCSToTempFileCommand struct {
 	cor.BaseCommand
-	Client *storage.Client
+	Client         *storage.Client
+	TempFilePrefix string
 }
 
-func NewGCSToTempFileCommand(client *storage.Client) *GCSToTempFileCommand {
+func NewGCSToTempFileCommand(client *storage.Client, tempFilePrefix string) *GCSToTempFileCommand {
 	if client == nil {
 		panic("Client must not be nil")
 	}
 	return &GCSToTempFileCommand{
-		Client: client,
+		Client:         client,
+		TempFilePrefix: tempFilePrefix,
 	}
 }
 
@@ -57,7 +59,7 @@ func (c *GCSToTempFileCommand) Execute(context cor.Context) {
 		context.AddError(err)
 	}
 	defer reader.Close()
-	tempFile, err := os.CreateTemp("", "gcs-to-tmp-fs")
+	tempFile, err := os.CreateTemp("", c.TempFilePrefix)
 	io.Copy(tempFile, reader)
 	// Add to the temp files to clean up after execution in a chain
 	context.AddTempFile(tempFile.Name())

@@ -41,6 +41,7 @@
     "settings": {
         "editor.tabSize": 2,
         "cSpell.words": [
+            "bazel",
             "genai",
             "metageneration",
             "rmcguinness"

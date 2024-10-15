@@ -18,8 +18,8 @@ type CloudConfig struct {
 	ProjectId string
 }
 
-// TriggerMediaWrite is the topic inbound type for GCS changes.
-type TriggerMediaWrite struct {
+// GCSObjectMessage is the topic inbound type for GCS changes.
+type GCSObjectMessage struct {
 	Kind                    string                 `json:"kind"`
 	ID                      string                 `json:"id"`
 	SelfLink                string                 `json:"selfLink"`
@@ -40,14 +40,6 @@ type TriggerMediaWrite struct {
 	ETag                    string                 `json:"etag"`
 }
 
-// GCSObject is a simplified struct for dealing with bucket objects
-type GCSObject struct {
-	Bucket   string
-	Name     string
-	MIMEType string
-}
-
-type VideoFormat struct {
-	Format string
-	Width  string
+func GetGCSObjectMessageName() string {
+	return "__GCS_OBJECT_MESSAGE__"
 }

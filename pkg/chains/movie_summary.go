@@ -15,37 +15,21 @@
 package pipeline
 
 import (
-	"strings"
+	"time"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/google/generative-ai-go/genai"
 )
 
-const DEFAULT_FFMPEG_COMMAND = "ffmpeg"
-const DEFAULT_WIDTH = "240"
-
-func NewFFMpegChain(
-	ffmpegCommand string,
-	videoFormat *model.VideoFormat,
+func MovieSummaryChain(
+	genaiClient *genai.Client,
+	genaiModel *genai.GenerativeModel,
 	storageClient *storage.Client,
-	outputBucketName string) cor.Chain {
-
-	if storageClient == nil {
-		panic("FFMPegChain requires a valid storage client")
-	}
-
-	// Ensure the FFMPegCommand is set, otherwise use the default
-	if len(strings.Trim(ffmpegCommand, " ")) == 0 {
-		ffmpegCommand = DEFAULT_FFMPEG_COMMAND
-	}
-
-	// Set the default width
-	videoWidth := DEFAULT_WIDTH
-	if videoFormat != nil {
-		videoWidth = videoFormat.Width
-	}
+	summaryPromptTemplate string,
+	chainOutputParam string,
+) cor.Chain {
 
 	out := &cor.BaseChain{}
 
@@ -53,13 +37,22 @@ func NewFFMpegChain(
 	out.AddCommand(&commands.MediaTriggerToGCSObject{})
 
 	// Write a temp file
-	out.AddCommand(&commands.GCSToTempFileCommand{Client: storageClient})
+	out.AddCommand(&commands.GCSToTempFileCommand{Client: storageClient, TempFilePrefix: "movie-summary-"})
 
-	// Run FFMpeg
-	out.AddCommand(&commands.FFMpegCommand{ExecutableCommand: ffmpegCommand, TargetWidth: videoWidth})
+	// Upload the file to file service
+	out.AddCommand(&commands.VideoUploadCommand{GenaiClient: genaiClient, TimeoutInSeconds: 300 * time.Second})
 
-	// Write to a GCS Bucket
-	out.AddCommand(&commands.GCSFileUpload{Client: *storageClient, Bucket: outputBucketName})
+	// Generate Summary
+	out.AddCommand(
+		&commands.MediaPromptCommand{
+			BaseCommand:        cor.BaseCommand{OutputParamName: chainOutputParam},
+			GenaiClient:        genaiClient,
+			GenaiModel:         genaiModel,
+			PromptTemplate:     summaryPromptTemplate,
+			TemplateParamsName: cor.CTX_PROMPT_VARS,
+		})
+
+	out.AddCommand(&commands.VideoCleanupCommand{GenaiClient: genaiClient})
 
 	return out
 }

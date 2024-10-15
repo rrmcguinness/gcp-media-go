@@ -12,23 +12,23 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package chains
 
 import (
 	"context"
 	"fmt"
 	"testing"
 
+	parent_chains "github.com/GoogleCloudPlatform/solutions/media/pkg/chains"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	p "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
 const DEFAULT_PROMPT = `
 Review the attached movie and fulfill the following instructions and response in JSON format:
-- Identify the movie's Title, Director, Producers, Cinematographers, and Actors.
+- Identify the movie's Title, Directors, Producers, Cinematographers, and the top 20 actors.
 - Write a creative and detailed summary that matches the tone of the movie.
 - Identify all of the scenes in the movie start and end timestamps in the format of HH:mm:ss where hours (HH), minutes (mm), and seconds (ss) are only two digits.
 
@@ -37,7 +37,7 @@ Example:
 		"title": "",
 		"summary": "",
 		"duration_in_minutes": 60,
-		"director": "",
+		"directors": [""],
 		"executive_producers": [""],
 		"producers": [""],
 		"cinematographers": [""],
@@ -64,7 +64,7 @@ func TestMediaChain(t *testing.T) {
 	genModel := cloudClients.AgentModels["creative-flash"]
 	assert.NotNil(t, genModel)
 
-	chain := p.MovieChain(cloudClients.GenAIClient, genModel, cloudClients.StorageClient, DEFAULT_PROMPT)
+	chain := parent_chains.MovieSummaryChain(cloudClients.GenAIClient, genModel, cloudClients.StorageClient, DEFAULT_PROMPT, "DOC_SUMMARY")
 
 	chainCtx := cor.NewBaseContext()
 	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())

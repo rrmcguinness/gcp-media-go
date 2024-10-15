@@ -17,10 +17,10 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "cor",
     srcs = [
-        "interfaces.go",
-        "base_command.go",
         "base_chain.go",
+        "base_command.go",
         "base_context.go",
+        "interfaces.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/cor",
     visibility = ["//visibility:public"],

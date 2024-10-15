@@ -35,21 +35,21 @@ copy_file_groups(
 )
 
 go_library(
-    name = "pipeline",
+    name = "chains",
     srcs = [
-        "ffmpeg_chain.go",
-        "movie_ai.go",
+        "movie_resize.go",
+        "movie_summary.go",
     ],
     data = [
         "copy_ffmpeg",
         "//configs:.env.test.toml",
         "//configs:.env.toml",
     ],
-    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/pipeline",
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/chains",
     visibility = ["//visibility:public"],
     deps = [
-        "//pkg/cor",
         "//pkg/commands",
+        "//pkg/cor",
         "//pkg/model",
         "@com_github_google_generative_ai_go//genai",
         "@com_google_cloud_go_storage//:storage",

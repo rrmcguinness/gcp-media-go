@@ -1,8 +1,11 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
-    name = "config_test",
-    srcs = ["config_test.go"],
+    name = "cloud_test",
+    srcs = [
+        "config_test.go",
+        "pubsub_listener_test.go",
+    ],
     data = [
         "//configs:.env.local.toml",
         "//configs:.env.test.toml",
@@ -11,24 +14,7 @@ go_test(
     rundir = ".",
     deps = [
         "//pkg/cloud",
-        "//pkg/model",
-        "//test",
-        "@com_github_stretchr_testify//assert",
-    ],
-)
-
-go_test(
-    name = "pubsub_listener_test",
-    srcs = ["pubsub_listener_test.go"],
-    data = [
-        "//configs:.env.local.toml",
-        "//configs:.env.test.toml",
-        "//configs:.env.toml",
-    ],
-    rundir = ".",
-    deps = [
         "//pkg/cor",
-        "//pkg/cloud",
         "//pkg/model",
         "//test",
         "@com_github_stretchr_testify//assert",

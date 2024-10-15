@@ -29,6 +29,10 @@ type VideoUploadCommand struct {
 	TimeoutInSeconds time.Duration
 }
 
+func GetVideoUploadFileParameterName() string {
+	return "__VIDEO_UPLOAD_FILE__"
+}
+
 func (v *VideoUploadCommand) IsExecutable(context cor.Context) bool {
 	return context != nil && context.Get(v.GetInputParam()) != nil
 }
@@ -37,7 +41,7 @@ func (v *VideoUploadCommand) Execute(context cor.Context) {
 	ctx, cancel := go_ctx.WithTimeout(go_ctx.Background(), v.TimeoutInSeconds)
 	defer cancel()
 
-	gcsFile := context.Get("__GCS_OBJ__").(*model.GCSObject)
+	gcsFile := context.Get(model.GetGCSObjectName()).(*model.GCSObject)
 	fileName := context.Get(v.GetInputParam()).(string)
 
 	genFil, err := v.GenaiClient.UploadFileFromPath(ctx, fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})
@@ -55,6 +59,6 @@ func (v *VideoUploadCommand) Execute(context cor.Context) {
 		}
 	}
 
-	context.Add("__Video_Upload__", genFil)
+	context.Add(GetVideoUploadFileParameterName(), genFil)
 	context.Add(v.GetOutputParam(), genFil)
 }
