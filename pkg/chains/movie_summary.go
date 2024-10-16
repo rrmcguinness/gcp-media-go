@@ -71,7 +71,10 @@ func MovieSummaryChain(
 		MovieObjectParameterName: movieOutputParam,
 	})
 
-	out.AddCommand(&commands.SaveMovieToBQ{BigQueryClient: bigqueryClient, DataSetName: "media_ds", TableName: "movies", MovieObjectParamName: movieOutputParam})
+	out.AddCommand(&commands.SaveMovieToBQ{BigQueryClient: bigqueryClient,
+		DataSetName:          "media_ds",
+		TableName:            "movies",
+		MovieObjectParamName: movieOutputParam})
 
 	out.AddCommand(&commands.VideoCleanupCommand{GenaiClient: genaiClient})
 
