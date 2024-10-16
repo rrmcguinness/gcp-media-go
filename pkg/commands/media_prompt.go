@@ -64,6 +64,8 @@ func (t *MediaPromptCommand) Execute(context cor.Context) {
 		context.AddError(err)
 		return
 	}
-
+	// Make retrievable for later use
 	context.Add(t.GetOutputParam(), out)
+	// Still pipe to next command
+	context.Add(cor.CTX_OUT, out)
 }

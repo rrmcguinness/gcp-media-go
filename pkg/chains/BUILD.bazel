@@ -51,6 +51,7 @@ go_library(
         "//pkg/commands",
         "//pkg/cor",
         "//pkg/model",
+        "@com_google_cloud_go_bigquery//:bigquery",
         "@com_github_google_generative_ai_go//genai",
         "@com_google_cloud_go_storage//:storage",
     ],

@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package pipeline
+package chains
 
 import (
 	"time"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
@@ -24,11 +25,15 @@ import (
 )
 
 func MovieSummaryChain(
+	bigqueryClient *bigquery.Client,
 	genaiClient *genai.Client,
 	genaiModel *genai.GenerativeModel,
 	storageClient *storage.Client,
 	summaryPromptTemplate string,
-	chainOutputParam string,
+	summaryOutputParam string,
+	scenePromptTemplate string,
+	sceneOutputParam string,
+	movieOutputParam string,
 ) cor.Chain {
 
 	out := &cor.BaseChain{}
@@ -45,12 +50,28 @@ func MovieSummaryChain(
 	// Generate Summary
 	out.AddCommand(
 		&commands.MediaPromptCommand{
-			BaseCommand:        cor.BaseCommand{OutputParamName: chainOutputParam},
+			BaseCommand:        cor.BaseCommand{OutputParamName: summaryOutputParam},
 			GenaiClient:        genaiClient,
 			GenaiModel:         genaiModel,
 			PromptTemplate:     summaryPromptTemplate,
 			TemplateParamsName: cor.CTX_PROMPT_VARS,
 		})
+
+	out.AddCommand(&commands.SummaryResponseToStruct{})
+
+	out.AddCommand(&commands.SceneBuilder{
+		BaseCommand: cor.BaseCommand{OutputParamName: sceneOutputParam},
+		GenaiClient: genaiClient,
+		GenaiModel:  genaiModel,
+		ScenePrompt: scenePromptTemplate})
+
+	out.AddCommand(&commands.MovieAssembly{
+		SummaryParameterName:     summaryOutputParam,
+		SceneParameterName:       sceneOutputParam,
+		MovieObjectParameterName: movieOutputParam,
+	})
+
+	out.AddCommand(&commands.SaveMovieToBQ{BigQueryClient: bigqueryClient, DataSetName: "media_ds", TableName: "movies", MovieObjectParamName: movieOutputParam})
 
 	out.AddCommand(&commands.VideoCleanupCommand{GenaiClient: genaiClient})
 

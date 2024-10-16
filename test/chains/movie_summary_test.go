@@ -16,36 +16,44 @@ package chains
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"testing"
 
 	parent_chains "github.com/GoogleCloudPlatform/solutions/media/pkg/chains"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
 const DEFAULT_PROMPT = `
-Review the attached movie and fulfill the following instructions and response in JSON format:
-- Identify the movie's Title, Directors, Producers, Cinematographers, and the top 20 actors.
-- Write a creative and detailed summary that matches the tone of the movie.
-- Identify all of the scenes in the movie start and end timestamps in the format of HH:mm:ss where hours (HH), minutes (mm), and seconds (ss) are only two digits.
+Review the attached movie and extract the following information
+- Title as title
+- Summary - a detailed summary of the movie, plot, and cinematic universe of the movie in markdown format
+- Director as director
+- Release Year as release_year, a four digit year
+- Genre as genre
+- Rating as rating with one of the following values: G, PG, PG-13, R, NC-17
+- Cast as cast, an array of Cast Members including Character Name as character_name, and associated actor name as actor_name
+- Extract the scenes and their start and end times in the format of HH:MM:SS or hours:minutes:seconds as two digits each
 
-Example:
-	{
-		"title": "",
-		"summary": "",
-		"duration_in_minutes": 60,
-		"directors": [""],
-		"executive_producers": [""],
-		"producers": [""],
-		"cinematographers": [""],
-		"actors": [""],
-		"scenes": [
-			{"start": "00:00:00", "end": "00:00:00" }
-		]
-	}
+Example Output:
+%s
+`
+
+const SCENE_PROMPT = `
+Movie Sequence: %d
+
+Movie Summary JSON:
+%s
+
+Using the movie and summary information above, review the movie from start time: %s to end time: %s and extract the summary, characters, and dialog.
+If there are no characters or dialog, return an empty object like: {}
+
+Example Output:
+%s
 `
 
 func TestMediaChain(t *testing.T) {
@@ -64,7 +72,18 @@ func TestMediaChain(t *testing.T) {
 	genModel := cloudClients.AgentModels["creative-flash"]
 	assert.NotNil(t, genModel)
 
-	chain := parent_chains.MovieSummaryChain(cloudClients.GenAIClient, genModel, cloudClients.StorageClient, DEFAULT_PROMPT, "DOC_SUMMARY")
+	jsonData, _ := json.Marshal(model.GetExampleSummary())
+	prompt := fmt.Sprintf(DEFAULT_PROMPT, jsonData)
+
+	chain := parent_chains.MovieSummaryChain(
+		cloudClients.BiqQueryClient,
+		cloudClients.GenAIClient,
+		genModel,
+		cloudClients.StorageClient,
+		prompt, "DOC_SUMMARY",
+		SCENE_PROMPT,
+		"SCENES",
+		"MOVIE")
 
 	chainCtx := cor.NewBaseContext()
 	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())
@@ -76,5 +95,5 @@ func TestMediaChain(t *testing.T) {
 
 	assert.False(t, chainCtx.HasErrors())
 
-	fmt.Println(chainCtx.Get("DOC_SUMMARY"))
+	fmt.Println(chainCtx.Get("MOVIE"))
 }

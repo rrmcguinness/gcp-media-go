@@ -37,4 +37,9 @@ module "high_res_resources" {
   region = var.region
 }
 
+module "bigquery" {
+  source = "./modules/bigquery"
+  region = var.region
+}
+
 

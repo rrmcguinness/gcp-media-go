@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 
+	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/pubsub"
 	"cloud.google.com/go/storage"
 	"github.com/google/generative-ai-go/genai"
@@ -28,6 +29,7 @@ type CloudServiceClients struct {
 	StorageClient   *storage.Client
 	PubsubClient    *pubsub.Client
 	GenAIClient     *genai.Client
+	BiqQueryClient  *bigquery.Client
 	PubSubListeners map[string]*PubSubListener
 	EmbeddingModels map[string]*genai.EmbeddingModel
 	AgentModels     map[string]*genai.GenerativeModel
@@ -37,6 +39,7 @@ func (c *CloudServiceClients) Close() {
 	c.StorageClient.Close()
 	c.PubsubClient.Close()
 	c.GenAIClient.Close()
+	c.BiqQueryClient.Close()
 }
 
 func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *CloudServiceClients, err error) {
@@ -54,6 +57,11 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 	if err != nil {
 		fmt.Printf("Error creating GenAI client: %v\n", err)
 		//return nil, err
+	}
+
+	bc, err := bigquery.NewClient(ctx, config.Application.GoogleProjectId)
+	if err != nil {
+		return nil, err
 	}
 
 	subscriptions := make(map[string]*PubSubListener)
@@ -92,6 +100,7 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		StorageClient:   sc,
 		PubsubClient:    pc,
 		GenAIClient:     gc,
+		BiqQueryClient:  bc,
 		PubSubListeners: subscriptions,
 		EmbeddingModels: embeddingModels,
 		AgentModels:     agentModels,

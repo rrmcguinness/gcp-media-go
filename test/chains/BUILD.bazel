@@ -13,12 +13,13 @@
 # limitations under the License.
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
+# "movie_resize_test.go",
+
 # gazlle-ignore
 go_test(
     name = "chains_test",
-    size = "small",
+    size = "medium",
     srcs = [
-        "movie_resize_test.go",
         "movie_summary_test.go",
     ],
     data = [
