@@ -31,10 +31,6 @@ type GCSFileUpload struct {
 	Bucket string
 }
 
-func (c *GCSFileUpload) IsExecutable(context cor.Context) bool {
-	return context.Get(c.GetInputParam()) != nil
-}
-
 func (c *GCSFileUpload) Execute(context cor.Context) {
 	ctx := go_ctx.Background()
 	path := context.Get(c.GetInputParam()).(string)

@@ -31,10 +31,6 @@ type SaveMovieToBQ struct {
 	TableName            string
 }
 
-func (s *SaveMovieToBQ) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(s.MovieObjectParamName) != nil
-}
-
 func (s *SaveMovieToBQ) Execute(context cor.Context) {
 	movie := context.Get(s.MovieObjectParamName).(*model.Movie)
 	i := s.BigQueryClient.Dataset(s.DataSetName).Table(s.TableName).Inserter()

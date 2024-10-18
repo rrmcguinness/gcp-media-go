@@ -20,6 +20,11 @@ type BaseCommand struct {
 	OutputParamName string
 }
 
+// IsExecutable a default implementation of IsExecutable.
+func (c *BaseCommand) IsExecutable(context Context) bool {
+	return context != nil && context.Get(c.GetInputParam()) != nil
+}
+
 // GetInputParam the name of the parameter expected as the primary input,
 // if empty it will default to CTX_IN, during a chain execution event CTX_IN
 // will be mapped to the previous executions CTX_OUT to ensure PIPE / chain behaviors.

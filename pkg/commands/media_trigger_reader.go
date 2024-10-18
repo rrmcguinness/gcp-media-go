@@ -25,10 +25,6 @@ type MediaTriggerToGCSObject struct {
 	cor.BaseCommand
 }
 
-func (c *MediaTriggerToGCSObject) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(c.GetInputParam()) != nil
-}
-
 func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	in := context.Get(c.GetInputParam()).(string)
 	var out model.GCSObjectMessage

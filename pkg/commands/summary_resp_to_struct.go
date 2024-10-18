@@ -24,10 +24,6 @@ type SummaryResponseToStruct struct {
 	cor.BaseCommand
 }
 
-func (s *SummaryResponseToStruct) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(s.GetInputParam()) != nil
-}
-
 func (s *SummaryResponseToStruct) Execute(context cor.Context) {
 	doc := context.Get(s.GetInputParam()).(string)
 	var summary model.MovieSummary

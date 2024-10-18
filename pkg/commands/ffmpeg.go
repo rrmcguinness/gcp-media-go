@@ -35,11 +35,6 @@ type FFMpegCommand struct {
 	TargetWidth       string
 }
 
-// IsExecutable determines if the command should execute
-func (c *FFMpegCommand) IsExecutable(context cor.Context) bool {
-	return context.Get(c.GetInputParam()) != nil
-}
-
 // Execute executes the business logic of the command
 func (c *FFMpegCommand) Execute(context cor.Context) {
 	inputFileName := context.Get(c.GetInputParam()).(string)

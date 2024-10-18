@@ -32,10 +32,6 @@ type MediaPromptCommand struct {
 	TemplateParamsName string
 }
 
-func (t *MediaPromptCommand) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(t.GetInputParam()) != nil
-}
-
 func (t *MediaPromptCommand) Execute(context cor.Context) {
 
 	ctx := go_ctx.Background()

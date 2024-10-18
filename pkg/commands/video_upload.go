@@ -33,10 +33,6 @@ func GetVideoUploadFileParameterName() string {
 	return "__VIDEO_UPLOAD_FILE__"
 }
 
-func (v *VideoUploadCommand) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(v.GetInputParam()) != nil
-}
-
 func (v *VideoUploadCommand) Execute(context cor.Context) {
 	ctx, cancel := go_ctx.WithTimeout(go_ctx.Background(), v.TimeoutInSeconds)
 	defer cancel()

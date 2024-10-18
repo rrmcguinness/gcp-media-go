@@ -35,10 +35,6 @@ type SceneBuilder struct {
 	ScenePrompt string
 }
 
-func (s *SceneBuilder) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get(s.GetInputParam()) != nil
-}
-
 func (s *SceneBuilder) Execute(context cor.Context) {
 	summary := context.Get(s.GetInputParam()).(*model.MovieSummary)
 	videoFile := context.Get(GetVideoUploadFileParameterName()).(*genai.File)

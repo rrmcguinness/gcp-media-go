@@ -40,13 +40,6 @@ func NewGCSToTempFileCommand(client *storage.Client, tempFilePrefix string) *GCS
 	}
 }
 
-func (c *GCSToTempFileCommand) IsExecutable(context cor.Context) bool {
-	if context != nil && context.Get(c.GetInputParam()) != nil {
-		return true
-	}
-	return false
-}
-
 func (c *GCSToTempFileCommand) Execute(context cor.Context) {
 	ctx := go_ctx.Background()
 
