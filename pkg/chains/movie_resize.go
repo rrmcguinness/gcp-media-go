@@ -23,7 +23,10 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
+// The default command requires ffmpeg on the path of the running computer.
 const DEFAULT_FFMPEG_COMMAND = "ffmpeg"
+
+// The default width is the recommended size.
 const DEFAULT_WIDTH = "240"
 
 func MovieResizeChain(

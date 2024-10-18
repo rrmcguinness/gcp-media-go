@@ -24,7 +24,7 @@ import (
 	"github.com/google/generative-ai-go/genai"
 )
 
-func MovieSummaryChain(
+func MovieIngestionChain(
 	bigqueryClient *bigquery.Client,
 	genaiClient *genai.Client,
 	genaiModel *genai.GenerativeModel,
@@ -57,6 +57,7 @@ func MovieSummaryChain(
 			TemplateParamsName: cor.CTX_PROMPT_VARS,
 		})
 
+	// Convert the JSON to a struct
 	out.AddCommand(&commands.SummaryResponseToStruct{})
 
 	out.AddCommand(&commands.SceneBuilder{

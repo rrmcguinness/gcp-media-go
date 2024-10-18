@@ -37,8 +37,8 @@ copy_file_groups(
 go_library(
     name = "chains",
     srcs = [
+        "movie_ingestion.go",
         "movie_resize.go",
-        "movie_summary.go",
     ],
     data = [
         "copy_ffmpeg",
@@ -51,8 +51,8 @@ go_library(
         "//pkg/commands",
         "//pkg/cor",
         "//pkg/model",
-        "@com_google_cloud_go_bigquery//:bigquery",
         "@com_github_google_generative_ai_go//genai",
+        "@com_google_cloud_go_bigquery//:bigquery",
         "@com_google_cloud_go_storage//:storage",
     ],
 )

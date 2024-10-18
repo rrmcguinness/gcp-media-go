@@ -33,7 +33,7 @@ resource "google_bigquery_dataset" "media_ds" {
   max_time_travel_hours = 96
 
   labels = {
-    env = "default"
+    env = "test"
   }
 }
 
@@ -43,6 +43,16 @@ resource "google_bigquery_table" "media_ds_movies" {
 
   schema = <<EOF
 [
+    {
+        "name": "id",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "create_date",
+        "type": "TIMESTAMP",
+        "mode": "REQUIRED"
+    },
     {
         "name": "title",
         "type": "STRING",
@@ -101,43 +111,19 @@ resource "google_bigquery_table" "media_ds_movies" {
                 "mode": "REQUIRED"
             },
             {
-                "name": "time_span",
-                "type": "RECORD",
-                "mode": "NULLABLE",
-                "fields": [
-                    {
-                        "name": "start",
-                        "type": "STRING",
-                        "mode": "NULLABLE"
-                    },
-                    {
-                        "name": "end",
-                        "type": "STRING",
-                        "mode": "NULLABLE"
-                    }
-                ]
-            },
-            {
-                "name": "summary",
+                "name": "start",
                 "type": "STRING",
                 "mode": "NULLABLE"
             },
             {
-                "name": "dialog",
-                "type": "RECORD",
-                "mode": "REPEATED",
-                "fields": [
-                    {
-                        "name": "character_name",
-                        "type": "STRING",
-                        "mode": "NULLABLE"
-                    },
-                    {
-                        "name": "dialog",
-                        "type": "STRING",
-                        "mode": "NULLABLE"
-                    }
-                ]
+                "name": "end",
+                "type": "STRING",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "script",
+                "type": "STRING",
+                "mode": "NULLABLE"
             }
         ]
     }
