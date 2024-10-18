@@ -1,4 +1,5 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("//:build/copy_file_groups.bzl", "copy_file_groups")
 
 gazelle(name = "gazelle")
 # gazelle:prefix github.com/GoogleCloudPlatform/solutions/media
@@ -43,4 +44,26 @@ config_setting(
         "@platforms//os:osx",
         "@platforms//cpu:x86_64",
     ],
+)
+
+
+
+copy_file_groups(
+    name = "copy_ffmpeg",
+    srcs = select({
+        ":apple_legacy": [
+            "//third_party/ffmpeg/darwin_arm64:ffmpeg_export",
+        ],
+        ":apple_silicon": [
+            "//third_party/ffmpeg/darwin_arm64:ffmpeg_export",
+        ],
+        ":linux_arm": [
+            "//third_party/ffmpeg/linux_arm64:ffmpeg_export",
+        ],
+        ":linux_x86_64": [
+            "//third_party/ffmpeg/linux_x86_64:ffmpeg_export",
+        ],
+    }),
+    prefix = "bin",
+    visibility = ["//visibility:public"],
 )

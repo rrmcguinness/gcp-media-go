@@ -27,7 +27,7 @@ type MediaTriggerToGCSObject struct {
 
 func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	in := context.Get(c.GetInputParam()).(string)
-	var out model.GCSObjectMessage
+	var out model.GCSPubSubNotification
 	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
 		context.AddError(err)

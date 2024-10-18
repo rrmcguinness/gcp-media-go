@@ -22,6 +22,9 @@ terraform {
   }
 }
 
+# TODO for production we may want to add customer managed encryption
+
+# trunk-ignore(checkov/CKV_GCP_81)
 resource "google_bigquery_dataset" "media_ds" {
   dataset_id                  = "media_ds"
   description                 = "Media data source for movie object"
@@ -37,10 +40,42 @@ resource "google_bigquery_dataset" "media_ds" {
   }
 }
 
-resource "google_bigquery_table" "media_ds_movies" {
+# trunk-ignore(checkov/CKV_GCP_80)
+resource "google_bigquery_table" "media_ds_scene_embeddings" {
   dataset_id = google_bigquery_dataset.media_ds.dataset_id
-  table_id   = "movies"
+  table_id   = "scene_embeddings"
+  deletion_protection = true
+  schema = <<EOF
+[
+    {
+        "name": "media_id",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "model_name",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "sequence_number",
+        "type": "INTEGER",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "embeddings",
+        "type": "FLOAT64",
+        "mode": "REPEATED"
+    }
+]
+EOF
+}
 
+# trunk-ignore(checkov/CKV_GCP_80)
+resource "google_bigquery_table" "media_ds_media" {
+  dataset_id = google_bigquery_dataset.media_ds.dataset_id
+  table_id   = "media"
+  deletion_protection = true
   schema = <<EOF
 [
     {

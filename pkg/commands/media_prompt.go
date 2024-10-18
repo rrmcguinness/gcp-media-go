@@ -24,7 +24,7 @@ import (
 	"github.com/google/generative-ai-go/genai"
 )
 
-type MediaPromptCommand struct {
+type MediaPrompt struct {
 	cor.BaseCommand
 	GenaiClient        *genai.Client
 	GenaiModel         *genai.GenerativeModel
@@ -32,11 +32,11 @@ type MediaPromptCommand struct {
 	TemplateParamsName string
 }
 
-func (t *MediaPromptCommand) Execute(context cor.Context) {
+func (t *MediaPrompt) Execute(context cor.Context) {
 
 	ctx := go_ctx.Background()
 
-	videoFile := context.Get(t.GetInputParam()).(*genai.File)
+	mediaFile := context.Get(t.GetInputParam()).(*genai.File)
 	params := context.Get(t.TemplateParamsName).(map[string]interface{})
 	template, err := template.New("why").Parse(t.PromptTemplate)
 	if err != nil {
@@ -52,7 +52,7 @@ func (t *MediaPromptCommand) Execute(context cor.Context) {
 	}
 
 	parts := make([]genai.Part, 0)
-	parts = append(parts, cloud.NewFileData(videoFile.URI, videoFile.MIMEType))
+	parts = append(parts, cloud.NewFileData(mediaFile.URI, mediaFile.MIMEType))
 	parts = append(parts, cloud.NewTextPart(buffer.String()))
 
 	out, err := cloud.GenerateMultiModalResponse(ctx, 0, t.GenaiModel, parts...)

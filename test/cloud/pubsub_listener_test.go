@@ -34,11 +34,11 @@ type MediaMessageCommand struct {
 }
 
 func (c *MediaMessageCommand) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get("message").(model.GCSObjectMessage).Kind == "storage#object"
+	return context != nil && context.Get("message").(model.GCSPubSubNotification).Kind == "storage#object"
 }
 
 func (c *MediaMessageCommand) Execute(context cor.Context) {
-	model := context.Get("message").(model.GCSObjectMessage)
+	model := context.Get("message").(model.GCSPubSubNotification)
 	log.Println(fmt.Sprintf("Message:\n%v\n", model))
 }
 
