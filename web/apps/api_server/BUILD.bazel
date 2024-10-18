@@ -1,3 +1,5 @@
+load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
+
 # Copyright 2024 Google, LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-load("@io_bazel_rules_go//go:def.bzl", "go_binary", "go_library")
-
 go_library(
-    name = "api_server_library",
-    srcs = ["api-server.go"],
-    importpath = "github.com/GoogleCloudPlatform/solutions/media/cmd/api-server",
+    name = "api_server_lib",
+    srcs = [
+        "api_server.go",
+        "media.go",
+    ],
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/web/apps/api_server",
     visibility = ["//visibility:private"],
-    deps = [
-        "//pkg/cloud"
-    ]
+    deps = ["@com_github_gin_gonic_gin//:gin"],
 )
 
 go_binary(
-    name = "api-server",
-    embed = [":api_server_library"],
+    name = "api_server",
+    embed = [":api_server_lib"],
     visibility = ["//visibility:public"],
 )
