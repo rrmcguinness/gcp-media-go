@@ -27,7 +27,7 @@ terraform {
 # trunk-ignore(checkov/CKV_GCP_81)
 resource "google_bigquery_dataset" "media_ds" {
   dataset_id                  = "media_ds"
-  description                 = "Media data source for movie object"
+  description                 = "Media data source for media file object"
   location                    = "US"
   delete_contents_on_destroy = false
 
