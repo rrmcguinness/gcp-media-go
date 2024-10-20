@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package cloud
+package cloud_test
 
 import (
 	"context"
@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	cloud "github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/test"

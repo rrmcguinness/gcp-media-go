@@ -30,11 +30,7 @@ resource "google_bigquery_dataset" "media_ds" {
   description                 = "Media data source for media file object"
   location                    = "US"
   delete_contents_on_destroy = false
-
-  default_partition_expiration_ms = 3600000
-  default_table_expiration_ms     = 3600000
   max_time_travel_hours = 96
-
   labels = {
     env = "test"
   }

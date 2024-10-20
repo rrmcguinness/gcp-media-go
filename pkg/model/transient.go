@@ -54,3 +54,8 @@ func MediaSummaryFromJSON(value string) (summary *MediaSummary, err error) {
 	err = json.Unmarshal([]byte(value), &summary)
 	return summary, err
 }
+
+type SceneMatchResult struct {
+	MediaId        string `json:"media_id" bigquery:"media_id"`
+	SequenceNumber int    `json:"sequence_number" bigquery:"sequence_number"`
+}

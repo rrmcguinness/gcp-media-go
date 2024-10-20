@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package workflow
+package workflow_test
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
-	wf "github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -37,7 +37,8 @@ Review the attached media file and extract the following information
 - Genre as genre
 - Rating as rating with one of the following values: G, PG, PG-13, R, NC-17
 - Cast as cast, an array of Cast Members including Character Name as character_name, and associated actor name as actor_name
-- Extract the scenes and their start and end times in the format of HH:MM:SS or hours:minutes:seconds as two digits each
+- Extract the scenes and order by start and end times in the format of HH:MM:SS or hours:minutes:seconds as two digits each
+- Add a sequence number to each scene starting from 1 and incrementing in order of the timestamp
 
 Example Output:
 %s
@@ -73,7 +74,7 @@ func TestMediaChain(t *testing.T) {
 	jsonData, _ := json.Marshal(model.GetExampleSummary())
 	prompt := fmt.Sprintf(DEFAULT_PROMPT, jsonData)
 
-	mediaIngestWorkflow := wf.MediaIngestion(
+	mediaIngestWorkflow := workflow.MediaIngestion(
 		cloudClients.BiqQueryClient,
 		cloudClients.GenAIClient,
 		genModel,
@@ -81,7 +82,7 @@ func TestMediaChain(t *testing.T) {
 		prompt, "DOC_SUMMARY",
 		SCENE_PROMPT,
 		"SCENES",
-		"MOVIE")
+		"MEDIA")
 
 	chainCtx := cor.NewBaseContext()
 	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())
@@ -97,5 +98,5 @@ func TestMediaChain(t *testing.T) {
 
 	assert.False(t, chainCtx.HasErrors())
 
-	fmt.Println(chainCtx.Get("MOVIE"))
+	fmt.Println(chainCtx.Get("MEDIA"))
 }

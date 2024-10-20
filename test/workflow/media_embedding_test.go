@@ -16,18 +16,15 @@ package workflow_test
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFFMpegCommand(t *testing.T) {
+func TestMediaEmbeddings(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	// This deferral will automatically close the client that was build from
 	// the same context
@@ -36,23 +33,25 @@ func TestFFMpegCommand(t *testing.T) {
 	// Get the config file
 	config := test.GetConfig(t)
 
-	cloud, err := cloud.NewCloudServiceClients(ctx, config)
+	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
 	test.HandleErr(err, t)
-	defer cloud.Close()
+	defer cloudClients.Close()
 
-	// Create the context
-	chainCtx := cor.NewBaseContext()
-	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
+	genModel := cloudClients.AgentModels["creative-flash"]
+	assert.NotNil(t, genModel)
 
-	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
+	embeddingModel := cloudClients.EmbeddingModels["multi-lingual"]
 
-	// This assertion insures the command can be executed
-	assert.True(t, mediaResizeWorkflow.IsExecutable(chainCtx))
-	mediaResizeWorkflow.Execute(chainCtx)
+	err = workflow.GenerateEmbeddings(
+		embeddingModel,
+		cloudClients.BiqQueryClient,
+		"media_ds",
+		"media",
+		"scene_embeddings", embeddingModel.Name())
 
-	for _, err := range chainCtx.GetErrors() {
-		fmt.Println(err.Error())
+	if err != nil {
+		t.Error(err)
 	}
 
-	assert.False(t, chainCtx.HasErrors())
+	assert.Nil(t, err)
 }

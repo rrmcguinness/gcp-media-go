@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package workflow_test
+package services_test
 
 import (
 	"context"
@@ -20,14 +20,12 @@ import (
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/services"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
-	"github.com/stretchr/testify/assert"
+	"github.com/zeebo/assert"
 )
 
-func TestFFMpegCommand(t *testing.T) {
+func TestSearchService(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	// This deferral will automatically close the client that was build from
 	// the same context
@@ -36,23 +34,32 @@ func TestFFMpegCommand(t *testing.T) {
 	// Get the config file
 	config := test.GetConfig(t)
 
-	cloud, err := cloud.NewCloudServiceClients(ctx, config)
+	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
 	test.HandleErr(err, t)
-	defer cloud.Close()
+	defer cloudClients.Close()
 
-	// Create the context
-	chainCtx := cor.NewBaseContext()
-	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
+	genModel := cloudClients.AgentModels["creative-flash"]
+	assert.NotNil(t, genModel)
 
-	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
+	embeddingModel := cloudClients.EmbeddingModels["multi-lingual"]
 
-	// This assertion insures the command can be executed
-	assert.True(t, mediaResizeWorkflow.IsExecutable(chainCtx))
-	mediaResizeWorkflow.Execute(chainCtx)
-
-	for _, err := range chainCtx.GetErrors() {
-		fmt.Println(err.Error())
+	searchService := &services.SearchService{
+		BigqueryClient: cloudClients.BiqQueryClient,
+		EmbeddingModel: embeddingModel,
+		DatasetName:    "media_ds",
+		MediaTable:     "media",
+		EmbeddingTable: "scene_embeddings",
 	}
 
-	assert.False(t, chainCtx.HasErrors())
+	out, err := searchService.FindScenes("Scenes that woody harrelson")
+
+	if err != nil {
+		t.Error(err)
+	}
+
+	assert.Nil(t, err)
+
+	for _, o := range out {
+		fmt.Printf("%s - %d\n", o.MediaId, o.SequenceNumber)
+	}
 }

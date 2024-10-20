@@ -17,7 +17,9 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
+	"time"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
@@ -45,6 +47,16 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	scenes := make([]*model.Scene, 0)
 	_ = json.Unmarshal([]byte(jsonSummary), &summary)
 	_ = json.Unmarshal([]byte(sceneValues), &scenes)
+
+	sort.Slice(scenes, func(i, j int) bool {
+		t, _ := time.Parse("15:04:05", scenes[i].Start)
+		tt, _ := time.Parse("15:04:05", scenes[j].Start)
+		return t.Before(tt)
+	})
+
+	for i, scene := range scenes {
+		scene.SequenceNumber = i
+	}
 
 	media := model.NewMedia()
 	media.Title = summary.Title

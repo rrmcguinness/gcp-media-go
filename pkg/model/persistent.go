@@ -88,7 +88,7 @@ type CastDialog struct {
 
 // SceneEmbedding captures the summary embedding of a media file, good for general searches.
 type SceneEmbedding struct {
-	Id             string    `json:"id" bigquery:"id"`
+	Id             string    `json:"id" bigquery:"media_id"`
 	SequenceNumber int       `json:"sequence_number" bigquery:"sequence_number"`
 	ModelName      string    `json:"model_name" bigquery:"model_name"`
 	Embeddings     []float64 `json:"embeddings" bigquery:"embeddings"`
