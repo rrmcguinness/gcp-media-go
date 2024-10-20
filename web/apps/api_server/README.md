@@ -60,6 +60,38 @@ bazel run //web/apps/api_server
 
 ## Example output
 ```json
-[{"seq":14,"start":"00:00:58","end":"00:01:02","script":"EXT. DESERT ROAD - DAY\n\nFour figures in black tactical gear are running across a dry riverbed.\n\nVOICEOVER (V.O.) - (Tom Hardy)\nThis is major...\n\nThe camera pans up to show them running across a rocky hillside.\n\nVOICEOVER (V.O.) - (Tom Hardy)\n...we are...\n\nOne of the figures dives into a body of water. Another figure dives in after him."},{"seq":12,"start":"00:00:53","end":"00:00:56","script":"INT. BAR - NIGHT\n\nAnne Weying (Michelle Williams) is talking to a man.\n\nANNE WEYING - (Michelle Williams)\nLet’s go get them.\n\nEXT. STREET - NIGHT\nA group of soldiers are walking down a street at night. They are carrying weapons and flashlights. They look determined.\n\nSOLDIER 1 - (unidentified)\nOh, shit!"},{"seq":11,"start":"00:00:50","end":"00:00:53","script":"INT. LABORATORY - DAY\n\nAnne Weying (V.O.) - (Michelle Williams)\nAnd it's our job to make sure that remains a secret.\n\nWe see a close up of Anne Weying, looking concerned.\n\nINT. BAR - NIGHT\n\nTwo men sit at a bar, looking serious. One of them is a military man.\n\nINT. LABORATORY - DAY\n\nAnne Weying is talking to a military man. She looks worried."},{"seq":5,"start":"00:00:17","end":"00:00:20","script":"EXT. WAREHOUSE - NIGHT\n\nEDDIE BROCK (V.O.) - (Tom Hardy)\nWhat?\n\nVenom is shown emerging from Eddie Brock's body, his face partially visible.\n\nVENOM - (Tom Hardy)\nWe are Venom!\n\nFour men are seen approaching, carrying weapons. They look determined and ready for a fight."},{"seq":19,"start":"00:01:12","end":"00:01:16","script":"INT. WAREHOUSE - NIGHT\n\nEddie Brock is held at gunpoint by several armed men.\n\nMAN 1 - (Unidentified)\nSay when.\n\nEddie looks at the men, a knife appears in his hand, and he attacks.\n\nEDDIE BROCK - (Tom Hardy)\nWhen."}]
+[
+  {
+    "seq": 14,
+    "start": "00:00:58",
+    "end": "00:01:02",
+    "script": "EXT. DESERT ROAD - DAY\n\nFour figures in black tactical gear are running across a dry riverbed.\n\nVOICEOVER (V.O.) - (Tom Hardy)\nThis is major...\n\nThe camera pans up to show them running across a rocky hillside.\n\nVOICEOVER (V.O.) - (Tom Hardy)\n...we are...\n\nOne of the figures dives into a body of water. Another figure dives in after him."
+  },
+  {
+    "seq": 12,
+    "start": "00:00:53",
+    "end": "00:00:56",
+    "script": "INT. BAR - NIGHT\n\nAnne Weying (Michelle Williams) is talking to a man.\n\nANNE WEYING - (Michelle Williams)\nLet’s go get them.\n\nEXT. STREET - NIGHT\nA group of soldiers are walking down a street at night. They are carrying weapons and flashlights. They look determined.\n\nSOLDIER 1 - (unidentified)\nOh, shit!"
+  },
+  {
+    "seq": 11,
+    "start": "00:00:50",
+    "end": "00:00:53",
+    "script": "INT. LABORATORY - DAY\n\nAnne Weying (V.O.) - (Michelle Williams)\nAnd it's our job to make sure that remains a secret.\n\nWe see a close up of Anne Weying, looking concerned.\n\nINT. BAR - NIGHT\n\nTwo men sit at a bar, looking serious. One of them is a military man.\n\nINT. LABORATORY - DAY\n\nAnne Weying is talking to a military man. She looks worried."
+  },
+  {
+    "seq": 5,
+    "start": "00:00:17",
+    "end": "00:00:20",
+    "script": "EXT. WAREHOUSE - NIGHT\n\nEDDIE BROCK (V.O.) - (Tom Hardy)\nWhat?\n\nVenom is shown emerging from Eddie Brock's body, his face partially visible.\n\nVENOM - (Tom Hardy)\nWe are Venom!\n\nFour men are seen approaching, carrying weapons. They look determined and ready for a fight."
+  },
+  {
+    "seq": 19,
+    "start": "00:01:12",
+    "end": "00:01:16",
+    "script": "INT. WAREHOUSE - NIGHT\n\nEddie Brock is held at gunpoint by several armed men.\n\nMAN 1 - (Unidentified)\nSay when.\n\nEddie looks at the men, a knife appears in his hand, and he attacks.\n\nEDDIE BROCK - (Tom Hardy)\nWhen."
+  }
+]
+
 ```
 
