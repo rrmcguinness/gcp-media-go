@@ -22,6 +22,33 @@ This is a simple server housing multiple functions
 * /media/:id find media by id
 * /media/:id/scenes/:scene_id find scenes
 
+## Prior to running the server
+
+Make sure you create a local config file in "//configs/.env.local.toml".
+In that configuration add the following filling in your project name and api key
+
+```toml
+[application]
+google_project_id=""
+google_api_key=""
+
+[big_query_data_sources."media_ds"]
+dataset="media_ds"
+table_names = ["media"]
+
+[topic_subscriptions."HiResTopic"]
+name="media_high_res_resources_subscription"
+dead_letter_topic="media_high_res_events_dead_letter"
+timeout_in_seconds=10
+command_name=""
+
+[topic_subscriptions."LowResTopic"]
+name="media_low_res_resources_subscription"
+dead_letter_topic="media_low_res_events_dead_letter"
+timeout_in_seconds=10
+command_name=""
+```
+
 ## Running the server
 
 ```shell
