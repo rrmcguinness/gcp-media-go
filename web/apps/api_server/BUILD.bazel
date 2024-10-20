@@ -19,14 +19,39 @@ go_library(
     srcs = [
         "api_server.go",
         "media.go",
+        "setup.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/web/apps/api_server",
     visibility = ["//visibility:private"],
-    deps = ["@com_github_gin_gonic_gin//:gin"],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/model",
+        "//pkg/services",
+        "@com_github_google_generative_ai_go//genai",
+        "@com_google_cloud_go_bigquery//:bigquery",
+        "@org_golang_google_api//iterator",
+        "@com_github_gin_gonic_gin//:gin"],
 )
 
 go_binary(
     name = "api_server",
     embed = [":api_server_lib"],
     visibility = ["//visibility:public"],
+    env = {
+        "GCP_CONFIG_PREFIX": "configs",
+        "GCP_RUNTIME": "local",
+    },
+    data = [
+        "//:copy_ffmpeg",
+        "//configs:.env.local.toml",
+        "//configs:.env.toml",
+    ],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/model",
+        "//pkg/services",
+        "@com_github_google_generative_ai_go//genai",
+        "@com_google_cloud_go_bigquery//:bigquery",
+        "@org_golang_google_api//iterator",
+        "@com_github_gin_gonic_gin//:gin"],
 )

@@ -39,7 +39,6 @@ func (s *SearchService) FindScenes(query string) (out []*model.SceneMatchResult,
 	ctx := context.Background()
 	searchEmbeddings, _ := s.EmbeddingModel.EmbedContent(ctx, genai.Text(query))
 
-	//fqMediaTableName := strings.Replace(s.bigqueryClient.Dataset(s.datasetName).Table(s.mediaTable).FullyQualifiedName(), ":", ".", -1)
 	fqEmbeddingTable := strings.Replace(s.BigqueryClient.Dataset(s.DatasetName).Table(s.EmbeddingTable).FullyQualifiedName(), ":", ".", -1)
 
 	var stringArray []string
@@ -47,7 +46,7 @@ func (s *SearchService) FindScenes(query string) (out []*model.SceneMatchResult,
 		stringArray = append(stringArray, strconv.FormatFloat(float64(f), 'f', -1, 64))
 	}
 
-	queryText := "SELECT base.media_id, base.sequence_number, distance FROM VECTOR_SEARCH(TABLE `%s`, 'embeddings', (SELECT [ %s ] as embed), top_k => 5, distance_type => 'COSINE') order by distance desc"
+	queryText := "SELECT base.media_id, base.sequence_number, distance FROM VECTOR_SEARCH(TABLE `%s`, 'embeddings', (SELECT [ %s ] as embed), top_k => 5, distance_type => 'EUCLIDEAN') order by distance asc"
 	queryText = fmt.Sprintf(queryText, fqEmbeddingTable, strings.Join(stringArray, ","))
 
 	q := s.BigqueryClient.Query(queryText)

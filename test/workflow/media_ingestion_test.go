@@ -45,9 +45,12 @@ Example Output:
 `
 
 const SCENE_PROMPT = `
-Given the following media file, summary, actors, and characters, extract the details of the scene using screen play script format between time frames {{ .TIME_START }} - {{ .TIME_END }}.
+Given the following media file, summary, actors, and characters, extract the following details between time frames {{ .TIME_START }} - {{ .TIME_END }} in json format:
+- sequence_number: {{ .SEQUENCE }}
+- start: {{ .TIME_START }}
+- end: {{ .TIME_END }}
+- script, the details of the scene using a modified screen play script format that includes the actors name on the character line. Example: CHARACTER NAME (V.O.) - (ACTOR NAME)
 
-Scene Sequence: {{ .SEQUENCE }}
 Media Summary:
 {{ .SUMMARY_DOCUMENT }}
 

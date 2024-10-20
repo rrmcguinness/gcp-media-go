@@ -51,7 +51,7 @@ func TestSearchService(t *testing.T) {
 		EmbeddingTable: "scene_embeddings",
 	}
 
-	out, err := searchService.FindScenes("Scenes that woody harrelson")
+	out, err := searchService.FindScenes("Scenes that Woody Harrelson")
 
 	if err != nil {
 		t.Error(err)

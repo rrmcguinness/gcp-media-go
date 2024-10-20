@@ -14,9 +14,13 @@
 
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/gin-gonic/gin"
+)
 
 func main() {
+	InitState()
+
 	r := gin.Default()
 
 	// Register "/media" end-points

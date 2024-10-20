@@ -44,7 +44,8 @@
             "bazel",
             "genai",
             "metageneration",
-            "rmcguinness"
+            "rmcguinness",
+            "UNNEST"
         ],
     }
 }

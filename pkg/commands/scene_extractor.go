@@ -46,7 +46,7 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 	// Create a human readable cast
 	castString := ""
 	for _, cast := range summary.Cast {
-		castString += fmt.Sprintf("Actor: %s - %s\n", cast.ActorName, cast.CharacterName)
+		castString += fmt.Sprintf("%s - %s\n", cast.CharacterName, cast.ActorName)
 	}
 	summaryText := fmt.Sprintf("Title:%s\nSummary:\n\n%s\nCast:\n\n%v\n", summary.Title, summary.Summary, castString)
 

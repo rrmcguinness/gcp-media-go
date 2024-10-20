@@ -17,21 +17,21 @@ package model
 // GetExampleScene is used to provide an example to the generative contexts.
 func GetExampleScene() *Scene {
 	out := &Scene{SequenceNumber: 1, Start: "00:00:00", End: "00:01:00", Script: `
-	INT. BATTLEFIELD - DAY
+INT. BATTLEFIELD - DAY
 
 A fierce battle is raging. Soldiers are fighting and dying all around.
 
-VOICEOVER (V.O.)
+VOICEOVER (V.O.) - (Nathan Fillion)
 I aim to misbehave.
 
 We see a young woman, RIVER TAM (16), running through the battlefield. She is terrified and covered in blood.
 
-RIVER (V.O.)
+RIVER (V.O.) - (Summar Glau)
 They were right. They were always right.
 
 River stumbles and falls. She looks up to see a man standing over her. He is SIMON TAM (26), her older brother.
 
-SIMON
+SIMON - (Sean Maher)
 It's all right, River. I'm here.
 
 Simon helps River to her feet. They run away together.`}
@@ -51,5 +51,7 @@ func GetExampleSummary() *MediaSummary {
 	}
 	s.SceneTimeStamps = append(s.SceneTimeStamps, &TimeSpan{Start: "00:00:00", End: "00:00:05"}, &TimeSpan{Start: "00:00:06", End: "00:00:10"})
 	s.Cast = append(s.Cast, &CastMember{CharacterName: "Malcolm Reynolds", ActorName: "Nathan Fillion"})
+	s.Cast = append(s.Cast, &CastMember{CharacterName: "River Tam", ActorName: "Summar Glau"})
+	s.Cast = append(s.Cast, &CastMember{CharacterName: "Simon Tam", ActorName: "Sean Maher"})
 	return s
 }

@@ -2,7 +2,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "services",
-    srcs = ["search.go"],
+    srcs = ["search.go", "media.go"],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/services",
     visibility = ["//visibility:public"],
     data = [

@@ -66,18 +66,22 @@ func MediaIngestion(
 		GenaiModel:  genaiModel,
 		ScenePrompt: scenePromptTemplate})
 
+	// Assemble the ouput into a single media object
 	out.AddCommand(&commands.MediaAssembly{
 		SummaryParameterName:     summaryOutputParam,
 		SceneParameterName:       sceneOutputParam,
 		MediaObjectParameterName: mediaOutputParam,
 	})
 
+	// Save media object to big query for async embedding job
 	out.AddCommand(&commands.MediaPersistToBigQuery{BigQueryClient: bigqueryClient,
 		DataSetName:        "media_ds",
 		TableName:          "media",
 		MediaParameterName: mediaOutputParam})
 
+	// Clean up the temporary media created by the job
 	out.AddCommand(&commands.MediaCleanup{GenaiClient: genaiClient})
 
+	// Return the chain for multiple executions
 	return out
 }

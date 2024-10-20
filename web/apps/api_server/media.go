@@ -14,11 +14,65 @@
 
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"log"
+	"strconv"
+
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+	"github.com/gin-gonic/gin"
+)
 
 func MediaRouter(r *gin.Engine) {
 
 	r.GET("/media", func(c *gin.Context) {
+		query := c.Query("s")
+		if len(query) == 0 {
+			c.Status(404)
+			return
+		}
+		results, err := state.searchService.FindScenes(query)
 
+		if err != nil {
+			c.Status(404)
+			log.Println(err)
+			return
+		}
+
+		out := make([]*model.Scene, 0)
+
+		for _, r := range results {
+			s, err := state.mediaService.GetScene(r.MediaId, r.SequenceNumber)
+			if err != nil {
+				c.Status(400)
+				return
+			}
+			out = append(out, s)
+		}
+		c.JSON(200, out)
+	})
+
+	r.GET("/media/:id", func(c *gin.Context) {
+		id := c.Param("id")
+		out, err := state.mediaService.Get(id)
+		if err != nil {
+			c.Status(404)
+			return
+		}
+		c.JSON(200, out)
+	})
+
+	r.GET("/media/:id/scenes/:scene_id", func(c *gin.Context) {
+		id := c.Param("id")
+		scene_id, err := strconv.Atoi(c.Param("scene_id"))
+		if err != nil {
+			c.Status(400)
+			return
+		}
+		out, err := state.mediaService.GetScene(id, scene_id)
+		if err != nil {
+			c.Status(404)
+			return
+		}
+		c.JSON(200, out)
 	})
 }
