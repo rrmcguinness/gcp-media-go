@@ -14,28 +14,25 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 DATA_DEPS = [
-        "//configs:.env.test.toml",
-        "//configs:.env.toml",
-        "//:copy_ffmpeg",
-    ]
+    "//configs:.env.test.toml",
+    "//configs:.env.toml",
+    "//:copy_ffmpeg",
+]
 
 TEST_DEPS = [
-        "//pkg/workflow",
-        "//pkg/cloud",
-        "//pkg/cor",
-        "//pkg/model",
-        "//test",
-        "@com_github_stretchr_testify//assert",
-    ]
-
+    "//pkg/workflow",
+    "//pkg/cloud",
+    "//pkg/cor",
+    "//pkg/model",
+    "//test",
+    "@com_github_stretchr_testify//assert",
+]
 
 # gazlle-ignore
 go_test(
     name = "media_resize",
     size = "large",
-    srcs = [
-        "media_resize_test.go",
-    ],
+    srcs = ["media_resize_test.go"],
     data = DATA_DEPS,
     rundir = ".",
     deps = TEST_DEPS,
@@ -44,22 +41,34 @@ go_test(
 go_test(
     name = "media_ingest",
     size = "large",
-    srcs = [
-       "media_ingestion_test.go",
-    ],
+    srcs = ["media_ingestion_test.go"],
     data = DATA_DEPS,
     rundir = ".",
     deps = TEST_DEPS,
 )
 
-
 go_test(
     name = "media_embeddings",
     size = "large",
-    srcs = [
-        "media_embedding_test.go",
-    ],
+    srcs = ["media_embedding_test.go"],
     data = DATA_DEPS,
     rundir = ".",
     deps = TEST_DEPS,
+)
+
+go_test(
+    name = "workflow_test",
+    srcs = [
+        "media_embedding_test.go",
+        "media_ingestion_test.go",
+        "media_resize_test.go",
+    ],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/cor",
+        "//pkg/model",
+        "//pkg/workflow",
+        "//test",
+        "@com_github_stretchr_testify//assert",
+    ],
 )

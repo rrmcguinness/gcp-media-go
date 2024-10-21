@@ -47,7 +47,8 @@ func MediaRouter(r *gin.RouterGroup) {
 
 			// Convert the results into a map driven by the media id
 			for _, r := range sceneResults {
-				if _, ok := out[r.MediaId]; !ok {
+				var med *model.Media
+				if m, ok := out[r.MediaId]; !ok {
 					m, err := state.mediaService.Get(r.MediaId)
 					if err != nil {
 						log.Print(err)
@@ -57,6 +58,9 @@ func MediaRouter(r *gin.RouterGroup) {
 					// Clear the scenes
 					m.Scenes = make([]*model.Scene, 0)
 					out[r.MediaId] = m
+					med = m
+				} else {
+					med = m
 				}
 
 				s, err := state.mediaService.GetScene(r.MediaId, r.SequenceNumber)
@@ -64,7 +68,7 @@ func MediaRouter(r *gin.RouterGroup) {
 					c.Status(400)
 					return
 				}
-				out[r.MediaId].Scenes = append(out[r.MediaId].Scenes, s)
+				med.Scenes = append(med.Scenes, s)
 			}
 			// Reduce
 			results := make([]*model.Media, 0)

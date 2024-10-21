@@ -46,8 +46,6 @@ config_setting(
     ],
 )
 
-
-
 copy_file_groups(
     name = "copy_ffmpeg",
     srcs = select({

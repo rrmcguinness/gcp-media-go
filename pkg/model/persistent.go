@@ -68,7 +68,7 @@ func NewMedia() *Media {
 // Scene is a representation of a time span and it's sequence in a media object
 // giving granular detail for the agent objects to interrogate
 type Scene struct {
-	SequenceNumber int    `json:"seq" bigquery:"sequence"`
+	SequenceNumber int    `json:"sequence" bigquery:"sequence"`
 	Start          string `json:"start" bigquery:"start"`
 	End            string `json:"end" bigquery:"end"`
 	Script         string `json:"script" bigquery:"script"`

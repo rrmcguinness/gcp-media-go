@@ -2,14 +2,18 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 
 go_library(
     name = "services",
-    srcs = ["search.go", "media.go", "queries.go"],
-    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/services",
-    visibility = ["//visibility:public"],
+    srcs = [
+        "media.go",
+        "queries.go",
+        "search.go",
+    ],
     data = [
         "//:copy_ffmpeg",
         "//configs:.env.test.toml",
         "//configs:.env.toml",
     ],
+    importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/services",
+    visibility = ["//visibility:public"],
     deps = [
         "//pkg/model",
         "@com_github_google_generative_ai_go//genai",
