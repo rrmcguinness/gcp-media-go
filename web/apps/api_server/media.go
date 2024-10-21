@@ -34,7 +34,7 @@ func MediaRouter(r *gin.Engine) {
 			c.Status(404)
 			return
 		}
-		results, err := state.searchService.FindScenes(query, count)
+		sceneResults, err := state.searchService.FindScenes(query, count)
 
 		if err != nil {
 			c.Status(404)
@@ -42,24 +42,35 @@ func MediaRouter(r *gin.Engine) {
 			return
 		}
 
-		out := make(map[string][]*model.Scene)
+		out := make(map[string]*model.Media, 0)
 
 		// Convert the results into a map driven by the media id
-		for _, r := range results {
+		for _, r := range sceneResults {
+			if _, ok := out[r.MediaId]; !ok {
+				m, err := state.mediaService.Get(r.MediaId)
+				if err != nil {
+					log.Print(err)
+					c.Status(400)
+					return
+				}
+				// Clear the scenes
+				m.Scenes = make([]*model.Scene, 0)
+				out[r.MediaId] = m
+			}
+
 			s, err := state.mediaService.GetScene(r.MediaId, r.SequenceNumber)
 			if err != nil {
 				c.Status(400)
 				return
 			}
-
-			if _, ok := out[r.MediaId]; ok {
-				out[r.MediaId] = append(out[r.MediaId], s)
-			} else {
-				out[r.MediaId] = make([]*model.Scene, 0)
-				out[r.MediaId] = append(out[r.MediaId], s)
-			}
+			out[r.MediaId].Scenes = append(out[r.MediaId].Scenes, s)
 		}
-		c.JSON(200, out)
+		// Reduce
+		results := make([]*model.Media, 0)
+		for _, v := range out {
+			results = append(results, v)
+		}
+		c.JSON(200, results)
 	})
 
 	r.GET("/media/:id", func(c *gin.Context) {

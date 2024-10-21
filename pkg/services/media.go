@@ -45,6 +45,7 @@ func (s *MediaService) Get(id string) (media *model.Media, err error) {
 		return media, err
 	}
 	// Since this should only return a single result
+	media = &model.Media{}
 	err = itr.Next(media)
 	return media, err
 }
