@@ -24,7 +24,10 @@ func main() {
 	r := gin.Default()
 
 	// Register "/media" end-points
-	MediaRouter(r)
+	api_v1 := r.Group("/api/v1")
+	{
+		MediaRouter(api_v1)
+	}
 
 	r.Run()
 }
