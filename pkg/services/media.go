@@ -38,8 +38,7 @@ func (s *MediaService) GetFQN() string {
 func (s *MediaService) Get(id string) (media *model.Media, err error) {
 	ctx := context.Background()
 
-	queryText := "SELECT * from `%s` WHERE id = '%s'"
-	queryText = fmt.Sprintf(queryText, s.GetFQN(), id)
+	queryText := fmt.Sprintf(QRY_FIND_MEDIA_BY_ID, s.GetFQN(), id)
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)
 	if err != nil {
@@ -54,9 +53,7 @@ func (s *MediaService) Get(id string) (media *model.Media, err error) {
 func (s *MediaService) GetScene(id string, sceneSequence int) (scene *model.Scene, err error) {
 	fqMediaTableName := strings.Replace(s.BigqueryClient.Dataset(s.DatasetName).Table(s.MediaTable).FullyQualifiedName(), ":", ".", -1)
 	ctx := context.Background()
-
-	queryText := "SELECT sequence, start, `end`, script FROM `%s`, UNNEST(scenes) as s WHERE id = '%s' and s.sequence = %d"
-	queryText = fmt.Sprintf(queryText, fqMediaTableName, id, sceneSequence)
+	queryText := fmt.Sprintf(QRY_GET_SCENE, fqMediaTableName, id, sceneSequence)
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)
 	if err != nil {

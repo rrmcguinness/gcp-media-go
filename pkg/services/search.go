@@ -34,7 +34,7 @@ type SearchService struct {
 	EmbeddingTable string
 }
 
-func (s *SearchService) FindScenes(query string) (out []*model.SceneMatchResult, err error) {
+func (s *SearchService) FindScenes(query string, maxResults int) (out []*model.SceneMatchResult, err error) {
 	out = make([]*model.SceneMatchResult, 0)
 	ctx := context.Background()
 	searchEmbeddings, _ := s.EmbeddingModel.EmbedContent(ctx, genai.Text(query))
@@ -46,8 +46,7 @@ func (s *SearchService) FindScenes(query string) (out []*model.SceneMatchResult,
 		stringArray = append(stringArray, strconv.FormatFloat(float64(f), 'f', -1, 64))
 	}
 
-	queryText := "SELECT base.media_id, base.sequence_number, distance FROM VECTOR_SEARCH(TABLE `%s`, 'embeddings', (SELECT [ %s ] as embed), top_k => 5, distance_type => 'EUCLIDEAN') order by distance asc"
-	queryText = fmt.Sprintf(queryText, fqEmbeddingTable, strings.Join(stringArray, ","))
+	queryText := fmt.Sprintf(QRY_SEQUENCE_KNN, fqEmbeddingTable, strings.Join(stringArray, ","), maxResults)
 
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)
