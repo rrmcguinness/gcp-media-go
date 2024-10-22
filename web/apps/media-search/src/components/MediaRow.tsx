@@ -1,0 +1,45 @@
+// Copyright 2024 Google, LLC
+// 
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+// 
+//     https://www.apache.org/licenses/LICENSE-2.0
+// 
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+import { Box, Grid2, Typography } from "@mui/material";
+import SceneData from "./SceneData";
+import { MediaResult, Scene } from "../shared/model";
+import Cast from "./Cast";
+
+const MediaRow = ({ result }: { result: MediaResult }) => {
+  return (
+    <>
+      <Grid2 size={4} sx={{textAlign: 'left'}}>
+        <Typography variant="h5" sx={{mb: 1}}>{result.title}</Typography>
+        <Typography variant="h6">Summary</Typography>
+        <Box sx={{pl: 2, pr: 2}}>
+        <Typography variant="caption">{result.summary}</Typography>
+        </Box>
+        <Cast cast={result.cast} />
+      </Grid2>
+      <Grid2 size={8}>
+        {result.scenes.map((s: Scene) => (
+          <Grid2 container spacing={2} sx={{p: 1, mb: 3, border: '0.2px dashed #eee'}}>
+            <Grid2 size={2} sx={{fontWeight: 800}}>Sequence</Grid2>
+            <Grid2 size={5} sx={{fontWeight: 800}}>Start</Grid2>
+            <Grid2 size={5} sx={{fontWeight: 800}}>End</Grid2>
+            <SceneData key={`${result.id}-${s.sequence}` } scene={s} />
+          </Grid2>
+        ))}
+      </Grid2>
+    </>
+  );
+};
+
+export default MediaRow

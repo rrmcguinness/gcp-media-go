@@ -1,8 +1,9 @@
 import "./App.css";
-import { Box, Container, createTheme, CssBaseline, ThemeOptions, ThemeProvider } from "@mui/material";
+import { Box, Container, createTheme, CssBaseline, ThemeOptions, ThemeProvider, Typography } from "@mui/material";
 import { LoadingIcon } from "./components/LoadingIcon";
 import React from "react";
 import { Outlet } from "react-router-dom";
+import Footer from "./components/Footer";
 
 const themeOptions: ThemeOptions = {
   palette: {
@@ -33,18 +34,22 @@ function App() {
           display: "flex",
           flexDirection: "column",
           minHeight: "100vh",
+          minWidth: "100vw"
         }}
       >
         <CssBaseline />
+
         <Container
           component="main"
           sx={{ mt: 3, pb: "3.5em", mb: 2, overflow: "auto" }}
           maxWidth="xl"
         >
+          <Typography variant="h3" sx={{fontFamily: 'Google Sans', fontWeight: 800, color: '#4285F4'}}>Me<span style={{color: '#FBBC04'}}>d</span>ia <span style={{color: '#DB4437'}}>S</span>ea<span style={{color: '#0F9D58'}}>r</span>ch</Typography>
           <React.Suspense fallback={<LoadingIcon />}>
             <Outlet />
           </React.Suspense>
         </Container>
+        <Footer />
       </Box>
     </ThemeProvider>
   );

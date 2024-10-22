@@ -12,93 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import SearchIcon from "@mui/icons-material/Search";
-import { Grid2, IconButton, InputBase, Paper, Snackbar, SnackbarCloseReason, TextField, Typography } from "@mui/material";
-import axios from "axios";
+
+import { Snackbar, SnackbarCloseReason, Typography } from "@mui/material";
 import { useState } from "react";
-
-interface CastMember {
-  actor_name: string;
-  character_name: string;
-}
-
-interface Scene {
-  sequence: number;
-  start: string;
-  end: string;
-  script: string;
-}
-
-interface MediaResult {
-  id: string;
-  create_date: Date;
-  title: string;
-  summary: string;
-  director: string;
-  release_year: number;
-  genre: string;
-  rating: string;
-  cast: CastMember[];
-  scenes: Scene[];
-}
-
-const formatScript = (val: string): string => {
-  return val.replace("\n", "<br/>")
-}
-
-const SceneData = ({ scene }: { scene: Scene }) => {
-  return( 
-  <>
-    <Grid2 size={2}>{scene.sequence}</Grid2>
-    <Grid2 size={5}>{scene.start}</Grid2>
-    <Grid2 size={5}>{scene.end}</Grid2>
-    <Grid2 size={12} sx={{textAlign: 'left'}}><div dangerouslySetInnerHTML={{ __html: formatScript(scene.script) }} /></Grid2>
-  </>)
-};
-
-const MediaRow = ({ result }: { result: MediaResult }) => {
-  return (
-    <>
-      <Grid2 size={4} sx={{textAlign: 'left'}}>
-        <Typography variant="h6">{result.title}</Typography>
-        <Typography variant="caption">{result.summary}</Typography>
-      </Grid2>
-      <Grid2 size={8}>
-        {result.scenes.map((s: Scene) => (
-          <Grid2 container spacing={2} sx={{mb: 2}}>
-            <SceneData key={`${result.id}-${s.sequence}` } scene={s} />
-          </Grid2>
-        ))}
-      </Grid2>
-    </>
-  );
-};
+import { MediaResult } from "../shared/model";
+import SearchBar from "../components/SearchBar";
+import MediaResults from "../components/MediaResults";
 
 const Search = () => {
-  const [query, setQuery] = useState<string>(null!);
+  
   const [results, setResults] = useState<Array<MediaResult>>([]);
   const [error, setError] = useState<string>(null!);
   const [open, setOpen] = useState<boolean>(false);
-
-  const runQuery = () => {
-    axios
-      .get(`http://localhost:8080/api/v1/media?count=5&s=${query}`)
-      .then((r) => {
-        console.log(r)
-        if (r.status == 200) {
-            setResults([...r.data]);
-        } else {
-          setError(
-            `Invalid HTTP Response: ${r.status} ${r.statusText} - ${r.data}`,
-          );
-          setOpen(true);
-        }
-      })
-      .catch((e) => {
-        setError(e);
-        setOpen(true);
-      });
-  };
 
   const handleClose = (
     _: React.SyntheticEvent | Event,
@@ -112,6 +37,8 @@ const Search = () => {
 
   return (
     <>
+      <SearchBar setError={setError} setOpen={setOpen} setResults={setResults} />
+      <MediaResults results={results} />
       <Snackbar
         open={open}
         autoHideDuration={6000}
@@ -119,30 +46,6 @@ const Search = () => {
         message={error}
         action={<></>}
       />
-      <Paper sx={{p: 2, mb: 2}}>
-        <TextField
-          variant="outlined"
-          sx={{ ml: 1, flex: 1 }}
-          placeholder="Search Media"
-          value={query}
-          onChange={(v) => setQuery(v.target.value)}
-        />
-        <IconButton sx={{ p: "10px" }} aria-label="search" onClick={runQuery}>
-          <SearchIcon />
-        </IconButton>
-      </Paper>
-
-      {results && results.length > 0 ? (
-        <Paper sx={{p: 2, mb: 2}}>
-          <Grid2 container spacing={2}>
-            {results.map((r) => (
-              <MediaRow key={r.id} result={r} />
-            ))}
-          </Grid2>
-        </Paper>
-      ) : (
-        <></>
-      )}
     </>
   );
 };
