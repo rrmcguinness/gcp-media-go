@@ -66,7 +66,7 @@ func MediaIngestion(
 		GenaiModel:  genaiModel,
 		ScenePrompt: scenePromptTemplate})
 
-	// Assemble the ouput into a single media object
+	// Assemble the output into a single media object
 	out.AddCommand(&commands.MediaAssembly{
 		SummaryParameterName:     summaryOutputParam,
 		SceneParameterName:       sceneOutputParam,

@@ -59,6 +59,7 @@ func (m *PubSubListener) SetCommand(command cor.Command) {
 // using the same context of the cloud service but may be configured independently
 // for a different recovery life-cycle.
 func (m *PubSubListener) Listen(ctx context.Context) {
+	log.Printf("listening: %s", m.subscription)
 	go func() {
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 			chainCtx := cor.NewBaseContext()

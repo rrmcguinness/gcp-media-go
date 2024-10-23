@@ -19,7 +19,9 @@ go_library(
     srcs = [
         "api_server.go",
         "media.go",
+        "listeners.go",
         "setup.go",
+        
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/web/apps/api_server",
     visibility = ["//visibility:private"],
@@ -27,6 +29,7 @@ go_library(
         "//pkg/cloud",
         "//pkg/model",
         "//pkg/services",
+        "//pkg/workflow",
         "@com_github_gin_contrib_cors//:cors",
         "@com_github_gin_gonic_gin//:gin",
     ],

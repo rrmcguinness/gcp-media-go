@@ -37,7 +37,10 @@ func (t *MediaPrompt) Execute(context cor.Context) {
 	ctx := go_ctx.Background()
 
 	mediaFile := context.Get(t.GetInputParam()).(*genai.File)
-	params := context.Get(t.TemplateParamsName).(map[string]interface{})
+	params := make(map[string]interface{})
+	if context.Get(t.TemplateParamsName) != nil {
+		params = context.Get(t.TemplateParamsName).(map[string]interface{})
+	}
 	template, err := template.New("why").Parse(t.PromptTemplate)
 	if err != nil {
 		context.AddError(err)

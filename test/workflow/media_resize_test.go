@@ -43,7 +43,6 @@ func TestFFMpegCommand(t *testing.T) {
 	// Create the context
 	chainCtx := cor.NewBaseContext()
 	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
-
 	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
 
 	// This assertion insures the command can be executed
