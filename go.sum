@@ -34,6 +34,8 @@ github.com/BurntSushi/toml v1.4.0 h1:kuoIxZQy2WRRk1pttg9asf+WVv6tWQuBNVmK8+nqPr0
 github.com/BurntSushi/toml v1.4.0/go.mod h1:ukJfTF/6rtPPRCnwkur4qwRxa8vTRFBF0uk2lLoLwho=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.24.2 h1:cZpsGsWTIFKymTA0je7IIvi1O7Es7apb9CF3EQlOcfE=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/detectors/gcp v1.24.2/go.mod h1:itPGVDKf9cC/ov4MdvJ2QZ0khw4bfoo9jzwTJlaxy2k=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.3 h1:xir5X8TS8UBVPWg2jHL+cSTf0jZgqYQSA54TscSt1/0=
+github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric v0.48.3/go.mod h1:SsdWig2J5PMnfMvfJuEb1uZa8Y+kvNyvrULFo69gTFk=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.3 h1:0t8v1hFl4bfMxvAyeD+Nay9YeVTffUMf3U5LM/0dTIM=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.24.3/go.mod h1:r8vUXZXWrNOUb+fF1iy1/KiK1lfR4bl4ebk6kOfPpY0=
 github.com/GoogleCloudPlatform/opentelemetry-operations-go/internal/cloudmock v0.48.3 h1:Nl7phYyHjnqofWDpD+6FYdiwtNIxebn0AHLry7Sxb0M=
@@ -206,6 +208,8 @@ go.opentelemetry.io/contrib/detectors/gcp v1.31.0 h1:G1JQOreVrfhRkner+l4mrGxmfqY
 go.opentelemetry.io/contrib/detectors/gcp v1.31.0/go.mod h1:tzQL6E1l+iV44YFTkcAeNQqzXUiekSYP9jjJjXwEd00=
 go.opentelemetry.io/contrib/exporters/autoexport v0.56.0 h1:2k73WaZ+jHYcK3lLAC3CJ8viT/LqkIcDDUWpbbYbZK0=
 go.opentelemetry.io/contrib/exporters/autoexport v0.56.0/go.mod h1:RAHAFqVEQ+iKEAPgm6z+Gnsi0Fd5MDuqnD5T3Ms6Kg4=
+go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.56.0 h1:0nTRpaCaILLdooXAQnfktlL6Zw1ECKEW9DZGH2byi2c=
+go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin v0.56.0/go.mod h1:A7aFlp4WSLmeOnFRZwf2dMU+40THPc+rsr6KOwZLOcg=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0 h1:r6I7RJCN86bpD/FQwedZ0vSixDpwuWREjW9oRMsmqDc=
 go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.54.0/go.mod h1:B9yO6b04uB80CzjedvewuqDhxJxi11s7/GtiGa8bAjI=
 go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.56.0 h1:UP6IpuHFkUgOQL9FFQFrZ+5LiwhhYRbi7VZSIx6Nj5s=

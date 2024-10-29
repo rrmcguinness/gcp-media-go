@@ -346,6 +346,12 @@ def go_dependencies():
         version = "v1.24.2",
     )
     go_repository(
+        name = "com_github_googlecloudplatform_opentelemetry_operations_go_exporter_metric",
+        importpath = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric",
+        sum = "h1:xir5X8TS8UBVPWg2jHL+cSTf0jZgqYQSA54TscSt1/0=",
+        version = "v0.48.3",
+    )
+    go_repository(
         name = "com_github_googlecloudplatform_opentelemetry_operations_go_exporter_trace",
         importpath = "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace",
         sum = "h1:0t8v1hFl4bfMxvAyeD+Nay9YeVTffUMf3U5LM/0dTIM=",
@@ -1447,6 +1453,12 @@ def go_dependencies():
         name = "io_opentelemetry_go_contrib_exporters_autoexport",
         importpath = "go.opentelemetry.io/contrib/exporters/autoexport",
         sum = "h1:2k73WaZ+jHYcK3lLAC3CJ8viT/LqkIcDDUWpbbYbZK0=",
+        version = "v0.56.0",
+    )
+    go_repository(
+        name = "io_opentelemetry_go_contrib_instrumentation_github_com_gin_gonic_gin_otelgin",
+        importpath = "go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin",
+        sum = "h1:0nTRpaCaILLdooXAQnfktlL6Zw1ECKEW9DZGH2byi2c=",
         version = "v0.56.0",
     )
     go_repository(

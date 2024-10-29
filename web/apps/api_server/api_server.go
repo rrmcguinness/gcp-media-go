@@ -23,8 +23,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/telemetry"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
 )
 
 func main() {
@@ -33,8 +35,17 @@ func main() {
 	defer cancel()
 
 	InitState(ctx)
+	telemetry.SetupLogging()
+	shutdown, err := telemetry.SetupOpenTelemetry(ctx, GetConfig())
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer shutdown(ctx)
 
 	r := gin.Default()
+
+	r.Use(otelgin.Middleware("media-search-server"))
+
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "PATCH"},
@@ -70,6 +81,7 @@ func main() {
 	<-quit
 	log.Println("Shutdown Server ...")
 
+	// Shutdown in 60 seconds if shutdown
 	oCtx, oCancel := context.WithTimeout(ctx, 60*time.Second)
 	defer oCancel()
 

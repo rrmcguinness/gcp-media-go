@@ -63,6 +63,7 @@ func (m *PubSubListener) Listen(ctx context.Context) {
 	go func() {
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 			chainCtx := cor.NewBaseContext()
+			chainCtx.SetContext(ctx)
 			chainCtx.Add(cor.CTX_IN, string(msg.Data))
 			m.command.Execute(chainCtx)
 			// Only take the message from the topic if the chain executes successfully

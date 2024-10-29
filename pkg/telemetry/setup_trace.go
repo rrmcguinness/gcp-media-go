@@ -17,13 +17,13 @@ package telemetry
 import (
 	"context"
 	"errors"
-	"log"
+	"log/slog"
 
+	metric_exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	telemetry_exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"go.opentelemetry.io/contrib/detectors/gcp"
-	"go.opentelemetry.io/contrib/exporters/autoexport"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/metric"
@@ -58,9 +58,9 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 		),
 	)
 	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
-		log.Println(err)
+		slog.Warn("partial resource", "error", err)
 	} else if err != nil {
-		log.Fatalf("resource.New: %v", err)
+		slog.Error("resource.New", "error", err)
 	}
 
 	// Configure Context Propagation to use the default W3C traceparent format
@@ -68,7 +68,7 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 
 	trace_exporter, err := telemetry_exporter.New(telemetry_exporter.WithProjectID(config.Application.GoogleProjectId))
 	if err != nil {
-		log.Fatalf("unable to set up tracing: %v", err)
+		slog.Error("unable to set up tracing", "error", err)
 	}
 
 	tp := trace.NewTracerProvider(
@@ -80,13 +80,16 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 	otel.SetTracerProvider(tp)
 
 	// Configure Metric Export to send metrics as OTLP
-	metric_reader, err := autoexport.NewMetricReader(ctx)
+	m_exporter, err := metric_exporter.New(
+		metric_exporter.WithProjectID(config.Application.GoogleProjectId),
+	)
 	if err != nil {
-		err = errors.Join(err, shutdown(ctx))
+		slog.Error("Failed to create exporter", "error", err)
 		return
 	}
+
 	mp := metric.NewMeterProvider(
-		metric.WithReader(metric_reader),
+		metric.WithReader(metric.NewPeriodicReader(m_exporter)),
 	)
 	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
 	otel.SetMeterProvider(mp)
