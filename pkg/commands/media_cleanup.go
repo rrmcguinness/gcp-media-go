@@ -15,15 +15,17 @@
 package commands
 
 import (
-	go_ctx "context"
-
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
 )
 
 type MediaCleanup struct {
 	cor.BaseCommand
-	GenaiClient *genai.Client
+	client *genai.Client
+}
+
+func NewMediaCleanup(name string, client *genai.Client) *MediaCleanup {
+	return &MediaCleanup{BaseCommand: *cor.NewBaseCommand(name), client: client}
 }
 
 func (v *MediaCleanup) IsExecutable(context cor.Context) bool {
@@ -32,7 +34,6 @@ func (v *MediaCleanup) IsExecutable(context cor.Context) bool {
 }
 
 func (v *MediaCleanup) Execute(context cor.Context) {
-	ctx := go_ctx.Background()
 	fil := context.Get(GetVideoUploadFileParameterName()).(*genai.File)
-	v.GenaiClient.DeleteFile(ctx, fil.Name)
+	v.client.DeleteFile(context.GetContext(), fil.Name)
 }

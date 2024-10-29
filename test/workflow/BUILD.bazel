@@ -19,56 +19,28 @@ DATA_DEPS = [
     "//:copy_ffmpeg",
 ]
 
-TEST_DEPS = [
-    "//pkg/workflow",
-    "//pkg/cloud",
-    "//pkg/cor",
-    "//pkg/model",
-    "//test",
-    "@com_github_stretchr_testify//assert",
-]
-
-# gazlle-ignore
-go_test(
-    name = "media_resize",
-    size = "large",
-    srcs = ["media_resize_test.go"],
-    data = DATA_DEPS,
-    rundir = ".",
-    deps = TEST_DEPS,
-)
-
-go_test(
-    name = "media_ingest",
-    size = "large",
-    srcs = ["media_ingestion_test.go"],
-    data = DATA_DEPS,
-    rundir = ".",
-    deps = TEST_DEPS,
-)
-
-go_test(
-    name = "media_embeddings",
-    size = "large",
-    srcs = ["media_embedding_test.go"],
-    data = DATA_DEPS,
-    rundir = ".",
-    deps = TEST_DEPS,
-)
-
 go_test(
     name = "workflow_test",
+    size = "large",
     srcs = [
+        "base_test.go",
         "media_embedding_test.go",
         "media_ingestion_test.go",
         "media_resize_test.go",
     ],
+    data = DATA_DEPS,
+    rundir = ".",
     deps = [
         "//pkg/cloud",
         "//pkg/cor",
         "//pkg/model",
+        "//pkg/telemetry",
         "//pkg/workflow",
         "//test",
+        "@com_github_google_generative_ai_go//genai",
         "@com_github_stretchr_testify//assert",
+        "@io_opentelemetry_go_contrib_bridges_otelslog//:otelslog",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//codes",
     ],
 )

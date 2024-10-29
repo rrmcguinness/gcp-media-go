@@ -15,7 +15,6 @@
 package commands
 
 import (
-	go_ctx "context"
 	"log"
 
 	"cloud.google.com/go/bigquery"
@@ -25,16 +24,20 @@ import (
 
 type MediaPersistToBigQuery struct {
 	cor.BaseCommand
-	BigQueryClient     *bigquery.Client
-	MediaParameterName string
-	DataSetName        string
-	TableName          string
+	client     *bigquery.Client
+	dataset    string
+	table      string
+	mediaParam string
+}
+
+func NewMediaPersistToBigQuery(name string, client *bigquery.Client, dataset string, table string, mediaParam string) *MediaPersistToBigQuery {
+	return &MediaPersistToBigQuery{BaseCommand: *cor.NewBaseCommand(name), client: client, dataset: dataset, table: table, mediaParam: mediaParam}
 }
 
 func (s *MediaPersistToBigQuery) Execute(context cor.Context) {
-	media := context.Get(s.MediaParameterName).(*model.Media)
-	i := s.BigQueryClient.Dataset(s.DataSetName).Table(s.TableName).Inserter()
-	if err := i.Put(go_ctx.Background(), media); err != nil {
+	media := context.Get(s.mediaParam).(*model.Media)
+	i := s.client.Dataset(s.dataset).Table(s.table).Inserter()
+	if err := i.Put(context.GetContext(), media); err != nil {
 		log.Printf("Failed to write media file: %s with error %v\n", media.Title, err)
 	}
 	context.Add(cor.CTX_OUT, media)

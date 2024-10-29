@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package workflow_test
+package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
-	"github.com/GoogleCloudPlatform/solutions/media/test"
-	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel/codes"
 )
 
 const DEFAULT_PROMPT = `
@@ -57,44 +54,28 @@ Example Output:
 {{ .EXAMPLE_JSON }}
 `
 
-func TestMediaChain(t *testing.T) {
+func SetupListeners(cloudClients *cloud.CloudServiceClients, ctx context.Context) {
 
-	traceCtx, span := tracer.Start(ctx, "media-ingestion-test")
-	defer span.End()
+	// TODO - Externalize the destination topic and ffmpeg command
+	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloudClients.StorageClient, "media_low_res_resources")
+	cloudClients.PubSubListeners["HiResTopic"].SetCommand(mediaResizeWorkflow)
+	cloudClients.PubSubListeners["HiResTopic"].Listen(ctx)
 
 	jsonData, _ := json.Marshal(model.GetExampleSummary())
 	prompt := fmt.Sprintf(DEFAULT_PROMPT, jsonData)
 
+	// TODO - Externalize prompt
 	mediaIngestWorkflow := workflow.MediaIngestion(
 		cloudClients.BiqQueryClient,
 		cloudClients.GenAIClient,
-		genModel,
+		cloudClients.AgentModels["creative-flash"],
 		cloudClients.StorageClient,
 		prompt, "DOC_SUMMARY",
 		SCENE_PROMPT,
 		"SCENES",
 		"MEDIA")
 
-	chainCtx := cor.NewBaseContext()
-	chainCtx.SetContext(traceCtx)
-	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())
-	chainCtx.Add(cor.CTX_PROMPT_VARS, make(map[string]interface{}))
+	cloudClients.PubSubListeners["LowResTopic"].SetCommand(mediaIngestWorkflow)
+	cloudClients.PubSubListeners["LowResTopic"].Listen(ctx)
 
-	assert.True(t, mediaIngestWorkflow.IsExecutable(chainCtx))
-
-	mediaIngestWorkflow.Execute(chainCtx)
-
-	for _, err := range chainCtx.GetErrors() {
-		fmt.Println(err.Error())
-	}
-
-	if chainCtx.HasErrors() {
-		span.SetStatus(codes.Error, "failed to execute media ingestion test")
-	}
-
-	assert.False(t, chainCtx.HasErrors())
-
-	span.SetStatus(codes.Ok, "passed - media ingestion test")
-
-	fmt.Println(chainCtx.Get("MEDIA"))
 }

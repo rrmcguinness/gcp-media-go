@@ -44,7 +44,7 @@ func (c *MediaMessageCommand) Execute(context cor.Context) {
 
 func TestMessageHandler(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
-	config := test.GetConfig(t)
+	config := test.GetConfig()
 
 	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
 	test.HandleErr(err, t)

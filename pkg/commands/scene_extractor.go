@@ -16,7 +16,6 @@ package commands
 
 import (
 	"bytes"
-	go_ctx "context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -26,13 +25,18 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/google/generative-ai-go/genai"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
 )
 
 type SceneExtractor struct {
 	cor.BaseCommand
-	GenaiClient *genai.Client
-	GenaiModel  *genai.GenerativeModel
-	ScenePrompt string
+	model  *genai.GenerativeModel
+	prompt string
+}
+
+func NewSceneExtractor(name string, model *genai.GenerativeModel, prompt string) *SceneExtractor {
+	return &SceneExtractor{BaseCommand: *cor.NewBaseCommand(name), model: model, prompt: prompt}
 }
 
 func (s *SceneExtractor) Execute(context cor.Context) {
@@ -52,12 +56,15 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 
 	sceneData := make([]string, 0)
 
-	template, _ := template.New("scene_template").Parse(s.ScenePrompt)
-
-	ctx := go_ctx.Background()
+	template, _ := template.New("scene_templtae").Parse(s.prompt)
 
 	for i, ts := range summary.SceneTimeStamps {
-
+		sceneCtx, sceneSpan := s.Tracer.Start(context.GetContext(), fmt.Sprintf("%s_genai", s.GetName()))
+		sceneSpan.SetAttributes(
+			attribute.Int("sequence", i),
+			attribute.String("start", ts.Start),
+			attribute.String("end", ts.End),
+		)
 		// Build the vocabulary that MAY be used by the template
 		vocabulary := make(map[string]string)
 		vocabulary["SEQUENCE"] = fmt.Sprintf("%d", i)
@@ -74,15 +81,18 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 		parts = append(parts, cloud.NewFileData(videoFile.URI, videoFile.MIMEType))
 		parts = append(parts, cloud.NewTextPart(tsPrompt))
 
-		out, err := cloud.GenerateMultiModalResponse(ctx, 0, s.GenaiModel, parts...)
+		out, err := cloud.GenerateMultiModalResponse(sceneCtx, 0, s.model, parts...)
 		if err != nil {
+			sceneSpan.SetStatus(codes.Error, "scene extract failed")
 			context.AddError(err)
+			sceneSpan.End()
 			return
 		}
 		if len(strings.Trim(out, " ")) > 0 && out != "{}" {
 			sceneData = append(sceneData, out)
 		}
+		sceneSpan.SetStatus(codes.Ok, "scene extract complete")
+		sceneSpan.End()
 	}
-
 	context.Add(s.GetOutputParam(), sceneData)
 }

@@ -26,14 +26,13 @@ import (
 )
 
 func GenerateEmbeddings(
+	ctx context.Context,
 	genaiEmbedding *genai.EmbeddingModel,
 	bigqueryClient *bigquery.Client,
 	datasetName string,
 	mediaTable string,
 	embeddingTable string,
 	modelName string) (err error) {
-
-	ctx := context.Background()
 
 	fqMediaTableName := strings.Replace(bigqueryClient.Dataset(datasetName).Table(mediaTable).FullyQualifiedName(), ":", ".", -1)
 	fqEmbeddingTable := strings.Replace(bigqueryClient.Dataset(datasetName).Table(embeddingTable).FullyQualifiedName(), ":", ".", -1)

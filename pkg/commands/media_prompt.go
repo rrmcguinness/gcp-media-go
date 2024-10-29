@@ -16,7 +16,6 @@ package commands
 
 import (
 	"bytes"
-	go_ctx "context"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
@@ -26,19 +25,22 @@ import (
 
 type MediaPrompt struct {
 	cor.BaseCommand
-	GenaiClient        *genai.Client
-	GenaiModel         *genai.GenerativeModel
-	PromptTemplate     string
-	TemplateParamsName string
+	model         *genai.GenerativeModel
+	template      string
+	templateParam string
+}
+
+func NewMediaPrompt(name string, model *genai.GenerativeModel, template string, templateParam string) *MediaPrompt {
+	return &MediaPrompt{BaseCommand: *cor.NewBaseCommand(name), model: model, template: template, templateParam: templateParam}
 }
 
 func (t *MediaPrompt) Execute(context cor.Context) {
-
-	ctx := go_ctx.Background()
-
 	mediaFile := context.Get(t.GetInputParam()).(*genai.File)
-	params := context.Get(t.TemplateParamsName).(map[string]interface{})
-	template, err := template.New("why").Parse(t.PromptTemplate)
+	params := make(map[string]interface{})
+	if context.Get(t.templateParam) != nil {
+		params = context.Get(t.templateParam).(map[string]interface{})
+	}
+	template, err := template.New("why").Parse(t.template)
 	if err != nil {
 		context.AddError(err)
 		return
@@ -55,7 +57,7 @@ func (t *MediaPrompt) Execute(context cor.Context) {
 	parts = append(parts, cloud.NewFileData(mediaFile.URI, mediaFile.MIMEType))
 	parts = append(parts, cloud.NewTextPart(buffer.String()))
 
-	out, err := cloud.GenerateMultiModalResponse(ctx, 0, t.GenaiModel, parts...)
+	out, err := cloud.GenerateMultiModalResponse(context.GetContext(), 0, t.model, parts...)
 	if err != nil {
 		context.AddError(err)
 		return

@@ -14,6 +14,8 @@
 
 package cor
 
+import "context"
+
 const (
 	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
 	CTX_IN                     = "__IN__"
@@ -25,6 +27,8 @@ const (
 // It's a bit more complex than other language versions due to the nature
 // of Filesystem behaviors.
 type Context interface {
+	SetContext(context context.Context)
+	GetContext() context.Context
 	Add(key string, value interface{}) Context
 	AddError(err error)
 	GetErrors() []error
@@ -39,6 +43,7 @@ type Context interface {
 // Command is a simple interface that ensures an atomic unit of work.
 // The principals of a Command are: 1) Atomic, 2) Testable, and 3) Thread Safe
 type Command interface {
+	GetName() string
 	GetInputParam() string
 	GetOutputParam() string
 	IsExecutable(context Context) bool

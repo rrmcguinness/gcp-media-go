@@ -27,20 +27,24 @@ import (
 
 type MediaAssembly struct {
 	cor.BaseCommand
-	SummaryParameterName     string
-	SceneParameterName       string
-	MediaObjectParameterName string
+	summaryParam     string
+	sceneParam       string
+	mediaObjectParam string
+}
+
+func NewMediaAssembly(name string, summaryParam string, sceneParam string, mediaObjectParam string) *MediaAssembly {
+	return &MediaAssembly{BaseCommand: *cor.NewBaseCommand(name), summaryParam: summaryParam, sceneParam: sceneParam, mediaObjectParam: mediaObjectParam}
 }
 
 func (m *MediaAssembly) IsExecutable(context cor.Context) bool {
 	return context != nil &&
-		context.Get(m.SummaryParameterName) != nil &&
-		context.Get(m.SceneParameterName) != nil
+		context.Get(m.summaryParam) != nil &&
+		context.Get(m.sceneParam) != nil
 }
 
 func (m *MediaAssembly) Execute(context cor.Context) {
-	jsonSummary := context.Get(m.SummaryParameterName).(string)
-	jsonScenes := context.Get(m.SceneParameterName).([]string)
+	jsonSummary := context.Get(m.summaryParam).(string)
+	jsonScenes := context.Get(m.sceneParam).([]string)
 	sceneValues := fmt.Sprintf("[ %s ]", strings.Join(jsonScenes, ","))
 
 	summary := model.MediaSummary{}
@@ -68,6 +72,6 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	media.Cast = append(media.Cast, summary.Cast...)
 	media.Scenes = append(media.Scenes, scenes...)
 
-	context.Add(m.MediaObjectParameterName, media)
+	context.Add(m.mediaObjectParam, media)
 	context.Add(cor.CTX_OUT, media)
 }

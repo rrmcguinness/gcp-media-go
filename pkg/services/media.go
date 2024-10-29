@@ -35,9 +35,7 @@ func (s *MediaService) GetFQN() string {
 }
 
 // Get returns a media object by id, or an error if it doesn't exist
-func (s *MediaService) Get(id string) (media *model.Media, err error) {
-	ctx := context.Background()
-
+func (s *MediaService) Get(ctx context.Context, id string) (media *model.Media, err error) {
 	queryText := fmt.Sprintf(QRY_FIND_MEDIA_BY_ID, s.GetFQN(), id)
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)
@@ -51,9 +49,8 @@ func (s *MediaService) Get(id string) (media *model.Media, err error) {
 }
 
 // GetScene returns a scene in a specified media type by its sequence number
-func (s *MediaService) GetScene(id string, sceneSequence int) (scene *model.Scene, err error) {
+func (s *MediaService) GetScene(ctx context.Context, id string, sceneSequence int) (scene *model.Scene, err error) {
 	fqMediaTableName := strings.Replace(s.BigqueryClient.Dataset(s.DatasetName).Table(s.MediaTable).FullyQualifiedName(), ":", ".", -1)
-	ctx := context.Background()
 	queryText := fmt.Sprintf(QRY_GET_SCENE, fqMediaTableName, id, sceneSequence)
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)

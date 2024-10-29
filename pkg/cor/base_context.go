@@ -14,12 +14,16 @@
 
 package cor
 
-import "os"
+import (
+	"context"
+	"os"
+)
 
 type BaseContext struct {
 	data      map[string]interface{}
 	errors    []error
 	tempFiles []string
+	context   context.Context
 }
 
 func NewBaseContext() Context {
@@ -28,6 +32,14 @@ func NewBaseContext() Context {
 		errors:    make([]error, 0),
 		tempFiles: make([]string, 0),
 	}
+}
+
+func (c *BaseContext) SetContext(context context.Context) {
+	c.context = context
+}
+
+func (c *BaseContext) GetContext() context.Context {
+	return c.context
 }
 
 func (c *BaseContext) Close() {

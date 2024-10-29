@@ -59,9 +59,11 @@ func (m *PubSubListener) SetCommand(command cor.Command) {
 // using the same context of the cloud service but may be configured independently
 // for a different recovery life-cycle.
 func (m *PubSubListener) Listen(ctx context.Context) {
+	log.Printf("listening: %s", m.subscription)
 	go func() {
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
 			chainCtx := cor.NewBaseContext()
+			chainCtx.SetContext(ctx)
 			chainCtx.Add(cor.CTX_IN, string(msg.Data))
 			m.command.Execute(chainCtx)
 			// Only take the message from the topic if the chain executes successfully
@@ -124,6 +126,7 @@ type TopicSubscription struct {
 
 type CloudConfig struct {
 	Application struct {
+		Name            string `toml:"name"`
 		GoogleProjectId string `toml:"google_project_id"`
 		GoogleLocation  string `toml:"location"`
 		GoogleAPIKey    string `toml:"google_api_key"`

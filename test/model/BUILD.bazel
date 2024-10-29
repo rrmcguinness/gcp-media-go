@@ -15,7 +15,7 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
-    name = "model_test",
+    name = "model",
     srcs = ["domain_model_test.go"],
     data = [
         "//configs:.env.test.toml",

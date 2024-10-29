@@ -12,32 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package workflow_test
+package main
 
 import (
-	"testing"
+	"log"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
-	"github.com/stretchr/testify/assert"
-	"go.opentelemetry.io/otel/codes"
+	"github.com/gin-gonic/gin"
 )
 
-func TestMediaEmbeddings(t *testing.T) {
-	embeddingContext, span := tracer.Start(ctx, "generate_embeddings")
-	defer span.End()
+func FileUpload(r *gin.RouterGroup) {
+	upload := r.Group("/upload")
+	{
+		upload.POST("", func(c *gin.Context) {
+			file, _ := c.FormFile("file")
+			log.Println(file.Filename)
 
-	err := workflow.GenerateEmbeddings(
-		embeddingContext,
-		embeddingModel,
-		cloudClients.BiqQueryClient,
-		"media_ds",
-		"media",
-		"scene_embeddings", embeddingModel.Name())
-
-	if err != nil {
-		t.Error(err)
+		})
 	}
-
-	span.SetStatus(codes.Ok, "success")
-	assert.Nil(t, err)
 }

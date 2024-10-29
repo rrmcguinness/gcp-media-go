@@ -48,8 +48,7 @@ func GetConfig() *cloud.CloudConfig {
 	return state.config
 }
 
-func InitState() {
-	ctx := context.Background()
+func InitState(ctx context.Context) {
 	// Get the config file
 	config := GetConfig()
 
@@ -77,4 +76,7 @@ func InitState() {
 		DatasetName:    datasetName,
 		MediaTable:     mediaTableName,
 	}
+
+	SetupListeners(cloudClients, ctx)
+
 }

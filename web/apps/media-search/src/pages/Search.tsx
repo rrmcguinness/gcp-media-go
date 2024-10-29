@@ -20,7 +20,6 @@ import SearchBar from "../components/SearchBar";
 import MediaResults from "../components/MediaResults";
 
 const Search = () => {
-  
   const [results, setResults] = useState<Array<MediaResult>>([]);
   const [error, setError] = useState<string>(null!);
   const [open, setOpen] = useState<boolean>(false);

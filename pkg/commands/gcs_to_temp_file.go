@@ -15,7 +15,6 @@
 package commands
 
 import (
-	go_ctx "context"
 	"io"
 	"os"
 
@@ -26,33 +25,30 @@ import (
 
 type GCSToTempFile struct {
 	cor.BaseCommand
-	Client         *storage.Client
-	TempFilePrefix string
+	client         *storage.Client
+	tempFilePrefix string
 }
 
-func NewGCSToTempFile(client *storage.Client, tempFilePrefix string) *GCSToTempFile {
-	if client == nil {
-		panic("Client must not be nil")
-	}
+func NewGCSToTempFile(name string, client *storage.Client, tempFilePrefix string) *GCSToTempFile {
 	return &GCSToTempFile{
-		Client:         client,
-		TempFilePrefix: tempFilePrefix,
+		BaseCommand:    *cor.NewBaseCommand(name),
+		client:         client,
+		tempFilePrefix: tempFilePrefix,
 	}
 }
 
 func (c *GCSToTempFile) Execute(context cor.Context) {
-	ctx := go_ctx.Background()
-
 	msg := context.Get(c.GetInputParam()).(*model.GCSObject)
 
-	readerBucket := c.Client.Bucket(msg.Bucket)
+	readerBucket := c.client.Bucket(msg.Bucket)
 	obj := readerBucket.Object(msg.Name)
-	reader, err := obj.NewReader(ctx)
+	reader, err := obj.NewReader(context.GetContext())
 	if err != nil {
 		context.AddError(err)
+		return
 	}
 	defer reader.Close()
-	tempFile, err := os.CreateTemp("", c.TempFilePrefix)
+	tempFile, err := os.CreateTemp("", c.tempFilePrefix)
 	io.Copy(tempFile, reader)
 	// Add to the temp files to clean up after execution in a chain
 	context.AddTempFile(tempFile.Name())

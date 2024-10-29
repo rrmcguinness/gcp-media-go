@@ -18,6 +18,8 @@ go_library(
     name = "api_server_lib",
     srcs = [
         "api_server.go",
+        "file_upload.go",
+        "listeners.go",
         "media.go",
         "setup.go",
     ],
@@ -27,8 +29,11 @@ go_library(
         "//pkg/cloud",
         "//pkg/model",
         "//pkg/services",
+        "//pkg/telemetry",
+        "//pkg/workflow",
         "@com_github_gin_contrib_cors//:cors",
         "@com_github_gin_gonic_gin//:gin",
+        "@io_opentelemetry_go_contrib_instrumentation_github_com_gin_gonic_gin_otelgin//:otelgin",
     ],
 )
 

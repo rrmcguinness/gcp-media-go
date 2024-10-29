@@ -28,7 +28,7 @@ const test_config_file = "configs/app-test.yaml"
 // any value redefined in .env.test.toml will overwrite .env.toml allowing
 // the environment to take precedence over the defaults.
 func TestConfig(t *testing.T) {
-	config := test.GetConfig(t)
+	config := test.GetConfig()
 	// Uncomment this to see the final configuration structure
 	// cloud.PrintConfig(config)
 
