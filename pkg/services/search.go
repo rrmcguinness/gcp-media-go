@@ -34,9 +34,8 @@ type SearchService struct {
 	EmbeddingTable string
 }
 
-func (s *SearchService) FindScenes(query string, maxResults int) (out []*model.SceneMatchResult, err error) {
+func (s *SearchService) FindScenes(ctx context.Context, query string, maxResults int) (out []*model.SceneMatchResult, err error) {
 	out = make([]*model.SceneMatchResult, 0)
-	ctx := context.Background()
 	searchEmbeddings, _ := s.EmbeddingModel.EmbedContent(ctx, genai.Text(query))
 
 	fqEmbeddingTable := strings.Replace(s.BigqueryClient.Dataset(s.DatasetName).Table(s.EmbeddingTable).FullyQualifiedName(), ":", ".", -1)

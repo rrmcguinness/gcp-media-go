@@ -15,34 +15,19 @@
 package workflow_test
 
 import (
-	"context"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
-	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/codes"
 )
 
 func TestMediaEmbeddings(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	// This deferral will automatically close the client that was build from
-	// the same context
-	defer cancel()
+	embeddingContext, span := tracer.Start(ctx, "generate_embeddings")
+	defer span.End()
 
-	// Get the config file
-	config := test.GetConfig(t)
-
-	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
-	test.HandleErr(err, t)
-	defer cloudClients.Close()
-
-	genModel := cloudClients.AgentModels["creative-flash"]
-	assert.NotNil(t, genModel)
-
-	embeddingModel := cloudClients.EmbeddingModels["multi-lingual"]
-
-	err = workflow.GenerateEmbeddings(
+	err := workflow.GenerateEmbeddings(
+		embeddingContext,
 		embeddingModel,
 		cloudClients.BiqQueryClient,
 		"media_ds",
@@ -53,5 +38,6 @@ func TestMediaEmbeddings(t *testing.T) {
 		t.Error(err)
 	}
 
+	span.SetStatus(codes.Ok, "success")
 	assert.Nil(t, err)
 }

@@ -25,6 +25,10 @@ type MediaTriggerToGCSObject struct {
 	cor.BaseCommand
 }
 
+func NewMediaTriggerToGCSObject(name string) *MediaTriggerToGCSObject {
+	return &MediaTriggerToGCSObject{BaseCommand: *cor.NewBaseCommand(name)}
+}
+
 func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	in := context.Get(c.GetInputParam()).(string)
 	var out model.GCSPubSubNotification

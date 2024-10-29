@@ -22,6 +22,10 @@ type MediaSummaryJsonToStruct struct {
 	cor.BaseCommand
 }
 
+func NewMediaSummaryJsonToStruct(name string) *MediaSummaryJsonToStruct {
+	return &MediaSummaryJsonToStruct{BaseCommand: *cor.NewBaseCommand(name)}
+}
+
 func (s *MediaSummaryJsonToStruct) Execute(context cor.Context) {
 	in := context.Get(s.GetInputParam()).(string)
 	doc, err := model.MediaSummaryFromJSON(in)

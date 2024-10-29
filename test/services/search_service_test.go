@@ -32,7 +32,7 @@ func TestSearchService(t *testing.T) {
 	defer cancel()
 
 	// Get the config file
-	config := test.GetConfig(t)
+	config := test.GetConfig()
 
 	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
 	test.HandleErr(err, t)
@@ -51,7 +51,7 @@ func TestSearchService(t *testing.T) {
 		EmbeddingTable: "scene_embeddings",
 	}
 
-	out, err := searchService.FindScenes("Scenes that Woody Harrelson", 5)
+	out, err := searchService.FindScenes(ctx, "Scenes that Woody Harrelson", 5)
 
 	if err != nil {
 		t.Error(err)

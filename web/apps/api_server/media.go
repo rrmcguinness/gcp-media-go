@@ -35,7 +35,7 @@ func MediaRouter(r *gin.RouterGroup) {
 				c.Status(404)
 				return
 			}
-			sceneResults, err := state.searchService.FindScenes(query, count)
+			sceneResults, err := state.searchService.FindScenes(c, query, count)
 
 			if err != nil {
 				c.Status(404)
@@ -49,7 +49,7 @@ func MediaRouter(r *gin.RouterGroup) {
 			for _, r := range sceneResults {
 				var med *model.Media
 				if m, ok := out[r.MediaId]; !ok {
-					m, err := state.mediaService.Get(r.MediaId)
+					m, err := state.mediaService.Get(c, r.MediaId)
 					if err != nil {
 						log.Print(err)
 						c.Status(400)
@@ -63,7 +63,7 @@ func MediaRouter(r *gin.RouterGroup) {
 					med = m
 				}
 
-				s, err := state.mediaService.GetScene(r.MediaId, r.SequenceNumber)
+				s, err := state.mediaService.GetScene(c, r.MediaId, r.SequenceNumber)
 				if err != nil {
 					c.Status(400)
 					return
@@ -80,7 +80,7 @@ func MediaRouter(r *gin.RouterGroup) {
 
 		media.GET("/:id", func(c *gin.Context) {
 			id := c.Param("id")
-			out, err := state.mediaService.Get(id)
+			out, err := state.mediaService.Get(c, id)
 			if err != nil {
 				c.Status(404)
 				return
@@ -95,7 +95,7 @@ func MediaRouter(r *gin.RouterGroup) {
 				c.Status(400)
 				return
 			}
-			out, err := state.mediaService.GetScene(id, scene_id)
+			out, err := state.mediaService.GetScene(c, id, scene_id)
 			if err != nil {
 				c.Status(404)
 				return

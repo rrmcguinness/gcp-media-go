@@ -21,7 +21,6 @@ go_library(
         "media.go",
         "listeners.go",
         "setup.go",
-        
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/web/apps/api_server",
     visibility = ["//visibility:private"],

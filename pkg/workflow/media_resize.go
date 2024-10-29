@@ -35,10 +35,6 @@ func MediaResize(
 	storageClient *storage.Client,
 	outputBucketName string) cor.Chain {
 
-	if storageClient == nil {
-		panic("FFMPegChain requires a valid storage client")
-	}
-
 	// Ensure the FFMPegCommand is set, otherwise use the default
 	if len(strings.Trim(ffmpegCommand, " ")) == 0 {
 		ffmpegCommand = DEFAULT_FFMPEG_COMMAND
@@ -50,19 +46,19 @@ func MediaResize(
 		videoWidth = videoFormat.Width
 	}
 
-	out := &cor.BaseChain{}
+	out := cor.NewBaseChain("media-resize-workflow")
 
 	// Convert the Message to an Object
-	out.AddCommand(&commands.MediaTriggerToGCSObject{})
+	out.AddCommand(commands.NewMediaTriggerToGCSObject("gcs-topic-listener"))
 
 	// Write a temp file
-	out.AddCommand(&commands.GCSToTempFile{Client: storageClient, TempFilePrefix: "ffmpeg-tmp-"})
+	out.AddCommand(commands.NewGCSToTempFile("copy-from-gcs-to-temp", storageClient, "ffmpeg-tmp-"))
 
 	// Run FFMpeg
-	out.AddCommand(&commands.FFMpegCommand{ExecutableCommand: ffmpegCommand, TargetWidth: videoWidth})
+	out.AddCommand(commands.NewFFMpegCommand("video-resize", ffmpegCommand, videoWidth))
 
 	// Write to a GCS Bucket
-	out.AddCommand(&commands.GCSFileUpload{Client: *storageClient, Bucket: outputBucketName})
+	out.AddCommand(commands.NewGCSFileUpload("resized-file-upload-to-gcs", storageClient, outputBucketName))
 
 	return out
 }

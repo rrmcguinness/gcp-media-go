@@ -36,51 +36,36 @@ func MediaIngestion(
 	mediaOutputParam string,
 ) cor.Chain {
 
-	out := &cor.BaseChain{}
+	out := cor.NewBaseChain("media-ingestion-workflow")
 
 	// Convert the Message to an Object
 	out.AddCommand(&commands.MediaTriggerToGCSObject{})
 
 	// Write a temp file
-	out.AddCommand(&commands.GCSToTempFile{Client: storageClient, TempFilePrefix: "media-summary-"})
+	out.AddCommand(commands.NewGCSToTempFile("gcs-to-temp-file", storageClient, "media-summary-"))
 
 	// Upload the file to file service
-	out.AddCommand(&commands.MediaUpload{GenaiClient: genaiClient, TimeoutInSeconds: 300 * time.Second})
+	out.AddCommand(commands.NewMediaUpload("media-upload", genaiClient, 300*time.Second))
 
 	// Generate Summary
-	out.AddCommand(
-		&commands.MediaPrompt{
-			BaseCommand:        cor.BaseCommand{OutputParamName: summaryOutputParam},
-			GenaiClient:        genaiClient,
-			GenaiModel:         genaiModel,
-			PromptTemplate:     summaryPromptTemplate,
-			TemplateParamsName: cor.CTX_PROMPT_VARS,
-		})
+	out.AddCommand(commands.NewMediaPrompt("generate-media-summary", genaiModel, summaryPromptTemplate, cor.CTX_PROMPT_VARS))
 
 	// Convert the JSON to a struct
-	out.AddCommand(&commands.MediaSummaryJsonToStruct{})
+	out.AddCommand(commands.NewMediaSummaryJsonToStruct("convert-media-summary"))
 
-	out.AddCommand(&commands.SceneExtractor{
-		BaseCommand: cor.BaseCommand{OutputParamName: sceneOutputParam},
-		GenaiClient: genaiClient,
-		GenaiModel:  genaiModel,
-		ScenePrompt: scenePromptTemplate})
+	sceneExtractor := commands.NewSceneExtractor("extract-media-scenes", genaiModel, scenePromptTemplate)
+	sceneExtractor.BaseCommand.OutputParamName = sceneOutputParam
+
+	out.AddCommand(sceneExtractor)
 
 	// Assemble the output into a single media object
-	out.AddCommand(&commands.MediaAssembly{
-		SummaryParameterName:     summaryOutputParam,
-		SceneParameterName:       sceneOutputParam,
-		MediaObjectParameterName: mediaOutputParam,
-	})
+	out.AddCommand(commands.NewMediaAssembly("assemble-media-scenes", summaryOutputParam, sceneOutputParam, mediaOutputParam))
 
 	// Save media object to big query for async embedding job
-	out.AddCommand(&commands.MediaPersistToBigQuery{BigQueryClient: bigqueryClient,
-		DataSetName:        "media_ds",
-		TableName:          "media",
-		MediaParameterName: mediaOutputParam})
+	out.AddCommand(commands.NewMediaPersistToBigQuery("write-to-bigquery", bigqueryClient, "media_ds", "media", mediaOutputParam))
 
 	// Clean up the temporary media created by the job
-	out.AddCommand(&commands.MediaCleanup{GenaiClient: genaiClient})
+	out.AddCommand(commands.NewMediaCleanup("cleanup-file-system", genaiClient))
 
 	// Return the chain for multiple executions
 	return out

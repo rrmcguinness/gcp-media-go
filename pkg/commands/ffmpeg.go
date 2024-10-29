@@ -31,8 +31,12 @@ const DEFAULT_FFMPEG_ARGS = "-analyzeduration 0 -probesize 5000000 -y -hide_bann
 // The scale uses a dynamic scale to keep the aspect ratio of the original.
 type FFMpegCommand struct {
 	cor.BaseCommand
-	ExecutableCommand string
-	TargetWidth       string
+	commandPath string
+	targetWidth string
+}
+
+func NewFFMpegCommand(name string, commandPath string, targetWidth string) *FFMpegCommand {
+	return &FFMpegCommand{BaseCommand: *cor.NewBaseCommand(name), commandPath: commandPath, targetWidth: targetWidth}
 }
 
 // Execute executes the business logic of the command
@@ -45,8 +49,8 @@ func (c *FFMpegCommand) Execute(context cor.Context) {
 	}
 	tempFile, err := os.CreateTemp("", "ffmpeg-output-")
 
-	args := fmt.Sprintf(DEFAULT_FFMPEG_ARGS, file.Name(), c.TargetWidth, tempFile.Name())
-	cmd := exec.Command(c.ExecutableCommand, strings.Split(args, " ")...)
+	args := fmt.Sprintf(DEFAULT_FFMPEG_ARGS, file.Name(), c.targetWidth, tempFile.Name())
+	cmd := exec.Command(c.commandPath, strings.Split(args, " ")...)
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {

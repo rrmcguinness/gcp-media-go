@@ -107,12 +107,12 @@ func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *genai.
 	return value, nil
 }
 
-func GenerateTextEmbeddingAsFloat32(model genai.EmbeddingModel, in string, count int) []float32 {
-	res, err := model.EmbedContent(context.Background(), genai.Text(in))
+func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingModel, in string, count int) []float32 {
+	res, err := model.EmbedContent(ctx, genai.Text(in))
 	if err != nil {
 		if count < MAX_RETRIES {
 			log.Printf("Error generating embeddings [Float32] for: %s on %v", in, err)
-			GenerateTextEmbeddingAsFloat32(model, in, count+1)
+			GenerateTextEmbeddingAsFloat32(ctx, model, in, count+1)
 		}
 	}
 

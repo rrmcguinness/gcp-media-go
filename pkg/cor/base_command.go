@@ -14,15 +14,30 @@
 
 package cor
 
+import (
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
+)
+
 // BaseCommand is the default implementation of Command
 type BaseCommand struct {
+	Name            string
 	InputParamName  string
 	OutputParamName string
+	Tracer          trace.Tracer
+}
+
+func NewBaseCommand(name string) *BaseCommand {
+	return &BaseCommand{Name: name, Tracer: otel.Tracer(name)}
+}
+
+func (c *BaseCommand) GetName() string {
+	return c.Name
 }
 
 // IsExecutable a default implementation of IsExecutable.
 func (c *BaseCommand) IsExecutable(context Context) bool {
-	return context != nil && context.Get(c.GetInputParam()) != nil
+	return context != nil && context.Get(c.GetInputParam()) != nil && context.GetContext() != nil
 }
 
 // GetInputParam the name of the parameter expected as the primary input,

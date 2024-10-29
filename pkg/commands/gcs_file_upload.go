@@ -15,7 +15,6 @@
 package commands
 
 import (
-	go_ctx "context"
 	"io"
 	"os"
 	"path/filepath"
@@ -27,12 +26,15 @@ import (
 
 type GCSFileUpload struct {
 	cor.BaseCommand
-	Client storage.Client
-	Bucket string
+	client *storage.Client
+	bucket string
+}
+
+func NewGCSFileUpload(name string, client *storage.Client, bucket string) *GCSFileUpload {
+	return &GCSFileUpload{BaseCommand: *cor.NewBaseCommand(name), client: client, bucket: bucket}
 }
 
 func (c *GCSFileUpload) Execute(context cor.Context) {
-	ctx := go_ctx.Background()
 	path := context.Get(c.GetInputParam()).(string)
 	name := filepath.Base(path)
 
@@ -45,15 +47,15 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 	}
 	defer os.Remove(path)
 
-	writerBucket := c.Client.Bucket(c.Bucket)
+	writerBucket := c.client.Bucket(c.bucket)
 	if original != nil {
 		obj := writerBucket.Object(original.Name)
-		writer := obj.NewWriter(ctx)
+		writer := obj.NewWriter(context.GetContext())
 		defer writer.Close()
 		io.Copy(writer, dat)
 	} else {
 		obj := writerBucket.Object(name)
-		writer := obj.NewWriter(ctx)
+		writer := obj.NewWriter(context.GetContext())
 		defer writer.Close()
 		io.Copy(writer, dat)
 	}

@@ -15,7 +15,6 @@
 package commands
 
 import (
-	go_ctx "context"
 	"time"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
@@ -25,8 +24,12 @@ import (
 
 type MediaUpload struct {
 	cor.BaseCommand
-	GenaiClient      *genai.Client
-	TimeoutInSeconds time.Duration
+	client           *genai.Client
+	timeoutInSeconds time.Duration
+}
+
+func NewMediaUpload(name string, genaiClient *genai.Client, timeoutInSeconds time.Duration) *MediaUpload {
+	return &MediaUpload{BaseCommand: *cor.NewBaseCommand(name), client: genaiClient, timeoutInSeconds: timeoutInSeconds}
 }
 
 func GetVideoUploadFileParameterName() string {
@@ -34,13 +37,10 @@ func GetVideoUploadFileParameterName() string {
 }
 
 func (v *MediaUpload) Execute(context cor.Context) {
-	ctx, cancel := go_ctx.WithTimeout(go_ctx.Background(), v.TimeoutInSeconds)
-	defer cancel()
-
 	gcsFile := context.Get(model.GetGCSObjectName()).(*model.GCSObject)
 	fileName := context.Get(v.GetInputParam()).(string)
 
-	genFil, err := v.GenaiClient.UploadFileFromPath(ctx, fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})
+	genFil, err := v.client.UploadFileFromPath(context.GetContext(), fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})
 	if err != nil {
 		context.AddError(err)
 		return
@@ -50,7 +50,7 @@ func (v *MediaUpload) Execute(context cor.Context) {
 	for genFil.State == genai.FileStateProcessing {
 		time.Sleep(5 * time.Second)
 		var err error
-		if genFil, err = v.GenaiClient.GetFile(ctx, genFil.Name); err != nil {
+		if genFil, err = v.client.GetFile(context.GetContext(), genFil.Name); err != nil {
 			context.AddError(err)
 		}
 	}

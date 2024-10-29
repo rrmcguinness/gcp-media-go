@@ -14,12 +14,20 @@
 
 package cor
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.opentelemetry.io/otel/codes"
+)
 
 type BaseChain struct {
 	BaseCommand
 	continueOnFailure bool
 	commands          []Command
+}
+
+func NewBaseChain(name string) *BaseChain {
+	return &BaseChain{BaseCommand: *NewBaseCommand(name)}
 }
 
 func (c *BaseChain) ContinueOnFailure(continueOnFailure bool) Chain {
@@ -33,24 +41,53 @@ func (c *BaseChain) AddCommand(command Command) Chain {
 }
 
 func (c *BaseChain) IsExecutable(context Context) bool {
-	return true
+	return context.GetContext() != nil
 }
 
 func (c *BaseChain) Execute(chCtx Context) {
-	defer chCtx.Close()
-	for i, command := range c.commands {
-		// Ensure that the next parameter is callable in a pipe stack
-		fmt.Printf("%d\n%v\n", i, chCtx)
+	var ctx = chCtx.GetContext()
+	var parentCtx = chCtx.GetContext()
 
+	outerCtx, chainSpan := c.Tracer.Start(ctx, fmt.Sprintf("%s_execute", c.GetName()))
+	for _, command := range c.commands {
+		// Ensure that the next parameter is callable in a pipe stack
+		commandContext, commandSpan := c.Tracer.Start(outerCtx, command.GetName())
 		if chCtx.HasErrors() && !c.continueOnFailure {
+			commandSpan.SetStatus(codes.Error, "previous error on chain")
 			break
 		} else if command.IsExecutable(chCtx) {
+			// Since the next command may be a chain, we must set the parent context
+			chCtx.SetContext(commandContext)
+
+			// Start a span for each command to measure command performance
 			command.Execute(chCtx)
+
+			// Reset the context to the original state
+			if parentCtx != nil {
+				chCtx.SetContext(parentCtx)
+			} else {
+				chCtx.SetContext(nil)
+			}
 		}
-		fmt.Printf("%d\n%v\n", i, chCtx)
-		// Chain the output
+
+		if chCtx.HasErrors() {
+			commandSpan.SetStatus(codes.Error, "error after execute")
+		} else {
+			commandSpan.SetStatus(codes.Ok, command.GetName())
+		}
+
+		commandSpan.End()
+
+		// Flipflop input/output
 		chCtx.Remove(CTX_IN)
 		chCtx.Add(CTX_IN, chCtx.Get(CTX_OUT))
 		chCtx.Remove(CTX_OUT)
 	}
+
+	if !chCtx.HasErrors() {
+		chainSpan.SetStatus(codes.Ok, c.GetName())
+	} else {
+		chainSpan.SetStatus(codes.Error, "chain failed to execute")
+	}
+	chainSpan.End()
 }

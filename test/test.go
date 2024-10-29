@@ -85,7 +85,7 @@ func SetupOS() {
 	os.Setenv(cloud.ENV_CONFIG_RUNTIME, "test")
 }
 
-func GetConfig(t *testing.T) *cloud.CloudConfig {
+func GetConfig() *cloud.CloudConfig {
 	if state.config == nil {
 		SetupOS()
 		// Create a default cloud config

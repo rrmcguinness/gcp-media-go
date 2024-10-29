@@ -15,17 +15,16 @@
 package workflow_test
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/codes"
 )
 
 const DEFAULT_PROMPT = `
@@ -59,20 +58,9 @@ Example Output:
 `
 
 func TestMediaChain(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	// This deferral will automatically close the client that was build from
-	// the same context
-	defer cancel()
 
-	// Get the config file
-	config := test.GetConfig(t)
-
-	cloudClients, err := cloud.NewCloudServiceClients(ctx, config)
-	test.HandleErr(err, t)
-	defer cloudClients.Close()
-
-	genModel := cloudClients.AgentModels["creative-flash"]
-	assert.NotNil(t, genModel)
+	traceCtx, span := tracer.Start(ctx, "media-ingestion-test")
+	defer span.End()
 
 	jsonData, _ := json.Marshal(model.GetExampleSummary())
 	prompt := fmt.Sprintf(DEFAULT_PROMPT, jsonData)
@@ -88,6 +76,7 @@ func TestMediaChain(t *testing.T) {
 		"MEDIA")
 
 	chainCtx := cor.NewBaseContext()
+	chainCtx.SetContext(traceCtx)
 	chainCtx.Add(cor.CTX_IN, test.GetTestLowResMessageText())
 	chainCtx.Add(cor.CTX_PROMPT_VARS, make(map[string]interface{}))
 
@@ -99,7 +88,13 @@ func TestMediaChain(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 
+	if chainCtx.HasErrors() {
+		span.SetStatus(codes.Error, "failed to execute media ingestion test")
+	}
+
 	assert.False(t, chainCtx.HasErrors())
+
+	span.SetStatus(codes.Ok, "passed - media ingestion test")
 
 	fmt.Println(chainCtx.Get("MEDIA"))
 }

@@ -82,5 +82,4 @@ func main() {
 		log.Println("Timeout, failed to shutdown gracefully")
 	}
 	log.Println("Server exiting")
-
 }

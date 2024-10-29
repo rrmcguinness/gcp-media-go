@@ -15,35 +15,30 @@
 package workflow_test
 
 import (
-	"context"
 	"fmt"
 	"testing"
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel/codes"
 )
 
 func TestFFMpegCommand(t *testing.T) {
-	ctx, cancel := context.WithCancel(context.Background())
-	// This deferral will automatically close the client that was build from
-	// the same context
-	defer cancel()
-
-	// Get the config file
-	config := test.GetConfig(t)
-
-	cloud, err := cloud.NewCloudServiceClients(ctx, config)
-	test.HandleErr(err, t)
-	defer cloud.Close()
+	traceContext, span := tracer.Start(ctx, "media-resize-test")
+	defer span.End()
 
 	// Create the context
 	chainCtx := cor.NewBaseContext()
+	chainCtx.SetContext(traceContext)
 	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
-	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloud.StorageClient, "media_low_res_resources")
+	mediaResizeWorkflow := workflow.MediaResize(
+		"bin/ffmpeg",
+		&model.MediaFormatFilter{Width: "240"},
+		cloudClients.StorageClient,
+		"media_low_res_resources")
 
 	// This assertion insures the command can be executed
 	assert.True(t, mediaResizeWorkflow.IsExecutable(chainCtx))
@@ -53,5 +48,10 @@ func TestFFMpegCommand(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 
+	if chainCtx.HasErrors() {
+		span.SetStatus(codes.Error, "failed - media-resize-test")
+	}
+
 	assert.False(t, chainCtx.HasErrors())
+	span.SetStatus(codes.Ok, "passed - media-resize-test")
 }

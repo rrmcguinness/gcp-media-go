@@ -125,6 +125,7 @@ type TopicSubscription struct {
 
 type CloudConfig struct {
 	Application struct {
+		Name            string `toml:"name"`
 		GoogleProjectId string `toml:"google_project_id"`
 		GoogleLocation  string `toml:"location"`
 		GoogleAPIKey    string `toml:"google_api_key"`
