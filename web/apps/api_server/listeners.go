@@ -54,8 +54,7 @@ Example Output:
 {{ .EXAMPLE_JSON }}
 `
 
-func SetupListeners(cloudClients *cloud.CloudServiceClients, ctx context.Context) {
-
+func SetupListeners(config *cloud.CloudConfig, cloudClients *cloud.CloudServiceClients, ctx context.Context) {
 	// TODO - Externalize the destination topic and ffmpeg command
 	mediaResizeWorkflow := workflow.MediaResize("bin/ffmpeg", &model.MediaFormatFilter{Width: "240"}, cloudClients.StorageClient, "media_low_res_resources")
 	cloudClients.PubSubListeners["HiResTopic"].SetCommand(mediaResizeWorkflow)
@@ -73,9 +72,9 @@ func SetupListeners(cloudClients *cloud.CloudServiceClients, ctx context.Context
 		prompt, "DOC_SUMMARY",
 		SCENE_PROMPT,
 		"SCENES",
-		"MEDIA")
+		"MEDIA",
+		config.Application.ThreadPoolSize)
 
 	cloudClients.PubSubListeners["LowResTopic"].SetCommand(mediaIngestWorkflow)
 	cloudClients.PubSubListeners["LowResTopic"].Listen(ctx)
-
 }

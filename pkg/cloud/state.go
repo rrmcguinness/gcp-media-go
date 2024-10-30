@@ -16,7 +16,7 @@ package cloud
 
 import (
 	"context"
-	"fmt"
+	"log/slog"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/pubsub"
@@ -25,6 +25,7 @@ import (
 	"google.golang.org/api/option"
 )
 
+// CloudServiceClients is the state machine for the cloud clients.
 type CloudServiceClients struct {
 	StorageClient   *storage.Client
 	PubsubClient    *pubsub.Client
@@ -35,6 +36,8 @@ type CloudServiceClients struct {
 	AgentModels     map[string]*genai.GenerativeModel
 }
 
+// A close method to ensure all clients are shut down,
+// these are handled using a closable context, but here for clean testing.
 func (c *CloudServiceClients) Close() {
 	c.StorageClient.Close()
 	c.PubsubClient.Close()
@@ -42,6 +45,7 @@ func (c *CloudServiceClients) Close() {
 	c.BiqQueryClient.Close()
 }
 
+// A helper function for correctly initializing the Google Cloud Services based on the configuration.
 func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *CloudServiceClients, err error) {
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
@@ -55,8 +59,8 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 
 	gc, err := genai.NewClient(ctx, option.WithAPIKey(config.Application.GoogleAPIKey))
 	if err != nil {
-		fmt.Printf("Error creating GenAI client: %v\n", err)
-		//return nil, err
+		slog.Error("error creating genai client", "error", err)
+		return nil, err
 	}
 
 	bc, err := bigquery.NewClient(ctx, config.Application.GoogleProjectId)
@@ -91,6 +95,7 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{genai.Text(values.SystemInstructions)},
 		}
+		model.SafetySettings = DEFAULT_SAFETY_SETTINGS
 		model.ResponseMIMEType = values.OutputFormat
 		model.Tools = []*genai.Tool{}
 		agentModels[am] = model

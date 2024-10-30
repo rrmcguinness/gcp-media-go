@@ -27,6 +27,7 @@ import (
 	"github.com/google/generative-ai-go/genai"
 )
 
+// Cloud Constants
 const (
 	CONFIG_FILE_BASE_NAME  = ".env"
 	CONFIG_FILE_EXTENSION  = ".toml"
@@ -36,11 +37,13 @@ const (
 	MAX_RETRIES            = 3
 )
 
+// Simple utility to see if a file exists
 func fileExists(in string) bool {
 	_, err := os.Stat(in)
 	return !errors.Is(err, os.ErrNotExist)
 }
 
+// The configuration loader, a hierarchical loader that allows environment overrides.
 func LoadConfig(baseConfig interface{}, additionalFiles ...string) {
 	configurationFilePrefix := os.Getenv(ENV_CONFIG_FILE_PREFIX)
 	if len(configurationFilePrefix) > 0 && !strings.HasSuffix(configurationFilePrefix, string(os.PathSeparator)) {
@@ -76,6 +79,7 @@ func LoadConfig(baseConfig interface{}, additionalFiles ...string) {
 	}
 }
 
+// A helper function for debugging configuration
 func PrintConfig(config interface{}) {
 	fmt.Println(strings.Repeat("#", 80))
 	c, err := json.MarshalIndent(config, " ", " ")
@@ -87,6 +91,7 @@ func PrintConfig(config interface{}) {
 	fmt.Println(strings.Repeat("#", 80))
 }
 
+// A GenAI helper function for executing multi-modal requests with a retry limit.
 func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *genai.GenerativeModel, parts ...genai.Part) (value string, err error) {
 	resp, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
@@ -107,6 +112,7 @@ func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *genai.
 	return value, nil
 }
 
+// A simple helper method used to adjust float precision for between 64bit and 32bit models.
 func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingModel, in string, count int) []float32 {
 	res, err := model.EmbedContent(ctx, genai.Text(in))
 	if err != nil {
@@ -129,24 +135,30 @@ func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingMo
 	return initialValues
 }
 
+// A simple helper function to stream Markdown generated JSON format
+// sometimes returned from Gemini
 func RemoveMarkdownJsonNotations(in string) string {
 	in = strings.ReplaceAll(in, "```json", "")
 	in = strings.ReplaceAll(in, "```", "")
 	return in
 }
 
+// A helper method for creating text parts
 func NewTextPart(in string) genai.Part {
 	return genai.Text(in)
 }
 
+// A helper method for creating image parts
 func NewImagePart(bucketURL string, mimeType string) genai.Part {
 	return genai.FileData{URI: bucketURL, MIMEType: mimeType}
 }
 
+// A helper method for creating binary large objects / blobs
 func NewBlobPart(in []byte, mimeType string) genai.Part {
 	return genai.Blob{Data: in, MIMEType: mimeType}
 }
 
+// A helper method for creating File Data parts.
 func NewFileData(in string, mimeType string) genai.Part {
 	return genai.FileData{URI: in, MIMEType: mimeType}
 }

@@ -77,6 +77,6 @@ func InitState(ctx context.Context) {
 		MediaTable:     mediaTableName,
 	}
 
-	SetupListeners(cloudClients, ctx)
+	SetupListeners(config, cloudClients, ctx)
 
 }

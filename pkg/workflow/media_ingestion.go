@@ -34,6 +34,7 @@ func MediaIngestion(
 	scenePromptTemplate string,
 	sceneOutputParam string,
 	mediaOutputParam string,
+	numberOfWorkers int,
 ) cor.Chain {
 
 	out := cor.NewBaseChain("media-ingestion-workflow")
@@ -53,7 +54,7 @@ func MediaIngestion(
 	// Convert the JSON to a struct
 	out.AddCommand(commands.NewMediaSummaryJsonToStruct("convert-media-summary"))
 
-	sceneExtractor := commands.NewSceneExtractor("extract-media-scenes", genaiModel, scenePromptTemplate)
+	sceneExtractor := commands.NewSceneExtractor("extract-media-scenes", genaiModel, scenePromptTemplate, numberOfWorkers)
 	sceneExtractor.BaseCommand.OutputParamName = sceneOutputParam
 
 	out.AddCommand(sceneExtractor)

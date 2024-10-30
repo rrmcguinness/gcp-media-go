@@ -34,6 +34,7 @@ var genModel *genai.GenerativeModel
 var embeddingModel *genai.EmbeddingModel
 var cloudClients *cloud.CloudServiceClients
 var ctx context.Context
+var config *cloud.CloudConfig
 
 const tName = "cloud.google.com/media/tests/workflow"
 
@@ -50,7 +51,7 @@ func TestMain(m *testing.M) {
 	defer cancel()
 
 	// Get the config file
-	config := test.GetConfig()
+	config = test.GetConfig()
 
 	telemetry.SetupLogging()
 	shutdown, err := telemetry.SetupOpenTelemetry(ctx, config)

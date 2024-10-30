@@ -58,9 +58,10 @@ func main() {
 		MaxAge: 12 * time.Hour,
 	}))
 
-	// Register "/media" end-points
+	// Create the "/api/v1" group
 	api_v1 := r.Group("/api/v1")
 	{
+		// Register "/api/v1/media" end-points
 		MediaRouter(api_v1)
 	}
 

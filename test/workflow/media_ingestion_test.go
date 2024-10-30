@@ -58,7 +58,6 @@ Example Output:
 `
 
 func TestMediaChain(t *testing.T) {
-
 	traceCtx, span := tracer.Start(ctx, "media-ingestion-test")
 	defer span.End()
 
@@ -73,7 +72,8 @@ func TestMediaChain(t *testing.T) {
 		prompt, "DOC_SUMMARY",
 		SCENE_PROMPT,
 		"SCENES",
-		"MEDIA")
+		"MEDIA",
+		config.Application.ThreadPoolSize)
 
 	chainCtx := cor.NewBaseContext()
 	chainCtx.SetContext(traceCtx)

@@ -40,5 +40,6 @@ go_library(
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//attribute",
         "@io_opentelemetry_go_otel//codes",
+        "@io_opentelemetry_go_otel_trace//:trace",
     ],
 )

@@ -23,6 +23,26 @@ import (
 	"github.com/google/generative-ai-go/genai"
 )
 
+// Default System Settings for GenAI agents
+var DEFAULT_SAFETY_SETTINGS = []*genai.SafetySetting{
+	{
+		Category:  genai.HarmCategoryDangerousContent,
+		Threshold: genai.HarmBlockOnlyHigh,
+	},
+	{
+		Category:  genai.HarmCategoryHarassment,
+		Threshold: genai.HarmBlockMediumAndAbove,
+	},
+	{
+		Category:  genai.HarmCategoryHateSpeech,
+		Threshold: genai.HarmBlockMediumAndAbove,
+	},
+	{
+		Category:  genai.HarmCategorySexuallyExplicit,
+		Threshold: genai.HarmBlockOnlyHigh,
+	},
+}
+
 // PubSubListener is a simple stateful wrapper around a subscription object.
 // this allows for the easy configuration of multiple listeners. Since listeners
 // life-cycles are outside of the command life-cycle they are considered cloud components.
@@ -49,6 +69,7 @@ func NewPubSubListener(
 	return cmd, nil
 }
 
+// A setter for the underlying handler command.
 func (m *PubSubListener) SetCommand(command cor.Command) {
 	if m.command == nil {
 		m.command = command
@@ -75,25 +96,6 @@ func (m *PubSubListener) Listen(ctx context.Context) {
 			log.Println(err)
 		}
 	}()
-}
-
-var DEFAULT_SAFETY_SETTINGS = []*genai.SafetySetting{
-	{
-		Category:  genai.HarmCategoryDangerousContent,
-		Threshold: genai.HarmBlockOnlyHigh,
-	},
-	{
-		Category:  genai.HarmCategoryHarassment,
-		Threshold: genai.HarmBlockMediumAndAbove,
-	},
-	{
-		Category:  genai.HarmCategoryHateSpeech,
-		Threshold: genai.HarmBlockMediumAndAbove,
-	},
-	{
-		Category:  genai.HarmCategorySexuallyExplicit,
-		Threshold: genai.HarmBlockOnlyHigh,
-	},
 }
 
 type BigQueryDataSource struct {
