@@ -30,17 +30,23 @@ import (
 )
 
 func main() {
+	telemetry.SetupLogging()
+
+	log.Print("Logging initialized")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	InitState(ctx)
-	telemetry.SetupLogging()
 	shutdown, err := telemetry.SetupOpenTelemetry(ctx, GetConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer shutdown(ctx)
+
+	log.Print("Tracing initialized")
+
+	InitState(ctx)
+	log.Println("Initialized State")
 
 	r := gin.Default()
 
@@ -63,6 +69,8 @@ func main() {
 	{
 		// Register "/api/v1/media" end-points
 		MediaRouter(api_v1)
+		// Register "/api/v1/uploads"
+		FileUpload(api_v1)
 	}
 
 	srv := &http.Server{
@@ -76,6 +84,8 @@ func main() {
 			log.Fatalf("listen: %s\n", err)
 		}
 	}()
+
+	log.Print("Server Ready")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)

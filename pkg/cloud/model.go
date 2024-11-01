@@ -17,29 +17,34 @@ package cloud
 import (
 	"context"
 	"log"
+	"time"
 
 	"cloud.google.com/go/pubsub"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/codes"
+	"golang.org/x/time/rate"
 )
 
 // Default System Settings for GenAI agents
 var DEFAULT_SAFETY_SETTINGS = []*genai.SafetySetting{
 	{
 		Category:  genai.HarmCategoryDangerousContent,
-		Threshold: genai.HarmBlockOnlyHigh,
+		Threshold: genai.HarmBlockNone,
 	},
 	{
 		Category:  genai.HarmCategoryHarassment,
-		Threshold: genai.HarmBlockMediumAndAbove,
+		Threshold: genai.HarmBlockNone,
 	},
 	{
 		Category:  genai.HarmCategoryHateSpeech,
-		Threshold: genai.HarmBlockMediumAndAbove,
+		Threshold: genai.HarmBlockNone,
 	},
 	{
 		Category:  genai.HarmCategorySexuallyExplicit,
-		Threshold: genai.HarmBlockOnlyHigh,
+		Threshold: genai.HarmBlockNone,
 	},
 }
 
@@ -81,19 +86,32 @@ func (m *PubSubListener) SetCommand(command cor.Command) {
 // for a different recovery life-cycle.
 func (m *PubSubListener) Listen(ctx context.Context) {
 	log.Printf("listening: %s", m.subscription)
+
 	go func() {
+		tracer := otel.Tracer("message-listener")
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+			spanCtx, span := tracer.Start(ctx, "receive-message")
+			span.SetName("receive-message")
+			span.SetAttributes(attribute.String("msg", string(msg.Data)))
+			log.Println("received message")
 			chainCtx := cor.NewBaseContext()
-			chainCtx.SetContext(ctx)
+			chainCtx.SetContext(spanCtx)
 			chainCtx.Add(cor.CTX_IN, string(msg.Data))
 			m.command.Execute(chainCtx)
 			// Only take the message from the topic if the chain executes successfully
 			if !chainCtx.HasErrors() {
+				span.SetStatus(codes.Ok, "success")
 				msg.Ack()
+			} else {
+				span.SetStatus(codes.Error, "failed")
+				for _, e := range chainCtx.GetErrors() {
+					log.Printf("error executing chain: %v", e)
+				}
 			}
+			span.End()
 		})
 		if err != nil {
-			log.Println(err)
+			log.Printf("error receiving data: %v", err)
 		}
 	}()
 }
@@ -117,6 +135,7 @@ type VertexAiLLMModel struct {
 	MaxTokens          int32   `toml:"max_tokens"`
 	OutputFormat       string  `toml:"output_format"`
 	EnableGoogle       bool    `toml:"enable_google"`
+	RateLimit          int     `toml:"rate_limit"`
 }
 
 type TopicSubscription struct {
@@ -146,5 +165,26 @@ func NewCloudConfig() *CloudConfig {
 		BigQueryDataSources: make(map[string]BigQueryDataSource),
 		EmbeddingModels:     make(map[string]VertexAiEmbeddingModel),
 		AgentModels:         make(map[string]VertexAiLLMModel),
+	}
+}
+
+type QuotaAwareModel struct {
+	*genai.GenerativeModel
+	RateLimit rate.Limiter
+}
+
+func NewQuotaAwareModel(wrapped *genai.GenerativeModel, requestsPerMinute int) *QuotaAwareModel {
+	return &QuotaAwareModel{
+		GenerativeModel: wrapped,
+		RateLimit:       *rate.NewLimiter(rate.Every(time.Minute/1), requestsPerMinute),
+	}
+}
+
+func (q *QuotaAwareModel) GenerateContent(ctx context.Context, parts ...genai.Part) (resp *genai.GenerateContentResponse, err error) {
+	if q.RateLimit.Allow() {
+		return q.GenerativeModel.GenerateContent(ctx, parts...)
+	} else {
+		time.Sleep(time.Second * 5)
+		return q.GenerateContent(ctx, parts...)
 	}
 }

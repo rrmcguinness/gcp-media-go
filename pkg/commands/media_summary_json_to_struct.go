@@ -22,8 +22,10 @@ type MediaSummaryJsonToStruct struct {
 	cor.BaseCommand
 }
 
-func NewMediaSummaryJsonToStruct(name string) *MediaSummaryJsonToStruct {
-	return &MediaSummaryJsonToStruct{BaseCommand: *cor.NewBaseCommand(name)}
+func NewMediaSummaryJsonToStruct(name string, outputParamName string) *MediaSummaryJsonToStruct {
+	out := MediaSummaryJsonToStruct{BaseCommand: *cor.NewBaseCommand(name)}
+	out.OutputParamName = outputParamName
+	return &out
 }
 
 func (s *MediaSummaryJsonToStruct) Execute(context cor.Context) {
@@ -34,4 +36,5 @@ func (s *MediaSummaryJsonToStruct) Execute(context cor.Context) {
 		return
 	}
 	context.Add(s.GetOutputParam(), doc)
+	context.Add(cor.CTX_OUT, doc)
 }

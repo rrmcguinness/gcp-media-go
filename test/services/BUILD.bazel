@@ -16,3 +16,14 @@ go_test(
         "@com_github_zeebo_assert//:assert",
     ],
 )
+
+go_test(
+    name = "services_test",
+    srcs = ["search_service_test.go"],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/services",
+        "//test",
+        "@com_github_zeebo_assert//:assert",
+    ],
+)

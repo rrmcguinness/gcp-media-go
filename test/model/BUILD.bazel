@@ -23,3 +23,8 @@ go_test(
     ],
     rundir = ".",
 )
+
+go_test(
+    name = "model_test",
+    srcs = ["domain_model_test.go"],
+)

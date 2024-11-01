@@ -4,6 +4,7 @@ import { LoadingIcon } from "./components/LoadingIcon";
 import React from "react";
 import { Outlet } from "react-router-dom";
 import Footer from "./components/Footer";
+import TopNav from "./components/TopNav";
 
 const themeOptions: ThemeOptions = {
   palette: {
@@ -28,6 +29,8 @@ const theme = createTheme(themeOptions);
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <TopNav />
+      <Typography variant="h3" sx={{fontFamily: 'Google Sans', fontWeight: 800, color: '#4285F4'}}>Me<span style={{color: '#FBBC04'}}>d</span>ia <span style={{color: '#DB4437'}}>S</span>ea<span style={{color: '#0F9D58'}}>r</span>ch</Typography>
       <Box
         sx={{
           position: "relative",
@@ -35,16 +38,15 @@ function App() {
           flexDirection: "column",
           minHeight: "100vh",
           minWidth: "100vw"
+
         }}
       >
         <CssBaseline />
-
         <Container
           component="main"
-          sx={{ mt: 3, pb: "3.5em", mb: 2, overflow: "auto" }}
+          sx={{ mt: 3, pb: "3.5em", mb: 2}}
           maxWidth="xl"
         >
-          <Typography variant="h3" sx={{fontFamily: 'Google Sans', fontWeight: 800, color: '#4285F4'}}>Me<span style={{color: '#FBBC04'}}>d</span>ia <span style={{color: '#DB4437'}}>S</span>ea<span style={{color: '#0F9D58'}}>r</span>ch</Typography>
           <React.Suspense fallback={<LoadingIcon />}>
             <Outlet />
           </React.Suspense>

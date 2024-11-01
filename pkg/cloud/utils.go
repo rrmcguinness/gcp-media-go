@@ -71,7 +71,6 @@ func LoadConfig(baseConfig interface{}, additionalFiles ...string) {
 	}
 
 	if fileExists(envConfigFileName) {
-		//envConfig := &Config{}
 		_, err := toml.DecodeFile(envConfigFileName, baseConfig)
 		if err != nil {
 			log.Fatalf("failed to decode environment configuration file: %s with error: %s", envConfigFileName, err)
@@ -92,7 +91,7 @@ func PrintConfig(config interface{}) {
 }
 
 // A GenAI helper function for executing multi-modal requests with a retry limit.
-func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *genai.GenerativeModel, parts ...genai.Part) (value string, err error) {
+func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaAwareModel, parts ...genai.Part) (value string, err error) {
 	resp, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
 		if tryCount < MAX_RETRIES {

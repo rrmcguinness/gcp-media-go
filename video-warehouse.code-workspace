@@ -46,9 +46,12 @@
             "bazel",
             "genai",
             "metageneration",
+            "opentelemetry",
             "otel",
+            "otelgin",
             "otelslog",
             "rmcguinness",
+            "semconv",
             "UNNEST"
         ],
     }

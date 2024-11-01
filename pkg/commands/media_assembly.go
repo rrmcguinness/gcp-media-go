@@ -17,6 +17,7 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"sort"
 	"strings"
 	"time"
@@ -37,20 +38,24 @@ func NewMediaAssembly(name string, summaryParam string, sceneParam string, media
 }
 
 func (m *MediaAssembly) IsExecutable(context cor.Context) bool {
-	return context != nil &&
+	executable := context != nil &&
 		context.Get(m.summaryParam) != nil &&
 		context.Get(m.sceneParam) != nil
+	return executable
 }
 
 func (m *MediaAssembly) Execute(context cor.Context) {
-	jsonSummary := context.Get(m.summaryParam).(string)
+	log.Println("Executing assembly")
+	summary := context.Get(m.summaryParam).(*model.MediaSummary)
 	jsonScenes := context.Get(m.sceneParam).([]string)
 	sceneValues := fmt.Sprintf("[ %s ]", strings.Join(jsonScenes, ","))
 
-	summary := model.MediaSummary{}
 	scenes := make([]*model.Scene, 0)
-	_ = json.Unmarshal([]byte(jsonSummary), &summary)
-	_ = json.Unmarshal([]byte(sceneValues), &scenes)
+	sceneErr := json.Unmarshal([]byte(sceneValues), &scenes)
+	if sceneErr != nil {
+		context.AddError(sceneErr)
+		return
+	}
 
 	sort.Slice(scenes, func(i, j int) bool {
 		t, _ := time.Parse("15:04:05", scenes[i].Start)
@@ -71,6 +76,8 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	media.Rating = summary.Rating
 	media.Cast = append(media.Cast, summary.Cast...)
 	media.Scenes = append(media.Scenes, scenes...)
+
+	log.Println("Assembly complete")
 
 	context.Add(m.mediaObjectParam, media)
 	context.Add(cor.CTX_OUT, media)

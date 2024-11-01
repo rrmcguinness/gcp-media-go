@@ -16,7 +16,7 @@ package cloud
 
 import (
 	"context"
-	"log/slog"
+	"log"
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/pubsub"
@@ -33,7 +33,7 @@ type CloudServiceClients struct {
 	BiqQueryClient  *bigquery.Client
 	PubSubListeners map[string]*PubSubListener
 	EmbeddingModels map[string]*genai.EmbeddingModel
-	AgentModels     map[string]*genai.GenerativeModel
+	AgentModels     map[string]*QuotaAwareModel
 }
 
 // A close method to ensure all clients are shut down,
@@ -59,7 +59,7 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 
 	gc, err := genai.NewClient(ctx, option.WithAPIKey(config.Application.GoogleAPIKey))
 	if err != nil {
-		slog.Error("error creating genai client", "error", err)
+		log.Printf("error creating genai client: %v", err)
 		return nil, err
 	}
 
@@ -84,7 +84,7 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		embeddingModels[emb] = gc.EmbeddingModel(config.EmbeddingModels[emb].Model)
 	}
 
-	agentModels := make(map[string]*genai.GenerativeModel)
+	agentModels := make(map[string]*QuotaAwareModel)
 	for am := range config.AgentModels {
 		values := config.AgentModels[am]
 		model := gc.GenerativeModel(values.Model)
@@ -98,7 +98,8 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		model.SafetySettings = DEFAULT_SAFETY_SETTINGS
 		model.ResponseMIMEType = values.OutputFormat
 		model.Tools = []*genai.Tool{}
-		agentModels[am] = model
+		wrappedAgent := NewQuotaAwareModel(model, values.RateLimit)
+		agentModels[am] = wrappedAgent
 	}
 
 	cloud = &CloudServiceClients{

@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom';
+import FileUpload from './pages/FileUpload.tsx';
 
 
 const Search = React.lazy(() => import('./pages/Search'));
@@ -20,6 +21,11 @@ const router = createBrowserRouter([
       {
         index: true,
         element: <Search />,
+        errorElement: <ErrorBoundary />,
+      },
+      {
+        path: "/uploads",
+        element: <FileUpload />,
         errorElement: <ErrorBoundary />,
       }
     ]

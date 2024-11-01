@@ -34,13 +34,19 @@ import (
 
 type SceneExtractor struct {
 	cor.BaseCommand
-	model           *genai.GenerativeModel
+	model           *cloud.QuotaAwareModel
 	prompt          string
 	numberOfWorkers int
 }
 
-func NewSceneExtractor(name string, model *genai.GenerativeModel, prompt string, numberOfWorkers int) *SceneExtractor {
+func NewSceneExtractor(name string, model *cloud.QuotaAwareModel, prompt string, numberOfWorkers int) *SceneExtractor {
 	return &SceneExtractor{BaseCommand: *cor.NewBaseCommand(name), model: model, prompt: prompt, numberOfWorkers: numberOfWorkers}
+}
+
+func (s *SceneExtractor) IsExecutable(context cor.Context) bool {
+	return context != nil &&
+		context.Get(s.GetInputParam()) != nil &&
+		context.Get(GetVideoUploadFileParameterName()) != nil
 }
 
 func (s *SceneExtractor) Execute(context cor.Context) {
@@ -89,6 +95,7 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 		}
 	}
 	context.Add(s.GetOutputParam(), sceneData)
+	context.Add(cor.CTX_OUT, sceneData)
 }
 
 type SceneResponse struct {
@@ -102,7 +109,7 @@ type SceneJob struct {
 	timeSpan *model.TimeSpan
 	span     trace.Span
 	parts    []genai.Part
-	model    *genai.GenerativeModel
+	model    *cloud.QuotaAwareModel
 }
 
 func (s *SceneJob) Close(status codes.Code, description string) {
@@ -119,7 +126,7 @@ func CreateJob(
 	exampleText string,
 	template template.Template,
 	videoFile *genai.File,
-	model *genai.GenerativeModel,
+	model *cloud.QuotaAwareModel,
 	timeSpan *model.TimeSpan,
 ) *SceneJob {
 	sceneCtx, sceneSpan := tracer.Start(ctx, fmt.Sprintf("%s_genai", commandName))

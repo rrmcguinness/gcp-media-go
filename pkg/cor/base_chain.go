@@ -52,6 +52,7 @@ func (c *BaseChain) Execute(chCtx Context) {
 	for _, command := range c.commands {
 		// Ensure that the next parameter is callable in a pipe stack
 		commandContext, commandSpan := c.Tracer.Start(outerCtx, command.GetName())
+		commandSpan.SetName(command.GetName())
 		if chCtx.HasErrors() && !c.continueOnFailure {
 			commandSpan.SetStatus(codes.Error, "previous error on chain")
 			break
@@ -68,6 +69,9 @@ func (c *BaseChain) Execute(chCtx Context) {
 			} else {
 				chCtx.SetContext(nil)
 			}
+		} else {
+			commandSpan.SetStatus(codes.Error, fmt.Sprintf("command not executable: %s", command.GetName()))
+			commandSpan.End()
 		}
 
 		if chCtx.HasErrors() {

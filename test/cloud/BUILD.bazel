@@ -20,3 +20,18 @@ go_test(
         "@com_github_stretchr_testify//assert",
     ],
 )
+
+go_test(
+    name = "cloud_test",
+    srcs = [
+        "config_test.go",
+        "pubsub_listener_test.go",
+    ],
+    deps = [
+        "//pkg/cloud",
+        "//pkg/cor",
+        "//pkg/model",
+        "//test",
+        "@com_github_stretchr_testify//assert",
+    ],
+)

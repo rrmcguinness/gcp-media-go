@@ -16,17 +16,45 @@ package main
 
 import (
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
 
 func FileUpload(r *gin.RouterGroup) {
-	upload := r.Group("/upload")
+	upload := r.Group("/uploads")
 	{
 		upload.POST("", func(c *gin.Context) {
-			file, _ := c.FormFile("file")
-			log.Println(file.Filename)
+			form, err := c.MultipartForm()
+			if err != nil {
+				c.Status(400)
+				return
+			}
+			files := form.File["files"]
+			bucket := state.cloud.StorageClient.Bucket("media_high_res_resources")
 
+			for _, file := range files {
+				localPath := filepath.Join(os.TempDir(), file.Filename)
+				err := c.SaveUploadedFile(file, localPath)
+				if err != nil {
+					log.Println(err)
+					c.Status(400)
+					return
+				}
+				defer os.Remove(localPath)
+				content, err := os.ReadFile(localPath)
+				if err != nil {
+					log.Println(err)
+					c.Status(400)
+					return
+				}
+				wc := bucket.Object(file.Filename).NewWriter(c)
+				wc.ContentType = "video/mp4"
+				wc.Write(content)
+				wc.Close()
+			}
+			c.Status(200)
 		})
 	}
 }

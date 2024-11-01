@@ -16,6 +16,8 @@ package telemetry
 
 import (
 	"context"
+	"io"
+	"log"
 	"log/slog"
 	"os"
 
@@ -35,6 +37,7 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 	if s := trace.SpanContextFromContext(ctx); s.IsValid() {
 		// Add trace context attributes following Cloud Logging structured log format described
 		// in https://cloud.google.com/logging/docs/structured-logging#special-payload-fields
+
 		record.AddAttrs(
 			slog.Any("logging.googleapis.com/trace", s.TraceID()),
 		)
@@ -67,10 +70,27 @@ func replacer(groups []string, a slog.Attr) slog.Attr {
 }
 
 func SetupLogging() {
+	// Create a multi writer
+	file, _ := os.Create("app.log")
+	multiWriter := io.MultiWriter(os.Stdout, file)
+
+	// Set output to standard output (instead of the default standard error)
+	log.SetOutput(multiWriter)
+
+	// Set a prefix for log messages
+	log.SetPrefix("[INFO] ")
+
+	// Add flags for date and time
+	log.SetFlags(log.Ldate | log.Ltime)
+
+	// Setup the SLOG behavior
 	// Use json as our base logging format.
-	jsonHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{ReplaceAttr: replacer})
+	jsonHandler := slog.NewJSONHandler(multiWriter, &slog.HandlerOptions{ReplaceAttr: replacer})
+
 	// Add span context attributes when Context is passed to logging calls.
 	instrumentedHandler := handlerWithSpanContext(jsonHandler)
+
 	// Set this handler as the global slog handler.
 	slog.SetDefault(slog.New(instrumentedHandler))
+	slog.SetLogLoggerLevel(slog.LevelInfo)
 }

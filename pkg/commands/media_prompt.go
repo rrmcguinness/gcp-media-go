@@ -25,22 +25,30 @@ import (
 
 type MediaPrompt struct {
 	cor.BaseCommand
-	model         *genai.GenerativeModel
+	model         *cloud.QuotaAwareModel
 	template      string
 	templateParam string
 }
 
-func NewMediaPrompt(name string, model *genai.GenerativeModel, template string, templateParam string) *MediaPrompt {
-	return &MediaPrompt{BaseCommand: *cor.NewBaseCommand(name), model: model, template: template, templateParam: templateParam}
+func NewMediaPrompt(name string,
+	model *cloud.QuotaAwareModel,
+	template string,
+	templateParam string) *MediaPrompt {
+	return &MediaPrompt{
+		BaseCommand:   *cor.NewBaseCommand(name),
+		model:         model,
+		template:      template,
+		templateParam: templateParam}
 }
 
 func (t *MediaPrompt) Execute(context cor.Context) {
 	mediaFile := context.Get(t.GetInputParam()).(*genai.File)
 	params := make(map[string]interface{})
+	// If the context does not have any template parameters, use an empty map.
 	if context.Get(t.templateParam) != nil {
 		params = context.Get(t.templateParam).(map[string]interface{})
 	}
-	template, err := template.New("why").Parse(t.template)
+	template, err := template.New("media-prompt-template").Parse(t.template)
 	if err != nil {
 		context.AddError(err)
 		return
@@ -53,17 +61,16 @@ func (t *MediaPrompt) Execute(context cor.Context) {
 		return
 	}
 
+	// Create the parts to query Gemini
 	parts := make([]genai.Part, 0)
 	parts = append(parts, cloud.NewFileData(mediaFile.URI, mediaFile.MIMEType))
 	parts = append(parts, cloud.NewTextPart(buffer.String()))
 
+	// Get the response
 	out, err := cloud.GenerateMultiModalResponse(context.GetContext(), 0, t.model, parts...)
 	if err != nil {
 		context.AddError(err)
 		return
 	}
-	// Make retrievable for later use
 	context.Add(t.GetOutputParam(), out)
-	// Still pipe to next command
-	context.Add(cor.CTX_OUT, out)
 }

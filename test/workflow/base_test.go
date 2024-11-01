@@ -30,7 +30,7 @@ import (
 )
 
 var err error
-var genModel *genai.GenerativeModel
+var genModel *cloud.QuotaAwareModel
 var embeddingModel *genai.EmbeddingModel
 var cloudClients *cloud.CloudServiceClients
 var ctx context.Context

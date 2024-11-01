@@ -17,9 +17,11 @@ package main
 import (
 	"context"
 	"os"
+	"time"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/services"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 )
 
 type StateManager struct {
@@ -76,6 +78,24 @@ func InitState(ctx context.Context) {
 		DatasetName:    datasetName,
 		MediaTable:     mediaTableName,
 	}
+
+	ticker := time.NewTicker(60 * time.Second)
+	closeTicker := make(chan struct{})
+
+	// Create a timer to run embedding checks every 60 seconds
+	go func() {
+		for {
+			select {
+			case <-ticker.C:
+				workflow.GenerateEmbeddings(context.Background(),
+					state.cloud.EmbeddingModels["multi-lingual"],
+					state.cloud.BiqQueryClient, "media_ds", "media", "scene_embeddings", "multi-lingual")
+			case <-closeTicker:
+				ticker.Stop()
+				return
+			}
+		}
+	}()
 
 	SetupListeners(config, cloudClients, ctx)
 

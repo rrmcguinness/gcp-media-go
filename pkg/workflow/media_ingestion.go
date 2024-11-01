@@ -19,6 +19,7 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"cloud.google.com/go/storage"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/commands"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/google/generative-ai-go/genai"
@@ -27,7 +28,7 @@ import (
 func MediaIngestion(
 	bigqueryClient *bigquery.Client,
 	genaiClient *genai.Client,
-	genaiModel *genai.GenerativeModel,
+	genaiModel *cloud.QuotaAwareModel,
 	storageClient *storage.Client,
 	summaryPromptTemplate string,
 	summaryOutputParam string,
@@ -51,12 +52,12 @@ func MediaIngestion(
 	// Generate Summary
 	out.AddCommand(commands.NewMediaPrompt("generate-media-summary", genaiModel, summaryPromptTemplate, cor.CTX_PROMPT_VARS))
 
-	// Convert the JSON to a struct
-	out.AddCommand(commands.NewMediaSummaryJsonToStruct("convert-media-summary"))
+	// Convert the JSON to a struct and save to the summaryOutputParam
+	out.AddCommand(commands.NewMediaSummaryJsonToStruct("convert-media-summary", summaryOutputParam))
 
+	// Create the scene extraction command
 	sceneExtractor := commands.NewSceneExtractor("extract-media-scenes", genaiModel, scenePromptTemplate, numberOfWorkers)
 	sceneExtractor.BaseCommand.OutputParamName = sceneOutputParam
-
 	out.AddCommand(sceneExtractor)
 
 	// Assemble the output into a single media object
