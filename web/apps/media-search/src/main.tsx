@@ -4,10 +4,9 @@ import App from './App.tsx'
 import './index.css'
 
 import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom';
-import FileUpload from './pages/FileUpload.tsx';
-
 
 const Search = React.lazy(() => import('./pages/Search'));
+const FileUpload = React.lazy(() => import('./pages/FileUpload'));
 
 const ErrorBoundary = () => {
     return (<Navigate to="/"/>)

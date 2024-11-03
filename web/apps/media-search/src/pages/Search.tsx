@@ -12,16 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-import {Snackbar, SnackbarCloseReason} from "@mui/material";
+import React from 'react';
+import {Snackbar, SnackbarCloseReason, Button, IconButton} from "@mui/material";
 import {useState} from "react";
 import {MediaResult} from "../shared/model";
 import SearchBar from "../components/SearchBar";
 import MediaResults from "../components/MediaResults";
+import CloseIcon from '@mui/icons-material/Close';
 
 const Search = () => {
     const [results, setResults] = useState<Array<MediaResult>>([]);
-    const [error, setError] = useState<string>(null!);
+    const [message, setMessage] = useState<string>(null!);
     const [open, setOpen] = useState<boolean>(false);
 
     const handleClose = (
@@ -34,16 +35,33 @@ const Search = () => {
         setOpen(false);
     };
 
+    const action = (
+        <React.Fragment>
+            <Button color="secondary" size="small" onClick={handleClose}>
+                Close
+            </Button>
+            <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+            >
+                <CloseIcon fontSize="small" />
+            </IconButton>
+        </React.Fragment>
+    );
+
     return (
         <>
-            <SearchBar setError={setError} setOpen={setOpen} setResults={setResults}/>
+            <SearchBar setMessage={setMessage} setOpen={setOpen} setResults={setResults}/>
             <MediaResults results={results}/>
             <Snackbar
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
                 open={open}
                 autoHideDuration={6000}
                 onClose={handleClose}
-                message={error}
-                action={<></>}
+                message={message}
+                action={action}
             />
         </>
     );

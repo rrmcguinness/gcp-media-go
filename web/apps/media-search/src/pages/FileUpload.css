@@ -15,7 +15,7 @@
  */
 
 .upload-files {
-    height: 80px;
+    min-height: 90px;
 }
 
 .upload-files div span {

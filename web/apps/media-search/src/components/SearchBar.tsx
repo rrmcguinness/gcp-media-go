@@ -20,12 +20,14 @@ import {useState} from "react";
 
 type SearchBarArgs = {
     setResults: (values: MediaResult[]) => void
-    setError: (value: string) => void
+    setMessage: (value: string) => void
     setOpen: (value: boolean) => void
 }
 
-const SearchBar = ({setResults, setError, setOpen}: SearchBarArgs) => {
+const SearchBar = ({setResults, setMessage, setOpen}: SearchBarArgs) => {
     const runQuery = () => {
+        setMessage("Searching...")
+        setOpen(true)
         setResults([])
         axios
             .get(`http://localhost:8080/api/v1/media?count=5&s=${query}`)
@@ -34,14 +36,14 @@ const SearchBar = ({setResults, setError, setOpen}: SearchBarArgs) => {
                 if (r.status == 200) {
                     setResults([...r.data]);
                 } else {
-                    setError(
+                    setMessage(
                         `Invalid HTTP Response: ${r.status} ${r.statusText} - ${r.data}`,
                     );
                     setOpen(true);
                 }
             })
             .catch((e) => {
-                setError(e);
+                setMessage(e);
                 setOpen(true);
             });
     };
