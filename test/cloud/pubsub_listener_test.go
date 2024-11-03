@@ -24,7 +24,6 @@ import (
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -34,11 +33,11 @@ type MediaMessageCommand struct {
 }
 
 func (c *MediaMessageCommand) IsExecutable(context cor.Context) bool {
-	return context != nil && context.Get("message").(model.GCSPubSubNotification).Kind == "storage#object"
+	return context != nil && context.Get("message").(cloud.GCSPubSubNotification).Kind == "storage#object"
 }
 
 func (c *MediaMessageCommand) Execute(context cor.Context) {
-	notification := context.Get("message").(model.GCSPubSubNotification)
+	notification := context.Get("message").(cloud.GCSPubSubNotification)
 	log.Println(fmt.Sprintf("Message:\n%v\n", notification))
 }
 

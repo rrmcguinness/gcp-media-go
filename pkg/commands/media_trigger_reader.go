@@ -16,9 +16,9 @@ package commands
 
 import (
 	"encoding/json"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type MediaTriggerToGCSObject struct {
@@ -31,14 +31,14 @@ func NewMediaTriggerToGCSObject(name string) *MediaTriggerToGCSObject {
 
 func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	in := context.Get(c.GetInputParam()).(string)
-	var out model.GCSPubSubNotification
+	var out cloud.GCSPubSubNotification
 	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
 		context.AddError(err)
 		return
 	}
 
-	msg := &model.GCSObject{Bucket: out.Bucket, Name: out.Name, MIMEType: out.ContentType}
-	context.Add(model.GetGCSObjectName(), msg)
+	msg := &cloud.GCSObject{Bucket: out.Bucket, Name: out.Name, MIMEType: out.ContentType}
+	context.Add(cloud.GetGCSObjectName(), msg)
 	context.Add(c.GetOutputParam(), msg)
 }

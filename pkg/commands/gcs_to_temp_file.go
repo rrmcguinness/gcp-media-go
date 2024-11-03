@@ -15,13 +15,13 @@
 package commands
 
 import (
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"io"
 	"log"
 	"os"
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type GCSToTempFile struct {
@@ -39,7 +39,7 @@ func NewGCSToTempFile(name string, client *storage.Client, tempFilePrefix string
 }
 
 func (c *GCSToTempFile) Execute(context cor.Context) {
-	msg := context.Get(c.GetInputParam()).(*model.GCSObject)
+	msg := context.Get(c.GetInputParam()).(*cloud.GCSObject)
 
 	readerBucket := c.client.Bucket(msg.Bucket)
 	obj := readerBucket.Object(msg.Name)

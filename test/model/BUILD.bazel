@@ -15,16 +15,19 @@
 load("@io_bazel_rules_go//go:def.bzl", "go_test")
 
 go_test(
-    name = "model",
-    srcs = ["domain_model_test.go"],
+    name = "model_test",
+    srcs = [
+        "persistent_test.go",
+        "transient_test.go",
+    ],
     data = [
         "//configs:.env.test.toml",
         "//configs:.env.toml",
     ],
     rundir = ".",
-)
-
-go_test(
-    name = "model_test",
-    srcs = ["domain_model_test.go"],
+    deps = [
+        "//pkg/model",
+        "@com_github_google_uuid//:uuid",
+        "@com_github_stretchr_testify//assert",
+    ],
 )

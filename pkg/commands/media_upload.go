@@ -15,10 +15,10 @@
 package commands
 
 import (
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"time"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/google/generative-ai-go/genai"
 )
 
@@ -37,7 +37,7 @@ func GetVideoUploadFileParameterName() string {
 }
 
 func (v *MediaUpload) Execute(context cor.Context) {
-	gcsFile := context.Get(model.GetGCSObjectName()).(*model.GCSObject)
+	gcsFile := context.Get(cloud.GetGCSObjectName()).(*cloud.GCSObject)
 	fileName := context.Get(v.GetInputParam()).(string)
 
 	genFil, err := v.client.UploadFileFromPath(context.GetContext(), fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})

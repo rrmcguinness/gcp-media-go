@@ -98,12 +98,12 @@ func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaA
 	return value, nil
 }
 
-// NewTextPart A helper method for creating text parts
+// NewTextPart A delegate method for creating text parts
 func NewTextPart(in string) genai.Part {
 	return genai.Text(in)
 }
 
-// NewFileData A helper method for creating File Data parts.
+// NewFileData A delegate method for creating File Data parts.
 func NewFileData(in string, mimeType string) genai.Part {
 	return genai.FileData{URI: in, MIMEType: mimeType}
 }

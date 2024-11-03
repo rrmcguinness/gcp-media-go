@@ -1,3 +1,17 @@
+// Copyright 2024 Google, LLC
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     https://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package cloud
 
 import (
@@ -14,20 +28,22 @@ import (
 // this allows for the easy configuration of multiple listeners. Since listeners
 // life-cycles are outside the command life-cycle they are considered cloud components.
 type PubSubListener struct {
-	client       *pubsub.Client
-	subscription *pubsub.Subscription
-	command      cor.Command
+	client       *pubsub.Client       // The Pub/Sub client.
+	subscription *pubsub.Subscription // The Pub/Sub subscription.
+	command      cor.Command          // The command to execute when a message is received.
 }
 
 // NewPubSubListener the constructor for PubSubListener
 func NewPubSubListener(
-	pubsubClient *pubsub.Client,
-	subscriptionID string,
-	command cor.Command,
+	pubsubClient *pubsub.Client, // The Pub/Sub client.
+	subscriptionID string, // The ID of the Pub/Sub subscription.
+	command cor.Command, // The command to execute when a message is received.
 ) (cmd *PubSubListener, err error) {
 
+	// Get the subscription from the Pub/Sub client.
 	sub := pubsubClient.Subscription(subscriptionID)
 
+	// Create a new PubSubListener.
 	cmd = &PubSubListener{
 		client:       pubsubClient,
 		subscription: sub,
@@ -38,6 +54,7 @@ func NewPubSubListener(
 
 // SetCommand A setter for the underlying handler command.
 func (m *PubSubListener) SetCommand(command cor.Command) {
+	// Only set the command if it's not already set.
 	if m.command == nil {
 		m.command = command
 	}
@@ -49,18 +66,28 @@ func (m *PubSubListener) SetCommand(command cor.Command) {
 func (m *PubSubListener) Listen(ctx context.Context) {
 	log.Printf("listening: %s", m.subscription)
 
+	// Start a goroutine to listen for messages.
 	go func() {
+		// Create a new tracer.
 		tracer := otel.Tracer("message-listener")
+
+		// Receive messages from the subscription.
 		err := m.subscription.Receive(ctx, func(_ context.Context, msg *pubsub.Message) {
+			// Start a new span.
 			spanCtx, span := tracer.Start(ctx, "receive-message")
 			span.SetName("receive-message")
 			span.SetAttributes(attribute.String("msg", string(msg.Data)))
 			log.Println("received message")
+
+			// Create a new chain context.
 			chainCtx := cor.NewBaseContext()
 			chainCtx.SetContext(spanCtx)
 			chainCtx.Add(cor.CtxIn, string(msg.Data))
+
+			// Execute the command.
 			m.command.Execute(chainCtx)
-			// Only take the message from the topic if the chain executes successfully
+
+			// Only acknowledge the message if the command executed successfully.
 			if !chainCtx.HasErrors() {
 				span.SetStatus(codes.Ok, "success")
 				msg.Ack()
@@ -70,8 +97,12 @@ func (m *PubSubListener) Listen(ctx context.Context) {
 					log.Printf("error executing chain: %v", e)
 				}
 			}
+
+			// End the span.
 			span.End()
 		})
+
+		// Log any errors.
 		if err != nil {
 			log.Printf("error receiving data: %v", err)
 		}

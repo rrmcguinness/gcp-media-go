@@ -17,6 +17,7 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "cloud",
     srcs = [
+        "gcs.go",
         "model.go",
         "pub_sub_listener.go",
         "state.go",

@@ -15,6 +15,7 @@
 package commands
 
 import (
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"io"
 	"log"
 	"os"
@@ -22,7 +23,6 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
 
 type GCSFileUpload struct {
@@ -39,7 +39,7 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 	path := context.Get(c.GetInputParam()).(string)
 	name := filepath.Base(path)
 
-	original := context.Get(model.GetGCSObjectName()).(*model.GCSObject)
+	original := context.Get(cloud.GetGCSObjectName()).(*cloud.GCSObject)
 
 	dat, err := os.Open(path)
 	if err != nil {

@@ -21,6 +21,22 @@ and enabling AI interactions with the data. The modular side of the project is b
 Chain of Responsibility (COR) design pattern. Each unit of work is atomic and state is only
 conveyed via Context to each chain and/or command.
 
+## Setting up your Go Lang environment
+
+```shell
+# Install Buildifier, Buildozer, and Unused Deps
+go install github.com/bazelbuild/buildtools/buildifier@latest
+go install github.com/bazelbuild/buildtools/buildozer@latest
+go install github.com/bazelbuild/buildtools/unused_deps@latest
+
+# Install dlv, the golang debugger
+go install github.com/go-delve/delve/cmd/dlv@latest
+
+# Lastly, add go tooling to your system path
+# vim ~/.zshrc or ~/.bashrc or ~/.bash_profile
+# export PATH=$PATH:$HOME/go/bin
+```
+
 ## Tooling
 
 Bazel is a unique build tool in that it supports most modern languages and propagates the

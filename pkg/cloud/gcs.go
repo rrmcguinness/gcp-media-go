@@ -12,13 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package model
+package cloud
 
+// GetGCSObjectName returns a placeholder string for a GCS object name.
 func GetGCSObjectName() string {
 	return "__GCS__OBJ__"
 }
 
-// GCSPubSubNotification is the topic inbound type for GCS changes.
+// GCSPubSubNotification is the structure of a message received from a
+// Google Cloud Storage (GCS) Pub/Sub notification. It contains metadata
+// about a change to an object in a GCS bucket.
 type GCSPubSubNotification struct {
 	Kind                    string                 `json:"kind"`
 	ID                      string                 `json:"id"`
@@ -40,7 +43,8 @@ type GCSPubSubNotification struct {
 	ETag                    string                 `json:"etag"`
 }
 
-// GCSObject is a simplified struct for dealing with bucket objects
+// GCSObject is a simplified representation of a Google Cloud Storage (GCS)
+// object. It contains the bucket name, object name, and MIME type of the object.
 type GCSObject struct {
 	Bucket   string
 	Name     string
