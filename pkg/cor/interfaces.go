@@ -18,8 +18,8 @@ import "context"
 
 const (
 	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
-	CTX_IN                     = "__IN__"
-	CTX_OUT                    = "__OUT__"
+	CtxIn                      = "__IN__"
+	CtxOut                     = "__OUT__"
 	CTX_PROMPT_VARS            = "__PROMPT_VARS__"
 )
 
@@ -40,14 +40,18 @@ type Context interface {
 	Close()
 }
 
+type Executable interface {
+	Execute(context Context)
+}
+
 // Command is a simple interface that ensures an atomic unit of work.
 // The principals of a Command are: 1) Atomic, 2) Testable, and 3) Thread Safe
 type Command interface {
+	Executable
 	GetName() string
 	GetInputParam() string
 	GetOutputParam() string
 	IsExecutable(context Context) bool
-	Execute(context Context)
 }
 
 // Chain is a collection of commands that ensure the serial or parallel execution

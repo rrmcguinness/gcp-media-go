@@ -41,20 +41,20 @@ func (c *BaseCommand) IsExecutable(context Context) bool {
 }
 
 // GetInputParam the name of the parameter expected as the primary input,
-// if empty it will default to CTX_IN, during a chain execution event CTX_IN
-// will be mapped to the previous executions CTX_OUT to ensure PIPE / chain behaviors.
+// if empty it will default to CtxIn, during a chain execution event CtxIn
+// will be mapped to the previous executions CtxOut to ensure PIPE / chain behaviors.
 func (c *BaseCommand) GetInputParam() string {
 	if len(c.InputParamName) == 0 {
-		return CTX_IN
+		return CtxIn
 	}
 	return c.InputParamName
 }
 
-// GetOutputParam the name of the output parameter, the default is CTX_OUT
+// GetOutputParam the name of the output parameter, the default is CtxOut
 // See the chain execute method for more detail.
 func (c *BaseCommand) GetOutputParam() string {
 	if len(c.OutputParamName) == 0 {
-		return CTX_OUT
+		return CtxOut
 	}
 	return c.OutputParamName
 }

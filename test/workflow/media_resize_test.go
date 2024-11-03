@@ -30,15 +30,12 @@ func TestFFMpegCommand(t *testing.T) {
 	traceContext, span := tracer.Start(ctx, "media-resize-test")
 	defer span.End()
 
+	mediaResizeWorkflow := workflow.NewMediaResizeWorkflow(config, cloudClients, "bin/ffmpeg", &model.MediaFormatFilter{Width: "240"})
+
 	// Create the context
 	chainCtx := cor.NewBaseContext()
 	chainCtx.SetContext(traceContext)
-	chainCtx.Add(cor.CTX_IN, test.GetTestHighResMessageText())
-	mediaResizeWorkflow := workflow.MediaResize(
-		"bin/ffmpeg",
-		&model.MediaFormatFilter{Width: "240"},
-		cloudClients.StorageClient,
-		"media_low_res_resources")
+	chainCtx.Add(cor.CtxIn, test.GetTestHighResMessageText())
 
 	// This assertion insures the command can be executed
 	assert.True(t, mediaResizeWorkflow.IsExecutable(chainCtx))

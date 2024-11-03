@@ -30,11 +30,11 @@ import (
 )
 
 var err error
-var genModel *cloud.QuotaAwareModel
+var genModel *cloud.QuotaAwareGenerativeAIModel
 var embeddingModel *genai.EmbeddingModel
-var cloudClients *cloud.CloudServiceClients
+var cloudClients *cloud.ServiceClients
 var ctx context.Context
-var config *cloud.CloudConfig
+var config *cloud.Config
 
 const tName = "cloud.google.com/media/tests/workflow"
 

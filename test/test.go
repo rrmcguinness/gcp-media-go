@@ -22,7 +22,7 @@ import (
 )
 
 type StateManager struct {
-	config *cloud.CloudConfig
+	config *cloud.Config
 }
 
 var state = &StateManager{}
@@ -81,15 +81,15 @@ func GetTestLowResMessageText() string {
 }
 
 func SetupOS() {
-	os.Setenv(cloud.ENV_CONFIG_FILE_PREFIX, "configs")
-	os.Setenv(cloud.ENV_CONFIG_RUNTIME, "test")
+	os.Setenv(cloud.EnvConfigFilePrefix, "configs")
+	os.Setenv(cloud.EnvConfigRuntime, "test")
 }
 
-func GetConfig() *cloud.CloudConfig {
+func GetConfig() *cloud.Config {
 	if state.config == nil {
 		SetupOS()
 		// Create a default cloud config
-		config := cloud.NewCloudConfig()
+		config := cloud.NewConfig()
 		// Load it from the TOML files
 		cloud.LoadConfig(&config)
 		state.config = config

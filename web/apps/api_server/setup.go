@@ -16,17 +16,15 @@ package main
 
 import (
 	"context"
-	"os"
-	"time"
-
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/services"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
+	"os"
 )
 
 type StateManager struct {
-	config        *cloud.CloudConfig
-	cloud         *cloud.CloudServiceClients
+	config        *cloud.Config
+	cloud         *cloud.ServiceClients
 	searchService *services.SearchService
 	mediaService  *services.MediaService
 }
@@ -34,15 +32,15 @@ type StateManager struct {
 var state = &StateManager{}
 
 func SetupOS() {
-	os.Setenv(cloud.ENV_CONFIG_FILE_PREFIX, "configs")
-	os.Setenv(cloud.ENV_CONFIG_RUNTIME, "test")
+	os.Setenv(cloud.EnvConfigFilePrefix, "configs")
+	os.Setenv(cloud.EnvConfigRuntime, "test")
 }
 
-func GetConfig() *cloud.CloudConfig {
+func GetConfig() *cloud.Config {
 	if state.config == nil {
 		SetupOS()
 		// Create a default cloud config
-		config := cloud.NewCloudConfig()
+		config := cloud.NewConfig()
 		// Load it from the TOML files
 		cloud.LoadConfig(&config)
 		state.config = config
@@ -79,23 +77,8 @@ func InitState(ctx context.Context) {
 		MediaTable:     mediaTableName,
 	}
 
-	ticker := time.NewTicker(60 * time.Second)
-	closeTicker := make(chan struct{})
-
-	// Create a timer to run embedding checks every 60 seconds
-	go func() {
-		for {
-			select {
-			case <-ticker.C:
-				workflow.GenerateEmbeddings(context.Background(),
-					state.cloud.EmbeddingModels["multi-lingual"],
-					state.cloud.BiqQueryClient, "media_ds", "media", "scene_embeddings", "multi-lingual")
-			case <-closeTicker:
-				ticker.Stop()
-				return
-			}
-		}
-	}()
+	embeddingGenerator := workflow.NewMediaEmbeddingGeneratorWorkflow(config, cloudClients)
+	embeddingGenerator.StartTimer()
 
 	SetupListeners(config, cloudClients, ctx)
 

@@ -16,6 +16,8 @@ package commands
 
 import (
 	"bytes"
+	"encoding/json"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"text/template"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
@@ -25,37 +27,32 @@ import (
 
 type MediaPrompt struct {
 	cor.BaseCommand
-	model         *cloud.QuotaAwareModel
-	template      string
-	templateParam string
+	generativeAIModel *cloud.QuotaAwareGenerativeAIModel
+	template          *template.Template
+	params            map[string]interface{}
 }
 
 func NewMediaPrompt(name string,
-	model *cloud.QuotaAwareModel,
-	template string,
-	templateParam string) *MediaPrompt {
-	return &MediaPrompt{
-		BaseCommand:   *cor.NewBaseCommand(name),
-		model:         model,
-		template:      template,
-		templateParam: templateParam}
+	generativeAIModel *cloud.QuotaAwareGenerativeAIModel,
+	template *template.Template) *MediaPrompt {
+
+	exampleSummary, _ := json.Marshal(model.GetExampleSummary())
+
+	out := &MediaPrompt{
+		BaseCommand:       *cor.NewBaseCommand(name),
+		generativeAIModel: generativeAIModel,
+		template:          template,
+		params:            make(map[string]interface{})}
+
+	out.params["EXAMPLE_JSON"] = string(exampleSummary)
+	return out
 }
 
 func (t *MediaPrompt) Execute(context cor.Context) {
 	mediaFile := context.Get(t.GetInputParam()).(*genai.File)
-	params := make(map[string]interface{})
-	// If the context does not have any template parameters, use an empty map.
-	if context.Get(t.templateParam) != nil {
-		params = context.Get(t.templateParam).(map[string]interface{})
-	}
-	template, err := template.New("media-prompt-template").Parse(t.template)
-	if err != nil {
-		context.AddError(err)
-		return
-	}
 
 	var buffer bytes.Buffer
-	err = template.Execute(&buffer, params)
+	err := t.template.Execute(&buffer, t.params)
 	if err != nil {
 		context.AddError(err)
 		return
@@ -67,7 +64,7 @@ func (t *MediaPrompt) Execute(context cor.Context) {
 	parts = append(parts, cloud.NewTextPart(buffer.String()))
 
 	// Get the response
-	out, err := cloud.GenerateMultiModalResponse(context.GetContext(), 0, t.model, parts...)
+	out, err := cloud.GenerateMultiModalResponse(context.GetContext(), 0, t.generativeAIModel, parts...)
 	if err != nil {
 		context.AddError(err)
 		return

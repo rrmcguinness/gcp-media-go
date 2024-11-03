@@ -36,15 +36,12 @@ func NewMediaPersistToBigQuery(name string, client *bigquery.Client, dataset str
 }
 
 func (s *MediaPersistToBigQuery) IsExecutable(context cor.Context) bool {
-	executable := context != nil && context.Get(s.mediaParam) != nil
-	log.Printf("can persists data: %v\n", executable)
-	return executable
+	return context != nil && context.Get(s.mediaParam) != nil
 }
 
 func (s *MediaPersistToBigQuery) Execute(context cor.Context) {
 	log.Println("Persisting data")
 	media := context.Get(s.mediaParam).(*model.Media)
-	log.Printf("saving media to database: title %s id %s", media.Title, media.Id)
 	i := s.client.Dataset(s.dataset).Table(s.table).Inserter()
 	if err := i.Put(context.GetContext(), media); err != nil {
 		log.Printf("failed to write media to database. title %s error %s", media.Title, err)
@@ -52,5 +49,5 @@ func (s *MediaPersistToBigQuery) Execute(context cor.Context) {
 		context.AddError(err)
 		return
 	}
-	context.Add(cor.CTX_OUT, media)
+	context.Add(cor.CtxOut, media)
 }

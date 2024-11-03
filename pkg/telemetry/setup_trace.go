@@ -32,7 +32,7 @@ import (
 	semaphore_conversion "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdown func(context.Context) error, err error) {
+func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown func(context.Context) error, err error) {
 	var shutdownFuncs []func(context.Context) error
 
 	// shutdown combines shutdown functions from multiple OpenTelemetry
@@ -66,13 +66,13 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 	// Configure Context Propagation to use the default W3C traceparent format
 	otel.SetTextMapPropagator(autoprop.NewTextMapPropagator())
 
-	trace_exporter, err := telemetry_exporter.New(telemetry_exporter.WithProjectID(config.Application.GoogleProjectId))
+	traceExporter, err := telemetry_exporter.New(telemetry_exporter.WithProjectID(config.Application.GoogleProjectId))
 	if err != nil {
 		slog.Error("unable to set up tracing", "error", err)
 	}
 
 	tp := trace.NewTracerProvider(
-		trace.WithBatcher(trace_exporter),
+		trace.WithBatcher(traceExporter),
 		trace.WithResource(res),
 	)
 
@@ -80,7 +80,7 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 	otel.SetTracerProvider(tp)
 
 	// Configure Metric Export to send metrics as OTLP
-	m_exporter, err := metric_exporter.New(
+	mExporter, err := metric_exporter.New(
 		metric_exporter.WithProjectID(config.Application.GoogleProjectId),
 	)
 	if err != nil {
@@ -89,7 +89,7 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.CloudConfig) (shutdow
 	}
 
 	mp := metric.NewMeterProvider(
-		metric.WithReader(metric.NewPeriodicReader(m_exporter)),
+		metric.WithReader(metric.NewPeriodicReader(mExporter)),
 	)
 	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
 	otel.SetMeterProvider(mp)

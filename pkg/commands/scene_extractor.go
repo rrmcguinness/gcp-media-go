@@ -34,13 +34,21 @@ import (
 
 type SceneExtractor struct {
 	cor.BaseCommand
-	model           *cloud.QuotaAwareModel
-	prompt          string
-	numberOfWorkers int
+	generativeAIModel *cloud.QuotaAwareGenerativeAIModel
+	promptTemplate    *template.Template
+	numberOfWorkers   int
 }
 
-func NewSceneExtractor(name string, model *cloud.QuotaAwareModel, prompt string, numberOfWorkers int) *SceneExtractor {
-	return &SceneExtractor{BaseCommand: *cor.NewBaseCommand(name), model: model, prompt: prompt, numberOfWorkers: numberOfWorkers}
+func NewSceneExtractor(
+	name string,
+	model *cloud.QuotaAwareGenerativeAIModel,
+	prompt *template.Template,
+	numberOfWorkers int) *SceneExtractor {
+	return &SceneExtractor{
+		BaseCommand:       *cor.NewBaseCommand(name),
+		generativeAIModel: model,
+		promptTemplate:    prompt,
+		numberOfWorkers:   numberOfWorkers}
 }
 
 func (s *SceneExtractor) IsExecutable(context cor.Context) bool {
@@ -63,7 +71,6 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 		castString += fmt.Sprintf("%s - %s\n", cast.CharacterName, cast.ActorName)
 	}
 	summaryText := fmt.Sprintf("Title:%s\nSummary:\n\n%s\nCast:\n\n%v\n", summary.Title, summary.Summary, castString)
-	template, _ := template.New("scene_template").Parse(s.prompt)
 
 	var wg sync.WaitGroup
 	jobs := make(chan *SceneJob, len(summary.SceneTimeStamps))
@@ -72,12 +79,12 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 	// Create worker pool
 	for w := 1; w <= s.numberOfWorkers; w++ {
 		wg.Add(1)
-		go scene_worker(jobs, results, &wg)
+		go sceneWorker(jobs, results, &wg)
 	}
 
 	// Execute all scenes against the worker pool
 	for i, ts := range summary.SceneTimeStamps {
-		job := CreateJob(context.GetContext(), s.Tracer, i, s.GetName(), summaryText, exampleText, *template, videoFile, s.model, ts)
+		job := CreateJob(context.GetContext(), s.Tracer, i, s.GetName(), summaryText, exampleText, *s.promptTemplate, videoFile, s.generativeAIModel, ts)
 		jobs <- job
 	}
 
@@ -95,7 +102,7 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 		}
 	}
 	context.Add(s.GetOutputParam(), sceneData)
-	context.Add(cor.CTX_OUT, sceneData)
+	context.Add(cor.CtxOut, sceneData)
 }
 
 type SceneResponse struct {
@@ -109,7 +116,7 @@ type SceneJob struct {
 	timeSpan *model.TimeSpan
 	span     trace.Span
 	parts    []genai.Part
-	model    *cloud.QuotaAwareModel
+	model    *cloud.QuotaAwareGenerativeAIModel
 }
 
 func (s *SceneJob) Close(status codes.Code, description string) {
@@ -126,7 +133,7 @@ func CreateJob(
 	exampleText string,
 	template template.Template,
 	videoFile *genai.File,
-	model *cloud.QuotaAwareModel,
+	model *cloud.QuotaAwareGenerativeAIModel,
 	timeSpan *model.TimeSpan,
 ) *SceneJob {
 	sceneCtx, sceneSpan := tracer.Start(ctx, fmt.Sprintf("%s_genai", commandName))
@@ -155,7 +162,7 @@ func CreateJob(
 }
 
 // Create a worker function for parallel work streams
-func scene_worker(jobs <-chan *SceneJob, results chan<- *SceneResponse, wg *sync.WaitGroup) {
+func sceneWorker(jobs <-chan *SceneJob, results chan<- *SceneResponse, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for j := range jobs {
 		out, err := cloud.GenerateMultiModalResponse(j.ctx, 0, j.model, j.parts...)

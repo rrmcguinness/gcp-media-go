@@ -25,28 +25,28 @@ import (
 	"google.golang.org/api/option"
 )
 
-// CloudServiceClients is the state machine for the cloud clients.
-type CloudServiceClients struct {
+// ServiceClients is the state machine for the cloud clients.
+type ServiceClients struct {
 	StorageClient   *storage.Client
 	PubsubClient    *pubsub.Client
 	GenAIClient     *genai.Client
 	BiqQueryClient  *bigquery.Client
 	PubSubListeners map[string]*PubSubListener
 	EmbeddingModels map[string]*genai.EmbeddingModel
-	AgentModels     map[string]*QuotaAwareModel
+	AgentModels     map[string]*QuotaAwareGenerativeAIModel
 }
 
-// A close method to ensure all clients are shut down,
+// Close A close method to ensure all clients are shut down,
 // these are handled using a closable context, but here for clean testing.
-func (c *CloudServiceClients) Close() {
+func (c *ServiceClients) Close() {
 	c.StorageClient.Close()
 	c.PubsubClient.Close()
 	c.GenAIClient.Close()
 	c.BiqQueryClient.Close()
 }
 
-// A helper function for correctly initializing the Google Cloud Services based on the configuration.
-func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *CloudServiceClients, err error) {
+// NewCloudServiceClients A helper function for correctly initializing the Google Cloud Services based on the configuration.
+func NewCloudServiceClients(ctx context.Context, config *Config) (cloud *ServiceClients, err error) {
 	sc, err := storage.NewClient(ctx)
 	if err != nil {
 		return nil, err
@@ -84,7 +84,7 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		embeddingModels[emb] = gc.EmbeddingModel(config.EmbeddingModels[emb].Model)
 	}
 
-	agentModels := make(map[string]*QuotaAwareModel)
+	agentModels := make(map[string]*QuotaAwareGenerativeAIModel)
 	for am := range config.AgentModels {
 		values := config.AgentModels[am]
 		model := gc.GenerativeModel(values.Model)
@@ -95,14 +95,14 @@ func NewCloudServiceClients(ctx context.Context, config *CloudConfig) (cloud *Cl
 		model.SystemInstruction = &genai.Content{
 			Parts: []genai.Part{genai.Text(values.SystemInstructions)},
 		}
-		model.SafetySettings = DEFAULT_SAFETY_SETTINGS
+		model.SafetySettings = DefaultSafetySettings
 		model.ResponseMIMEType = values.OutputFormat
 		model.Tools = []*genai.Tool{}
 		wrappedAgent := NewQuotaAwareModel(model, values.RateLimit)
 		agentModels[am] = wrappedAgent
 	}
 
-	cloud = &CloudServiceClients{
+	cloud = &ServiceClients{
 		StorageClient:   sc,
 		PubsubClient:    pc,
 		GenAIClient:     gc,

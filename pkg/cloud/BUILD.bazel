@@ -18,6 +18,7 @@ go_library(
     name = "cloud",
     srcs = [
         "model.go",
+        "pub_sub_listener.go",
         "state.go",
         "utils.go",
     ],

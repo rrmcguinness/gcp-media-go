@@ -54,9 +54,9 @@ type Media struct {
 	Scenes      []*Scene      `json:"scenes" bigquery:"scenes"`
 }
 
-func NewMedia() *Media {
-	uuid, _ := uuid.NewV7()
-
+func NewMedia(fileName string) *Media {
+	// Use a UUID 5
+	uuid := uuid.NewSHA1(uuid.NameSpaceURL, ([]byte)(fileName))
 	return &Media{
 		Id:         uuid.String(),
 		CreateDate: time.Now(),

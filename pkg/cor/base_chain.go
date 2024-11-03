@@ -83,9 +83,9 @@ func (c *BaseChain) Execute(chCtx Context) {
 		commandSpan.End()
 
 		// Flipflop input/output
-		chCtx.Remove(CTX_IN)
-		chCtx.Add(CTX_IN, chCtx.Get(CTX_OUT))
-		chCtx.Remove(CTX_OUT)
+		chCtx.Remove(CtxIn)
+		chCtx.Add(CtxIn, chCtx.Get(CtxOut))
+		chCtx.Remove(CtxOut)
 	}
 
 	if !chCtx.HasErrors() {

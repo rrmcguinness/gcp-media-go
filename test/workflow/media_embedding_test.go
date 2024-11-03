@@ -15,6 +15,8 @@
 package workflow_test
 
 import (
+	"fmt"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
@@ -23,21 +25,20 @@ import (
 )
 
 func TestMediaEmbeddings(t *testing.T) {
-	embeddingContext, span := tracer.Start(ctx, "generate_embeddings")
+	traceCtx, span := tracer.Start(ctx, "generate_embeddings")
 	defer span.End()
 
-	err := workflow.GenerateEmbeddings(
-		embeddingContext,
-		embeddingModel,
-		cloudClients.BiqQueryClient,
-		"media_ds",
-		"media",
-		"scene_embeddings", embeddingModel.Name())
+	chainCtx := cor.NewBaseContext()
+	chainCtx.SetContext(traceCtx)
 
-	if err != nil {
-		t.Error(err)
+	embeddingWorkflow := workflow.NewMediaEmbeddingGeneratorWorkflow(config, cloudClients)
+	embeddingWorkflow.Execute(chainCtx)
+
+	for _, e := range chainCtx.GetErrors() {
+		fmt.Printf("Error: %v \n", e)
 	}
 
+	assert.False(t, chainCtx.HasErrors())
 	span.SetStatus(codes.Ok, "success")
 	assert.Nil(t, err)
 }

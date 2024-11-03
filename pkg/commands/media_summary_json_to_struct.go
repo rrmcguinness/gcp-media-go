@@ -36,5 +36,5 @@ func (s *MediaSummaryJsonToStruct) Execute(context cor.Context) {
 		return
 	}
 	context.Add(s.GetOutputParam(), doc)
-	context.Add(cor.CTX_OUT, doc)
+	context.Add(cor.CtxOut, doc)
 }

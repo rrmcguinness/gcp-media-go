@@ -16,9 +16,9 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "workflow",
     srcs = [
-        "media_embeddings.go",
-        "media_ingestion.go",
-        "media_resize.go",
+        "media_embedding_generator_workflow.go",
+        "media_reader_workflow.go",
+        "media_resize_workflow.go",
     ],
     data = [
         "//:copy_ffmpeg",
@@ -35,6 +35,8 @@ go_library(
         "@com_github_google_generative_ai_go//genai",
         "@com_google_cloud_go_bigquery//:bigquery",
         "@com_google_cloud_go_storage//:storage",
+        "@io_opentelemetry_go_otel//:otel",
+        "@io_opentelemetry_go_otel//codes",
         "@org_golang_google_api//iterator",
     ],
 )

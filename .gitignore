@@ -1,6 +1,8 @@
 # See http://help.github.com/ignore-files/ for more about ignoring files.
 bazel-*
 
+*.log
+
 # compiled output
 dist
 tmp
@@ -11,6 +13,7 @@ node_modules
 
 # IDEs and editors
 /.idea
+/.ijwb
 .project
 .classpath
 .c9/

@@ -1,0 +1,5 @@
+{"timestamp":"2024-11-02T23:37:59.2177-04:00","severity":"INFO","message":"[INFO] failed to export to Google Cloud Trace: rpc error: code = InvalidArgument desc = Missing span display name!"}
+{"timestamp":"2024-11-02T23:37:59.218401-04:00","severity":"INFO","message":"[INFO] rpc error: code = InvalidArgument desc = Missing span display name!"}
+{"timestamp":"2024-11-02T23:39:02.719886-04:00","severity":"INFO","message":"[INFO] can persists data: true"}
+{"timestamp":"2024-11-02T23:39:02.720058-04:00","severity":"INFO","message":"[INFO] Persisting data"}
+{"timestamp":"2024-11-02T23:39:02.720087-04:00","severity":"INFO","message":"[INFO] saving media to database: title Venom: The Last Dance id b66d519b-1752-5804-a418-97f89f5eaec1"}

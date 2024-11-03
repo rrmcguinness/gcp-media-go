@@ -17,13 +17,15 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"sort"
 	"strings"
 	"time"
+)
 
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
-	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
+const (
+	DefaultMovieTimeFormat = "15:04:05"
 )
 
 type MediaAssembly struct {
@@ -33,19 +35,23 @@ type MediaAssembly struct {
 	mediaObjectParam string
 }
 
+// NewMediaAssembly default constructor for MediaAssembly
 func NewMediaAssembly(name string, summaryParam string, sceneParam string, mediaObjectParam string) *MediaAssembly {
-	return &MediaAssembly{BaseCommand: *cor.NewBaseCommand(name), summaryParam: summaryParam, sceneParam: sceneParam, mediaObjectParam: mediaObjectParam}
+	return &MediaAssembly{
+		BaseCommand:      *cor.NewBaseCommand(name),
+		summaryParam:     summaryParam,
+		sceneParam:       sceneParam,
+		mediaObjectParam: mediaObjectParam}
 }
 
+// IsExecutable overrides the default to verify the summary param and scene param are in the context
 func (m *MediaAssembly) IsExecutable(context cor.Context) bool {
-	executable := context != nil &&
+	return context != nil &&
 		context.Get(m.summaryParam) != nil &&
 		context.Get(m.sceneParam) != nil
-	return executable
 }
 
 func (m *MediaAssembly) Execute(context cor.Context) {
-	log.Println("Executing assembly")
 	summary := context.Get(m.summaryParam).(*model.MediaSummary)
 	jsonScenes := context.Get(m.sceneParam).([]string)
 	sceneValues := fmt.Sprintf("[ %s ]", strings.Join(jsonScenes, ","))
@@ -57,17 +63,19 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 		return
 	}
 
+	// Sort the scenes and sequence them
 	sort.Slice(scenes, func(i, j int) bool {
-		t, _ := time.Parse("15:04:05", scenes[i].Start)
-		tt, _ := time.Parse("15:04:05", scenes[j].Start)
+		t, _ := time.Parse(DefaultMovieTimeFormat, scenes[i].Start)
+		tt, _ := time.Parse(DefaultMovieTimeFormat, scenes[j].Start)
 		return t.Before(tt)
 	})
-
 	for i, scene := range scenes {
 		scene.SequenceNumber = i
 	}
 
-	media := model.NewMedia()
+	// Call the constructor to ensure the UUID is generated
+	// TODO - Base the
+	media := model.NewMedia(summary.Title)
 	media.Title = summary.Title
 	media.Summary = summary.Summary
 	media.Director = summary.Director
@@ -77,8 +85,6 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	media.Cast = append(media.Cast, summary.Cast...)
 	media.Scenes = append(media.Scenes, scenes...)
 
-	log.Println("Assembly complete")
-
 	context.Add(m.mediaObjectParam, media)
-	context.Add(cor.CTX_OUT, media)
+	context.Add(cor.CtxOut, media)
 }

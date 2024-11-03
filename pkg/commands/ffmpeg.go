@@ -23,7 +23,11 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 )
 
-const DEFAULT_FFMPEG_ARGS = "-analyzeduration 0 -probesize 5000000 -y -hide_banner -i %s -filter:v scale=w=%s:h=trunc(ow/a/2)*2 -f mp4 %s"
+const (
+	DefaultFfmpegArgs = "-analyzeduration 0 -probesize 5000000 -y -hide_banner -i %s -filter:v scale=w=%s:h=trunc(ow/a/2)*2 -f mp4 %s"
+	TempFilePrefix    = "ffmpeg-output-"
+	CommandSeparator  = " "
+)
 
 // FFMpegCommand is a simple command used for
 // downloading a media file embedded in the message, resizing it
@@ -47,10 +51,10 @@ func (c *FFMpegCommand) Execute(context cor.Context) {
 		context.AddError(err)
 		return
 	}
-	tempFile, err := os.CreateTemp("", "ffmpeg-output-")
+	tempFile, err := os.CreateTemp("", TempFilePrefix)
 
-	args := fmt.Sprintf(DEFAULT_FFMPEG_ARGS, file.Name(), c.targetWidth, tempFile.Name())
-	cmd := exec.Command(c.commandPath, strings.Split(args, " ")...)
+	args := fmt.Sprintf(DefaultFfmpegArgs, file.Name(), c.targetWidth, tempFile.Name())
+	cmd := exec.Command(c.commandPath, strings.Split(args, CommandSeparator)...)
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
@@ -58,5 +62,5 @@ func (c *FFMpegCommand) Execute(context cor.Context) {
 		return
 	}
 	context.AddTempFile(tempFile.Name())
-	context.Add(cor.CTX_OUT, tempFile.Name())
+	context.Add(cor.CtxOut, tempFile.Name())
 }

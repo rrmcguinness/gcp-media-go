@@ -29,12 +29,12 @@ import (
 
 // Cloud Constants
 const (
-	CONFIG_FILE_BASE_NAME  = ".env"
-	CONFIG_FILE_EXTENSION  = ".toml"
-	CONFIG_SEPARATOR       = "."
-	ENV_CONFIG_FILE_PREFIX = "GCP_CONFIG_PREFIX"
-	ENV_CONFIG_RUNTIME     = "GCP_RUNTIME"
-	MAX_RETRIES            = 3
+	ConfigFileBaseName  = ".env"
+	ConfigFileExtension = ".toml"
+	ConfigSeparator     = "."
+	EnvConfigFilePrefix = "GCP_CONFIG_PREFIX"
+	EnvConfigRuntime    = "GCP_RUNTIME"
+	MaxRetries          = 3
 )
 
 // Simple utility to see if a file exists
@@ -43,24 +43,24 @@ func fileExists(in string) bool {
 	return !errors.Is(err, os.ErrNotExist)
 }
 
-// The configuration loader, a hierarchical loader that allows environment overrides.
-func LoadConfig(baseConfig interface{}, additionalFiles ...string) {
-	configurationFilePrefix := os.Getenv(ENV_CONFIG_FILE_PREFIX)
+// LoadConfig The configuration loader, a hierarchical loader that allows environment overrides.
+func LoadConfig(baseConfig interface{}) {
+	configurationFilePrefix := os.Getenv(EnvConfigFilePrefix)
 	if len(configurationFilePrefix) > 0 && !strings.HasSuffix(configurationFilePrefix, string(os.PathSeparator)) {
 		configurationFilePrefix = configurationFilePrefix + string(os.PathSeparator)
 	}
 
-	runtimeEnvironment := os.Getenv(ENV_CONFIG_RUNTIME)
+	runtimeEnvironment := os.Getenv(EnvConfigRuntime)
 	if runtimeEnvironment == "" {
 		runtimeEnvironment = "test"
 	}
 
 	// Read Base Config
-	baseConfigFileName := configurationFilePrefix + CONFIG_FILE_BASE_NAME + CONFIG_FILE_EXTENSION
+	baseConfigFileName := configurationFilePrefix + ConfigFileBaseName + ConfigFileExtension
 	fmt.Printf("Base Configuration File: %s\n", baseConfigFileName)
 
 	// Override with environment config
-	envConfigFileName := configurationFilePrefix + CONFIG_FILE_BASE_NAME + CONFIG_SEPARATOR + runtimeEnvironment + CONFIG_FILE_EXTENSION
+	envConfigFileName := configurationFilePrefix + ConfigFileBaseName + ConfigSeparator + runtimeEnvironment + ConfigFileExtension
 	fmt.Printf("Environment Configuration File: %s\n", envConfigFileName)
 
 	if fileExists(baseConfigFileName) {
@@ -78,7 +78,7 @@ func LoadConfig(baseConfig interface{}, additionalFiles ...string) {
 	}
 }
 
-// A helper function for debugging configuration
+// PrintConfig A helper function for debugging configuration
 func PrintConfig(config interface{}) {
 	fmt.Println(strings.Repeat("#", 80))
 	c, err := json.MarshalIndent(config, " ", " ")
@@ -90,11 +90,11 @@ func PrintConfig(config interface{}) {
 	fmt.Println(strings.Repeat("#", 80))
 }
 
-// A GenAI helper function for executing multi-modal requests with a retry limit.
-func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaAwareModel, parts ...genai.Part) (value string, err error) {
+// GenerateMultiModalResponse A GenAI helper function for executing multi-modal requests with a retry limit.
+func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaAwareGenerativeAIModel, parts ...genai.Part) (value string, err error) {
 	resp, err := model.GenerateContent(ctx, parts...)
 	if err != nil {
-		if tryCount < MAX_RETRIES {
+		if tryCount < MaxRetries {
 			return GenerateMultiModalResponse(ctx, tryCount+1, model, parts...)
 		} else {
 			return "", err
@@ -111,11 +111,11 @@ func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaA
 	return value, nil
 }
 
-// A simple helper method used to adjust float precision for between 64bit and 32bit models.
+// GenerateTextEmbeddingAsFloat32 A simple helper method used to adjust float precision for between 64bit and 32bit models.
 func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingModel, in string, count int) []float32 {
 	res, err := model.EmbedContent(ctx, genai.Text(in))
 	if err != nil {
-		if count < MAX_RETRIES {
+		if count < MaxRetries {
 			log.Printf("Error generating embeddings [Float32] for: %s on %v", in, err)
 			GenerateTextEmbeddingAsFloat32(ctx, model, in, count+1)
 		}
@@ -134,7 +134,7 @@ func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingMo
 	return initialValues
 }
 
-// A simple helper function to stream Markdown generated JSON format
+// RemoveMarkdownJsonNotations A simple helper function to stream Markdown generated JSON format
 // sometimes returned from Gemini
 func RemoveMarkdownJsonNotations(in string) string {
 	in = strings.ReplaceAll(in, "```json", "")
@@ -142,22 +142,22 @@ func RemoveMarkdownJsonNotations(in string) string {
 	return in
 }
 
-// A helper method for creating text parts
+// NewTextPart A helper method for creating text parts
 func NewTextPart(in string) genai.Part {
 	return genai.Text(in)
 }
 
-// A helper method for creating image parts
+// NewImagePart A helper method for creating image parts
 func NewImagePart(bucketURL string, mimeType string) genai.Part {
 	return genai.FileData{URI: bucketURL, MIMEType: mimeType}
 }
 
-// A helper method for creating binary large objects / blobs
+// NewBlobPart A helper method for creating binary large objects / blobs
 func NewBlobPart(in []byte, mimeType string) genai.Part {
 	return genai.Blob{Data: in, MIMEType: mimeType}
 }
 
-// A helper method for creating File Data parts.
+// NewFileData A helper method for creating File Data parts.
 func NewFileData(in string, mimeType string) genai.Part {
 	return genai.FileData{URI: in, MIMEType: mimeType}
 }
