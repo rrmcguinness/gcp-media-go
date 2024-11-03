@@ -39,10 +39,10 @@ type ServiceClients struct {
 // Close A close method to ensure all clients are shut down,
 // these are handled using a closable context, but here for clean testing.
 func (c *ServiceClients) Close() {
-	c.StorageClient.Close()
-	c.PubsubClient.Close()
-	c.GenAIClient.Close()
-	c.BiqQueryClient.Close()
+	_ = c.StorageClient.Close()
+	_ = c.PubsubClient.Close()
+	_ = c.GenAIClient.Close()
+	_ = c.BiqQueryClient.Close()
 }
 
 // NewCloudServiceClients A helper function for correctly initializing the Google Cloud Services based on the configuration.

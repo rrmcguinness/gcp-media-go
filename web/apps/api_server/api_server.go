@@ -37,11 +37,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	shutdown, err := telemetry.SetupOpenTelemetry(ctx, GetConfig())
+	_, err := telemetry.SetupOpenTelemetry(ctx, GetConfig())
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer shutdown(ctx)
 
 	log.Print("Tracing initialized")
 
@@ -65,12 +64,12 @@ func main() {
 	}))
 
 	// Create the "/api/v1" group
-	api_v1 := r.Group("/api/v1")
+	apiV1 := r.Group("/api/v1")
 	{
 		// Register "/api/v1/media" end-points
-		MediaRouter(api_v1)
+		MediaRouter(apiV1)
 		// Register "/api/v1/uploads"
-		FileUpload(api_v1)
+		FileUpload(apiV1)
 	}
 
 	srv := &http.Server{

@@ -12,26 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Grid2, Typography } from "@mui/material";
+import {Grid2, Typography} from "@mui/material";
 import React from "react";
-import { CastMember } from "../shared/model";
+import {CastMember} from "../shared/model";
 
-const Cast = ({cast}: {cast: CastMember[]}) => {
-  return (
-    <React.Fragment>
-      <Typography variant="h6">Cast</Typography>
-      <Grid2 container spacing={2} sx={{border: '1px solid #666', p: 1}}>
-        <Grid2 size={8} sx={{fontWeight: 900, textAlign: 'center'}}>Character Name</Grid2>
-        <Grid2 size={4} sx={{fontWeight: 900, textAlign: 'center'}}>Actor/Actress</Grid2>
-        {cast.map((c) => (
-          <>
-            <Grid2 size={8}><Typography variant="body2"><span style={{fontWeight: 800, marginRight: '3em'}}>{c.character_name}</span></Typography></Grid2>
-            <Grid2 size={4}><Typography variant="body2">{c.actor_name}</Typography></Grid2>
-          </>
-        ))}
-      </Grid2>
-    </React.Fragment>
-  );
+const Cast = ({cast}: { cast: CastMember[] }) => {
+    return (
+        <React.Fragment>
+            <Typography variant="h6">Cast</Typography>
+            <Grid2 container spacing={2} sx={{border: '1px solid #666', p: 1}}>
+                <Grid2 size={8} sx={{fontWeight: 900, textAlign: 'center'}}>Character Name</Grid2>
+                <Grid2 size={4} sx={{fontWeight: 900, textAlign: 'center'}}>Actor/Actress</Grid2>
+                {cast.map((c) => (
+                    <>
+                        <Grid2 size={8}><Typography variant="body2"><span
+                            style={{fontWeight: 800, marginRight: '3em'}}>{c.character_name}</span></Typography></Grid2>
+                        <Grid2 size={4}><Typography variant="body2">{c.actor_name}</Typography></Grid2>
+                    </>
+                ))}
+            </Grid2>
+        </React.Fragment>
+    );
 }
 
 export default Cast

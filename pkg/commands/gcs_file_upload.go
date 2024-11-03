@@ -16,6 +16,7 @@ package commands
 
 import (
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -45,18 +46,44 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 		context.AddError(err)
 		return
 	}
-	defer os.Remove(path)
+
+	defer func(name string) {
+		err := os.Remove(name)
+		if err != nil {
+			log.Printf("failed to remove file from OS: %v\n", err)
+		}
+	}(path)
 
 	writerBucket := c.client.Bucket(c.bucket)
 	if original != nil {
 		obj := writerBucket.Object(original.Name)
 		writer := obj.NewWriter(context.GetContext())
-		defer writer.Close()
-		io.Copy(writer, dat)
+		defer func(writer *storage.Writer) {
+			err := writer.Close()
+			if err != nil {
+				log.Printf("failed to close writer: %v\n", err)
+			}
+		}(writer)
+		written, err := io.Copy(writer, dat)
+		if err != nil {
+			log.Printf("failed to close writer or partial write: %d total bytes, %v\n", written, err)
+			context.AddError(err)
+			return
+		}
 	} else {
 		obj := writerBucket.Object(name)
 		writer := obj.NewWriter(context.GetContext())
-		defer writer.Close()
-		io.Copy(writer, dat)
+		defer func(writer *storage.Writer) {
+			err := writer.Close()
+			if err != nil {
+				log.Printf("failed to close writer: %v\n", err)
+			}
+		}(writer)
+		written, err := io.Copy(writer, dat)
+		if err != nil {
+			log.Printf("failed to close writer or partial write: %d total bytes, %v\n", written, err)
+			context.AddError(err)
+			return
+		}
 	}
 }

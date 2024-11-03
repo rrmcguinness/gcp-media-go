@@ -16,7 +16,7 @@ package commands
 
 import (
 	"bytes"
-	go_ctx "context"
+	goctx "context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -112,11 +112,12 @@ type SceneResponse struct {
 
 type SceneJob struct {
 	workerId int
-	ctx      go_ctx.Context
+	ctx      goctx.Context
 	timeSpan *model.TimeSpan
 	span     trace.Span
 	parts    []genai.Part
 	model    *cloud.QuotaAwareGenerativeAIModel
+	err      error
 }
 
 func (s *SceneJob) Close(status codes.Code, description string) {
@@ -125,7 +126,7 @@ func (s *SceneJob) Close(status codes.Code, description string) {
 }
 
 func CreateJob(
-	ctx go_ctx.Context,
+	ctx goctx.Context,
 	tracer trace.Tracer,
 	workerId int,
 	commandName string,
@@ -151,7 +152,10 @@ func CreateJob(
 	vocabulary["EXAMPLE_JSON"] = exampleText
 
 	var doc bytes.Buffer
-	template.Execute(&doc, vocabulary)
+	err := template.Execute(&doc, vocabulary)
+	if err != nil {
+		return &SceneJob{err: err}
+	}
 	tsPrompt := doc.String()
 
 	parts := make([]genai.Part, 0)
@@ -165,15 +169,19 @@ func CreateJob(
 func sceneWorker(jobs <-chan *SceneJob, results chan<- *SceneResponse, wg *sync.WaitGroup) {
 	defer wg.Done()
 	for j := range jobs {
-		out, err := cloud.GenerateMultiModalResponse(j.ctx, 0, j.model, j.parts...)
-		if err != nil {
-			j.Close(codes.Error, "scene extract failed")
-			results <- &SceneResponse{err: err}
-			return
+		if j.err == nil {
+			out, err := cloud.GenerateMultiModalResponse(j.ctx, 0, j.model, j.parts...)
+			if err != nil {
+				j.Close(codes.Error, "scene extract failed")
+				results <- &SceneResponse{err: err}
+				return
+			}
+			if len(strings.Trim(out, " ")) > 0 && out != "{}" {
+				results <- &SceneResponse{value: out, err: nil}
+			}
+			j.Close(codes.Ok, "completed scene")
+		} else {
+			results <- &SceneResponse{value: "", err: j.err}
 		}
-		if len(strings.Trim(out, " ")) > 0 && out != "{}" {
-			results <- &SceneResponse{value: out, err: nil}
-		}
-		j.Close(codes.Ok, "completed scene")
 	}
 }

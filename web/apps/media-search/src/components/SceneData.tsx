@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import { Grid2, Typography } from "@mui/material";
-import { Scene } from "../shared/model";
+import {Grid2, Typography} from "@mui/material";
+import {Scene} from "../shared/model";
 
-const SceneData = ({ scene }: { scene: Scene }) => {
+const SceneData = ({scene}: { scene: Scene }) => {
 
-  const formatScript = (val: string): string => {
-    return val.replace("\n", "<br/>")
-  }
+    const formatScript = (val: string): string => {
+        return val.replace("\n", "<br/>")
+    }
 
-  return( 
-  <>
-    <Grid2 size={2}>{scene.sequence}</Grid2>
-    <Grid2 size={5}>{scene.start}</Grid2>
-    <Grid2 size={5}>{scene.end}</Grid2>
-    <Grid2 size={12} sx={{textAlign: 'left'}}><Typography component="div" variant="body2"><div dangerouslySetInnerHTML={{ __html: formatScript(scene.script) }} /></Typography></Grid2>
-  </>)
+    return (
+        <>
+            <Grid2 size={2}>{scene.sequence}</Grid2>
+            <Grid2 size={5}>{scene.start}</Grid2>
+            <Grid2 size={5}>{scene.end}</Grid2>
+            <Grid2 size={12} sx={{textAlign: 'left'}}><Typography component="div" variant="body2">
+                <div dangerouslySetInnerHTML={{__html: formatScript(scene.script)}}/>
+            </Typography></Grid2>
+        </>)
 };
 
 export default SceneData

@@ -17,10 +17,8 @@ package cor
 import "context"
 
 const (
-	EVENT_STORAGE_BUCKET_WRITE = "storage#object"
-	CtxIn                      = "__IN__"
-	CtxOut                     = "__OUT__"
-	CTX_PROMPT_VARS            = "__PROMPT_VARS__"
+	CtxIn  = "__IN__"
+	CtxOut = "__OUT__"
 )
 
 // Context is an opinionated runtime context for Go Lang.

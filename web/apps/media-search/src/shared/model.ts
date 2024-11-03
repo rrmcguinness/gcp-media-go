@@ -13,26 +13,26 @@
 // limitations under the License.
 
 export interface CastMember {
-  actor_name: string;
-  character_name: string;
+    actor_name: string;
+    character_name: string;
 }
 
 export interface Scene {
-  sequence: number;
-  start: string;
-  end: string;
-  script: string;
+    sequence: number;
+    start: string;
+    end: string;
+    script: string;
 }
 
 export interface MediaResult {
-  id: string;
-  create_date: Date;
-  title: string;
-  summary: string;
-  director: string;
-  release_year: number;
-  genre: string;
-  rating: string;
-  cast: CastMember[];
-  scenes: Scene[];
+    id: string;
+    create_date: Date;
+    title: string;
+    summary: string;
+    director: string;
+    release_year: number;
+    genre: string;
+    rating: string;
+    cast: CastMember[];
+    scenes: Scene[];
 }

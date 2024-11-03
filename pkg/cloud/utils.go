@@ -16,7 +16,6 @@ package cloud
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"log"
@@ -78,18 +77,6 @@ func LoadConfig(baseConfig interface{}) {
 	}
 }
 
-// PrintConfig A helper function for debugging configuration
-func PrintConfig(config interface{}) {
-	fmt.Println(strings.Repeat("#", 80))
-	c, err := json.MarshalIndent(config, " ", " ")
-	if err != nil {
-		fmt.Println(err)
-	} else {
-		fmt.Print(string(c))
-	}
-	fmt.Println(strings.Repeat("#", 80))
-}
-
 // GenerateMultiModalResponse A GenAI helper function for executing multi-modal requests with a retry limit.
 func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaAwareGenerativeAIModel, parts ...genai.Part) (value string, err error) {
 	resp, err := model.GenerateContent(ctx, parts...)
@@ -111,50 +98,9 @@ func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaA
 	return value, nil
 }
 
-// GenerateTextEmbeddingAsFloat32 A simple helper method used to adjust float precision for between 64bit and 32bit models.
-func GenerateTextEmbeddingAsFloat32(ctx context.Context, model genai.EmbeddingModel, in string, count int) []float32 {
-	res, err := model.EmbedContent(ctx, genai.Text(in))
-	if err != nil {
-		if count < MaxRetries {
-			log.Printf("Error generating embeddings [Float32] for: %s on %v", in, err)
-			GenerateTextEmbeddingAsFloat32(ctx, model, in, count+1)
-		}
-	}
-
-	initialValues := res.Embedding.Values
-	if len(initialValues) < 768 {
-		for {
-			initialValues = append(initialValues, 0)
-			if len(initialValues) == 768 {
-				break
-			}
-		}
-	}
-
-	return initialValues
-}
-
-// RemoveMarkdownJsonNotations A simple helper function to stream Markdown generated JSON format
-// sometimes returned from Gemini
-func RemoveMarkdownJsonNotations(in string) string {
-	in = strings.ReplaceAll(in, "```json", "")
-	in = strings.ReplaceAll(in, "```", "")
-	return in
-}
-
 // NewTextPart A helper method for creating text parts
 func NewTextPart(in string) genai.Part {
 	return genai.Text(in)
-}
-
-// NewImagePart A helper method for creating image parts
-func NewImagePart(bucketURL string, mimeType string) genai.Part {
-	return genai.FileData{URI: bucketURL, MIMEType: mimeType}
-}
-
-// NewBlobPart A helper method for creating binary large objects / blobs
-func NewBlobPart(in []byte, mimeType string) genai.Part {
-	return genai.Blob{Data: in, MIMEType: mimeType}
 }
 
 // NewFileData A helper method for creating File Data parts.

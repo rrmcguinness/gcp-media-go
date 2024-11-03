@@ -16,7 +16,6 @@ package workflow_test
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"testing"
@@ -24,14 +23,11 @@ import (
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/telemetry"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
-	"github.com/google/generative-ai-go/genai"
 	"go.opentelemetry.io/contrib/bridges/otelslog"
 	"go.opentelemetry.io/otel"
 )
 
 var err error
-var genModel *cloud.QuotaAwareGenerativeAIModel
-var embeddingModel *genai.EmbeddingModel
 var cloudClients *cloud.ServiceClients
 var ctx context.Context
 var config *cloud.Config
@@ -40,7 +36,6 @@ const tName = "cloud.google.com/media/tests/workflow"
 
 var (
 	tracer = otel.Tracer(tName)
-	meter  = otel.Meter(tName)
 	logger = otelslog.NewLogger(tName)
 )
 
@@ -65,17 +60,13 @@ func TestMain(m *testing.M) {
 	}
 	defer cloudClients.Close()
 
-	genModel = cloudClients.AgentModels["creative-flash"]
-	if genModel == nil {
-		panic(errors.New("failed to create Generative model"))
-	}
-
-	embeddingModel = cloudClients.EmbeddingModels["multi-lingual"]
-
 	logger.Info("completed test setup")
 	fmt.Println("Completed Setup")
 
 	exitCode := m.Run()
-	shutdown(ctx)
+	err = shutdown(ctx)
+	if err != nil {
+		return
+	}
 	os.Exit(exitCode)
 }

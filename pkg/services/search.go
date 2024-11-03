@@ -45,7 +45,7 @@ func (s *SearchService) FindScenes(ctx context.Context, query string, maxResults
 		stringArray = append(stringArray, strconv.FormatFloat(float64(f), 'f', -1, 64))
 	}
 
-	queryText := fmt.Sprintf(QRY_SEQUENCE_KNN, fqEmbeddingTable, strings.Join(stringArray, ","), maxResults)
+	queryText := fmt.Sprintf(QrySequenceKnn, fqEmbeddingTable, strings.Join(stringArray, ","), maxResults)
 
 	q := s.BigqueryClient.Query(queryText)
 	itr, err := q.Read(ctx)

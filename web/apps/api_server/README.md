@@ -59,6 +59,7 @@ bazel run //web/apps/api_server
 ```
 
 ## Example output
+
 ```json
 [
   {

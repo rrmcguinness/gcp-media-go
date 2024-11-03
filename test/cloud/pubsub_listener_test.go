@@ -38,8 +38,8 @@ func (c *MediaMessageCommand) IsExecutable(context cor.Context) bool {
 }
 
 func (c *MediaMessageCommand) Execute(context cor.Context) {
-	model := context.Get("message").(model.GCSPubSubNotification)
-	log.Println(fmt.Sprintf("Message:\n%v\n", model))
+	notification := context.Get("message").(model.GCSPubSubNotification)
+	log.Println(fmt.Sprintf("Message:\n%v\n", notification))
 }
 
 func TestMessageHandler(t *testing.T) {

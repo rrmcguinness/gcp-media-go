@@ -90,12 +90,12 @@ func MediaRouter(r *gin.RouterGroup) {
 
 		media.GET("/:id/scenes/:scene_id", func(c *gin.Context) {
 			id := c.Param("id")
-			scene_id, err := strconv.Atoi(c.Param("scene_id"))
+			sceneId, err := strconv.Atoi(c.Param("scene_id"))
 			if err != nil {
 				c.Status(400)
 				return
 			}
-			out, err := state.mediaService.GetScene(c, id, scene_id)
+			out, err := state.mediaService.GetScene(c, id, sceneId)
 			if err != nil {
 				c.Status(404)
 				return

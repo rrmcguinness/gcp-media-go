@@ -18,14 +18,6 @@ import "encoding/json"
 
 // These objects are used in memory via workflows, but are not persisted to the dataset
 
-func GetMediaSummaryName() string {
-	return "__MEDIA_SUMMARY__"
-}
-
-func GetMediaFormatFilterName() string {
-	return "__VIDEO_FORMAT__"
-}
-
 // MediaFormatFilter is a simple video format object expressing the intended output
 // and the destination width
 type MediaFormatFilter struct {

@@ -15,7 +15,7 @@
 package services
 
 const (
-	QRY_SEQUENCE_KNN     = "SELECT base.media_id, base.sequence_number FROM VECTOR_SEARCH(TABLE `%s`, 'embeddings', (SELECT [ %s ] as embed), top_k => %d, distance_type => 'EUCLIDEAN') ORDER BY distance asc"
-	QRY_FIND_MEDIA_BY_ID = "SELECT * from `%s` WHERE id = '%s'"
-	QRY_GET_SCENE        = "SELECT sequence, start, `end`, script FROM `%s`, UNNEST(scenes) as s WHERE id = '%s' and s.sequence = %d"
+	QrySequenceKnn   = "SELECT base.media_id, base.sequence_number FROM VECTOR_SEARCH(TABLE `%s`, 'embeddings', (SELECT [ %s ] as embed), top_k => %d, distance_type => 'EUCLIDEAN') ORDER BY distance asc"
+	QryFindMediaById = "SELECT * from `%s` WHERE id = '%s'"
+	QryGetScene      = "SELECT sequence, start, `end`, script FROM `%s`, UNNEST(scenes) as s WHERE id = '%s' and s.sequence = %d"
 )

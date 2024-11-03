@@ -51,7 +51,7 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 	return t.Handler.Handle(ctx, record)
 }
 
-func replacer(groups []string, a slog.Attr) slog.Attr {
+func replacer(_ []string, a slog.Attr) slog.Attr {
 	// Rename attribute keys to match Cloud Logging structured log format
 	switch a.Key {
 	case slog.LevelKey:

@@ -25,7 +25,7 @@ export const LoadingIcon = () => {
                 textAlign: 'center',
                 paddingTop: '20%',
             }}>
-            <img src={image} style={{width: '200px'}}/>
+            <img src={image} style={{width: '200px'}} alt="loading icon"/>
         </Box>
     );
 };

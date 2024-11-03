@@ -35,5 +35,9 @@ func (v *MediaCleanup) IsExecutable(context cor.Context) bool {
 
 func (v *MediaCleanup) Execute(context cor.Context) {
 	fil := context.Get(GetVideoUploadFileParameterName()).(*genai.File)
-	v.client.DeleteFile(context.GetContext(), fil.Name)
+	err := v.client.DeleteFile(context.GetContext(), fil.Name)
+	if err != nil {
+		context.AddError(err)
+		return
+	}
 }

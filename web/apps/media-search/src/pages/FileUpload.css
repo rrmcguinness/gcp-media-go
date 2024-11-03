@@ -14,15 +14,15 @@
  * limitations under the License.
  */
 
- .upload-files {
-  height: 80px;
- }
+.upload-files {
+    height: 80px;
+}
 
- .upload-files div span {
-  font-size: 14pt;
- }
+.upload-files div span {
+    font-size: 14pt;
+}
 
- .upload-files svg {
-  height: 60px;
-  width: 60px;
- }
+.upload-files svg {
+    height: 60px;
+    width: 60px;
+}

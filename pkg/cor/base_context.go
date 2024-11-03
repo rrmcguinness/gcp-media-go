@@ -16,6 +16,7 @@ package cor
 
 import (
 	"context"
+	"log"
 	"os"
 )
 
@@ -45,7 +46,10 @@ func (c *BaseContext) GetContext() context.Context {
 func (c *BaseContext) Close() {
 	// Clean up any temp files created along the way
 	for _, file := range c.GetTempFiles() {
-		os.Remove(file)
+		err := os.Remove(file)
+		if err != nil {
+			log.Printf("failed to remove file %v\n", err)
+		}
 	}
 }
 

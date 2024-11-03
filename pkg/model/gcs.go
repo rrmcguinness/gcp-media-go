@@ -14,10 +14,6 @@
 
 package model
 
-func GetGCSObjectMessageName() string {
-	return "__GCS_OBJECT_MESSAGE__"
-}
-
 func GetGCSObjectName() string {
 	return "__GCS__OBJ__"
 }

@@ -15,7 +15,7 @@
 package workflow
 
 import (
-	go_ctx "context"
+	goctx "context"
 	"fmt"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
@@ -50,7 +50,7 @@ func (m *MediaEmbeddingGeneratorWorkflow) StartTimer() {
 		for {
 			select {
 			case <-ticker.C:
-				traceCtx, span := tracer.Start(go_ctx.Background(), "media-embeddings")
+				traceCtx, span := tracer.Start(goctx.Background(), "media-embeddings")
 				chainCtx := cor.NewBaseContext()
 				chainCtx.SetContext(traceCtx)
 				m.Execute(chainCtx)

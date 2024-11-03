@@ -20,11 +20,6 @@ import (
 	"github.com/google/uuid"
 )
 
-// GetContextMediaName used for referring to media consistently
-func GetContextMediaName() string {
-	return "__MEDIA__"
-}
-
 // Actor is used to represent the public details of an actor or actress.
 type Actor struct {
 	Id           string    `json:"id" bigquery:"id"`
@@ -56,9 +51,9 @@ type Media struct {
 
 func NewMedia(fileName string) *Media {
 	// Use a UUID 5
-	uuid := uuid.NewSHA1(uuid.NameSpaceURL, ([]byte)(fileName))
+	generatedID := uuid.NewSHA1(uuid.NameSpaceURL, ([]byte)(fileName))
 	return &Media{
-		Id:         uuid.String(),
+		Id:         generatedID.String(),
 		CreateDate: time.Now(),
 		Cast:       make([]*CastMember, 0),
 		Scenes:     make([]*Scene, 0),

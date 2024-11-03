@@ -42,7 +42,6 @@ func FileUpload(r *gin.RouterGroup) {
 					c.Status(400)
 					return
 				}
-				defer os.Remove(localPath)
 				content, err := os.ReadFile(localPath)
 				if err != nil {
 					log.Println(err)
@@ -51,8 +50,20 @@ func FileUpload(r *gin.RouterGroup) {
 				}
 				wc := bucket.Object(file.Filename).NewWriter(c)
 				wc.ContentType = "video/mp4"
-				wc.Write(content)
-				wc.Close()
+				_, err = wc.Write(content)
+				if err != nil {
+					c.Status(500)
+					log.Printf("failed to write file to bucket: %v\n", err)
+					return
+				}
+				err = wc.Close()
+				if err != nil {
+					log.Printf("failed to close bucket handle: %v\n", err)
+				}
+				err = os.Remove(localPath)
+				if err != nil {
+					log.Printf("failed to remove file from server: %v\n", err)
+				}
 			}
 			c.Status(200)
 		})

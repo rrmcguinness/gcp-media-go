@@ -16,6 +16,7 @@ package commands
 
 import (
 	"io"
+	"log"
 	"os"
 
 	"cloud.google.com/go/storage"
@@ -47,9 +48,20 @@ func (c *GCSToTempFile) Execute(context cor.Context) {
 		context.AddError(err)
 		return
 	}
-	defer reader.Close()
+	defer func(reader *storage.Reader, context cor.Context) {
+		err := reader.Close()
+		if err != nil {
+			log.Printf("failed to close reader: %v\n", err)
+		}
+	}(reader, context)
+
 	tempFile, err := os.CreateTemp("", c.tempFilePrefix)
-	io.Copy(tempFile, reader)
+	written, err := io.Copy(tempFile, reader)
+	if err != nil {
+		log.Printf("failed to copy io, %d written: %v\n", written, err)
+		context.AddError(err)
+		return
+	}
 	// Add to the temp files to clean up after execution in a chain
 	context.AddTempFile(tempFile.Name())
 	// Make the variable available if needed

@@ -19,8 +19,8 @@ import (
 	"errors"
 	"log/slog"
 
-	metric_exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
-	telemetry_exporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	metricexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	telemetryexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"go.opentelemetry.io/contrib/detectors/gcp"
@@ -29,7 +29,7 @@ import (
 	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
-	semaphore_conversion "go.opentelemetry.io/otel/semconv/v1.4.0"
+	semaphoreconversion "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
 func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown func(context.Context) error, err error) {
@@ -54,7 +54,7 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown fun
 		resource.WithTelemetrySDK(),
 		// Add your own custom attributes to identify your application
 		resource.WithAttributes(
-			semaphore_conversion.ServiceNameKey.String(config.Application.Name),
+			semaphoreconversion.ServiceNameKey.String(config.Application.Name),
 		),
 	)
 	if errors.Is(err, resource.ErrPartialResource) || errors.Is(err, resource.ErrSchemaURLConflict) {
@@ -66,7 +66,7 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown fun
 	// Configure Context Propagation to use the default W3C traceparent format
 	otel.SetTextMapPropagator(autoprop.NewTextMapPropagator())
 
-	traceExporter, err := telemetry_exporter.New(telemetry_exporter.WithProjectID(config.Application.GoogleProjectId))
+	traceExporter, err := telemetryexporter.New(telemetryexporter.WithProjectID(config.Application.GoogleProjectId))
 	if err != nil {
 		slog.Error("unable to set up tracing", "error", err)
 	}
@@ -80,8 +80,8 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown fun
 	otel.SetTracerProvider(tp)
 
 	// Configure Metric Export to send metrics as OTLP
-	mExporter, err := metric_exporter.New(
-		metric_exporter.WithProjectID(config.Application.GoogleProjectId),
+	mExporter, err := metricexporter.New(
+		metricexporter.WithProjectID(config.Application.GoogleProjectId),
 	)
 	if err != nil {
 		slog.Error("Failed to create exporter", "error", err)

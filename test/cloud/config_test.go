@@ -21,8 +21,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const test_config_file = "configs/app-test.yaml"
-
 // TestConfig is used to test the validity of the hierarchy loader.
 // First load is .env.toml, then .env.test.toml (set in test.SetupOS)
 // any value redefined in .env.test.toml will overwrite .env.toml allowing

@@ -13,40 +13,40 @@
 // limitations under the License.
 
 
-import { Snackbar, SnackbarCloseReason, Typography } from "@mui/material";
-import { useState } from "react";
-import { MediaResult } from "../shared/model";
+import {Snackbar, SnackbarCloseReason} from "@mui/material";
+import {useState} from "react";
+import {MediaResult} from "../shared/model";
 import SearchBar from "../components/SearchBar";
 import MediaResults from "../components/MediaResults";
 
 const Search = () => {
-  const [results, setResults] = useState<Array<MediaResult>>([]);
-  const [error, setError] = useState<string>(null!);
-  const [open, setOpen] = useState<boolean>(false);
+    const [results, setResults] = useState<Array<MediaResult>>([]);
+    const [error, setError] = useState<string>(null!);
+    const [open, setOpen] = useState<boolean>(false);
 
-  const handleClose = (
-    _: React.SyntheticEvent | Event,
-    reason?: SnackbarCloseReason,
-  ) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setOpen(false);
-  };
+    const handleClose = (
+        _: React.SyntheticEvent | Event,
+        reason?: SnackbarCloseReason,
+    ) => {
+        if (reason === 'clickaway') {
+            return;
+        }
+        setOpen(false);
+    };
 
-  return (
-    <>
-      <SearchBar setError={setError} setOpen={setOpen} setResults={setResults} />
-      <MediaResults results={results} />
-      <Snackbar
-        open={open}
-        autoHideDuration={6000}
-        onClose={handleClose}
-        message={error}
-        action={<></>}
-      />
-    </>
-  );
+    return (
+        <>
+            <SearchBar setError={setError} setOpen={setOpen} setResults={setResults}/>
+            <MediaResults results={results}/>
+            <Snackbar
+                open={open}
+                autoHideDuration={6000}
+                onClose={handleClose}
+                message={error}
+                action={<></>}
+            />
+        </>
+    );
 };
 
 export default Search;
