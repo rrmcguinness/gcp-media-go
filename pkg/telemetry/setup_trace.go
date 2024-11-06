@@ -17,16 +17,17 @@ package telemetry
 import (
 	"context"
 	"errors"
+	"go.opentelemetry.io/otel/sdk/metric"
+	"log"
 	"log/slog"
 
-	metricexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
+	mexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/metric"
 	telemetryexporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"go.opentelemetry.io/contrib/detectors/gcp"
 	"go.opentelemetry.io/contrib/propagators/autoprop"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/sdk/metric"
 	"go.opentelemetry.io/otel/sdk/resource"
 	"go.opentelemetry.io/otel/sdk/trace"
 	semaphoreconversion "go.opentelemetry.io/otel/semconv/v1.4.0"
@@ -79,20 +80,24 @@ func SetupOpenTelemetry(ctx context.Context, config *cloud.Config) (shutdown fun
 	shutdownFuncs = append(shutdownFuncs, tp.Shutdown)
 	otel.SetTracerProvider(tp)
 
-	// Configure Metric Export to send metrics as OTLP
-	mExporter, err := metricexporter.New(
-		metricexporter.WithProjectID(config.Application.GoogleProjectId),
+	mExporter, err := mexporter.New(
+		mexporter.WithProjectID(config.Application.GoogleProjectId),
 	)
+
 	if err != nil {
-		slog.Error("Failed to create exporter", "error", err)
-		return
+		log.Printf("Failed to create exporter: %v", err)
+		return nil, err
 	}
 
-	mp := metric.NewMeterProvider(
+	mProvider := metric.NewMeterProvider(
 		metric.WithReader(metric.NewPeriodicReader(mExporter)),
 	)
-	shutdownFuncs = append(shutdownFuncs, mp.Shutdown)
-	otel.SetMeterProvider(mp)
+
+	// Setup Namespace Meter
+	otel.Meter("github.com/GoogleCloudPlatform/solutions/media")
+
+	shutdownFuncs = append(shutdownFuncs, mProvider.Shutdown)
+	otel.SetMeterProvider(mProvider)
 
 	return shutdown, nil
 }

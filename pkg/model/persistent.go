@@ -37,16 +37,19 @@ type Actor struct {
 
 // Media capture the highest level of metadata about a media file.
 type Media struct {
-	Id          string        `json:"id" bigquery:"id"`
-	CreateDate  time.Time     `json:"create_date" bigquery:"create_date"`
-	Title       string        `json:"title" bigquery:"title"`
-	Summary     string        `json:"summary" bigquery:"summary"`
-	Director    string        `json:"director" bigquery:"director"`
-	ReleaseYear int           `json:"release_year" bigquery:"release_year"`
-	Genre       string        `json:"genre" bigquery:"genre"`
-	Rating      string        `json:"rating" bigquery:"rating"`
-	Cast        []*CastMember `json:"cast" bigquery:"cast"`
-	Scenes      []*Scene      `json:"scenes" bigquery:"scenes"`
+	Id              string        `json:"id" bigquery:"id"`
+	CreateDate      time.Time     `json:"create_date" bigquery:"create_date"`
+	Title           string        `json:"title" bigquery:"title"`
+	Category        string        `json:"category" bigquery:"category"`
+	Summary         string        `json:"summary" bigquery:"summary"`
+	LengthInSeconds int           `json:"length_in_seconds" bigquery:"length_in_seconds"`
+	MediaUrl        string        `json:"media_url" bigquery:"media_url"`
+	Director        string        `json:"director,omitempty" bigquery:"director"`
+	ReleaseYear     int           `json:"release_year,omitempty" bigquery:"release_year"`
+	Genre           string        `json:"genre,omitempty" bigquery:"genre"`
+	Rating          string        `json:"rating,omitempty" bigquery:"rating"`
+	Cast            []*CastMember `json:"cast,omitempty" bigquery:"cast"`
+	Scenes          []*Scene      `json:"scenes,omitempty" bigquery:"scenes"`
 }
 
 func NewMedia(fileName string) *Media {
@@ -63,10 +66,12 @@ func NewMedia(fileName string) *Media {
 // Scene is a representation of a time span and it's sequence in a media object
 // giving granular detail for the agent objects to interrogate
 type Scene struct {
-	SequenceNumber int    `json:"sequence" bigquery:"sequence"`
-	Start          string `json:"start" bigquery:"start"`
-	End            string `json:"end" bigquery:"end"`
-	Script         string `json:"script" bigquery:"script"`
+	SequenceNumber   int    `json:"sequence" bigquery:"sequence"`
+	TokensToGenerate int    `json:"tokens_to_generate" bigquery:"tokens_to_generate"`
+	TokensGenerated  int    `json:"tokens_generated" bigquery:"tokens_generated"`
+	Start            string `json:"start" bigquery:"start"`
+	End              string `json:"end" bigquery:"end"`
+	Script           string `json:"script" bigquery:"script"`
 }
 
 // CastMember is a mapping object from a character to an actor

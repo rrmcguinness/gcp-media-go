@@ -8,7 +8,7 @@ import TopNav from "./components/TopNav";
 
 const themeOptions: ThemeOptions = {
     palette: {
-        mode: 'light',
+        mode: 'dark',
         primary: {
             main: '#1565c0',
         },
@@ -30,7 +30,7 @@ function App() {
     return (
         <ThemeProvider theme={theme}>
             <TopNav/>
-            <Typography variant="h3" sx={{fontFamily: 'Google Sans', fontWeight: 800, color: '#4285F4'}}>Me<span
+            <Typography variant="h3" sx={{ml: 2, mt: 2, fontFamily: 'Google Sans', fontWeight: 800, color: '#4285F4'}}>Me<span
                 style={{color: '#FBBC04'}}>d</span>ia <span style={{color: '#DB4437'}}>S</span>ea<span
                 style={{color: '#0F9D58'}}>r</span>ch</Typography>
             <Box

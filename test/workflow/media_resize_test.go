@@ -15,15 +15,14 @@
 package workflow_test
 
 import (
-	"fmt"
-	"testing"
-
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/workflow"
 	"github.com/GoogleCloudPlatform/solutions/media/test"
 	"github.com/stretchr/testify/assert"
 	"go.opentelemetry.io/otel/codes"
+	"log"
+	"testing"
 )
 
 func TestFFMpegCommand(t *testing.T) {
@@ -42,7 +41,7 @@ func TestFFMpegCommand(t *testing.T) {
 	mediaResizeWorkflow.Execute(chainCtx)
 
 	for _, err := range chainCtx.GetErrors() {
-		fmt.Println(err.Error())
+		log.Printf("error in chain: %v", err.Error())
 	}
 
 	if chainCtx.HasErrors() {

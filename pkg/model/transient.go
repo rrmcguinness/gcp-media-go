@@ -14,8 +14,6 @@
 
 package model
 
-import "encoding/json"
-
 // These objects are used in memory via workflows, but are not persisted to the dataset
 
 // MediaFormatFilter is a simple video format object expressing the intended output
@@ -32,19 +30,16 @@ type TimeSpan struct {
 
 type MediaSummary struct {
 	Title           string        `json:"title"`
+	Category        string        `json:"category"`
 	Summary         string        `json:"summary"`
-	Director        string        `json:"director"`
-	ReleaseYear     int           `json:"release_year"`
-	Genre           string        `json:"genre"`
-	Rating          string        `json:"rating"`
-	Cast            []*CastMember `json:"cast"`
-	SceneTimeStamps []*TimeSpan   `json:"scene_time_stamps"`
-}
-
-func MediaSummaryFromJSON(value string) (summary *MediaSummary, err error) {
-	summary = &MediaSummary{}
-	err = json.Unmarshal([]byte(value), &summary)
-	return summary, err
+	LengthInSeconds int           `json:"length_in_seconds"`
+	MediaUrl        string        `json:"media_url,omitempty"`
+	Director        string        `json:"director,omitempty"`
+	ReleaseYear     int           `json:"release_year,omitempty"`
+	Genre           string        `json:"genre,omitempty"`
+	Rating          string        `json:"rating,omitempty"`
+	Cast            []*CastMember `json:"cast,omitempty"`
+	SceneTimeStamps []*TimeSpan   `json:"scene_time_stamps,omitempty"`
 }
 
 type SceneMatchResult struct {

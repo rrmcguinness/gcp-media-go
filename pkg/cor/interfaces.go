@@ -14,7 +14,11 @@
 
 package cor
 
-import "context"
+import (
+	"context"
+	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/trace"
+)
 
 const (
 	CtxIn  = "__IN__"
@@ -28,8 +32,8 @@ type Context interface {
 	SetContext(context context.Context)
 	GetContext() context.Context
 	Add(key string, value interface{}) Context
-	AddError(err error)
-	GetErrors() []error
+	AddError(key string, err error)
+	GetErrors() map[string]error
 	Get(key string) interface{}
 	Remove(key string)
 	HasErrors() bool
@@ -50,6 +54,10 @@ type Command interface {
 	GetInputParam() string
 	GetOutputParam() string
 	IsExecutable(context Context) bool
+	GetTracer() trace.Tracer
+	GetMeter() metric.Meter
+	GetSuccessCounter() metric.Int64Counter
+	GetErrorCounter() metric.Int64Counter
 }
 
 // Chain is a collection of commands that ensure the serial or parallel execution

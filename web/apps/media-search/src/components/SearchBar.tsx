@@ -79,7 +79,7 @@ const SearchBar = ({setResults, setMessage, setOpen}: SearchBarArgs) => {
                             </IconButton>
                         </InputAdornment>
                     }
-                    label="Password"
+                    label="Search"
                 />
             </FormControl>
         </Paper>

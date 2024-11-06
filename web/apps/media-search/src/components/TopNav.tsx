@@ -73,7 +73,7 @@ const TopNav = () => {
                         color="inherit"
                         aria-label="menu"
                         sx={{mr: 2}}
-                        onClick={() => nav("/")}
+                        onClick={() => nav("/dashboard")}
                     >
                         <AssessmentIcon/>
                     </IconButton>

@@ -18,6 +18,7 @@ go_library(
     name = "api_server_lib",
     srcs = [
         "api_server.go",
+        "dashboard.go",
         "file_upload.go",
         "listeners.go",
         "media.go",

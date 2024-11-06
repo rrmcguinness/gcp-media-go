@@ -16,6 +16,7 @@ package workflow
 
 import (
 	goctx "context"
+	"errors"
 	"fmt"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
@@ -93,19 +94,18 @@ func (m *MediaEmbeddingGeneratorWorkflow) Execute(context cor.Context) {
 	q := m.bigqueryClient.Query(m.findEligibleMediaQuery)
 	it, err := q.Read(context.GetContext())
 	if err != nil {
-		context.AddError(err)
+		context.AddError(m.GetName(), err)
 		return
 	}
 
 	for {
 		var value model.Media
-		fmt.Println(value.Title)
 		err := it.Next(&value)
-		if err == iterator.Done {
+		if errors.Is(err, iterator.Done) {
 			break
 		}
 		if err != nil {
-			context.AddError(err)
+			context.AddError(m.GetName(), err)
 			return
 		}
 
@@ -115,7 +115,7 @@ func (m *MediaEmbeddingGeneratorWorkflow) Execute(context cor.Context) {
 			in := model.NewSceneEmbedding(value.Id, scene.SequenceNumber, m.genaiEmbedding.Name())
 			resp, err := m.genaiEmbedding.EmbedContent(context.GetContext(), genai.Text(scene.Script))
 			if err != nil {
-				context.AddError(err)
+				context.AddError(m.GetName(), err)
 				return
 			}
 			for _, f := range resp.Embedding.Values {
@@ -126,7 +126,7 @@ func (m *MediaEmbeddingGeneratorWorkflow) Execute(context cor.Context) {
 
 		inserter := m.bigqueryClient.Dataset(m.dataset).Table(m.embeddingTable).Inserter()
 		if err := inserter.Put(context.GetContext(), toInsert); err != nil {
-			context.AddError(err)
+			context.AddError(m.GetName(), err)
 			return
 		}
 	}

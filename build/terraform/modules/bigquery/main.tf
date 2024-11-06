@@ -90,8 +90,23 @@ resource "google_bigquery_table" "media_ds_media" {
         "mode": "REQUIRED"
     },
     {
+        "name": "category",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
         "name": "summary",
         "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "media_url",
+        "type": "STRING",
+        "mode": "REQUIRED"
+    },
+    {
+        "name": "length_in_seconds",
+        "type": "INTEGER",
         "mode": "NULLABLE"
     },
     {
@@ -140,6 +155,16 @@ resource "google_bigquery_table" "media_ds_media" {
                 "name": "sequence",
                 "type": "INTEGER",
                 "mode": "REQUIRED"
+            },
+            {
+                "name": "tokens_to_generate",
+                "type": "INTEGER",
+                "mode": "NULLABLE"
+            },
+            {
+                "name": "tokens_generated",
+                "type": "INTEGER",
+                "mode": "NULLABLE"
             },
             {
                 "name": "start",

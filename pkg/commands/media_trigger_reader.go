@@ -34,9 +34,12 @@ func (c *MediaTriggerToGCSObject) Execute(context cor.Context) {
 	var out cloud.GCSPubSubNotification
 	err := json.Unmarshal([]byte(in), &out)
 	if err != nil {
-		context.AddError(err)
+		c.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(c.GetName(), err)
 		return
 	}
+
+	c.GetSuccessCounter().Add(context.GetContext(), 1)
 
 	msg := &cloud.GCSObject{Bucket: out.Bucket, Name: out.Name, MIMEType: out.ContentType}
 	context.Add(cloud.GetGCSObjectName(), msg)

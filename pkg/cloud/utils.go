@@ -18,6 +18,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"go.opentelemetry.io/otel/metric"
 	"log"
 	"os"
 	"strings"
@@ -78,19 +79,29 @@ func LoadConfig(baseConfig interface{}) {
 }
 
 // GenerateMultiModalResponse A GenAI helper function for executing multi-modal requests with a retry limit.
-func GenerateMultiModalResponse(ctx context.Context, tryCount int, model *QuotaAwareGenerativeAIModel, parts ...genai.Part) (value string, err error) {
+func GenerateMultiModalResponse(
+	ctx context.Context,
+	inputTokenCounter metric.Int64Counter,
+	outputTokenCounter metric.Int64Counter,
+	retryCounter metric.Int64Counter,
+	tryCount int,
+	model *QuotaAwareGenerativeAIModel,
+	parts ...genai.Part) (value string, err error) {
 	resp, err := model.GenerateContent(ctx, parts...)
+	inputTokenCounter.Add(ctx, int64(resp.UsageMetadata.PromptTokenCount))
+	outputTokenCounter.Add(ctx, int64(resp.UsageMetadata.CandidatesTokenCount))
 	if err != nil {
 		if tryCount < MaxRetries {
-			return GenerateMultiModalResponse(ctx, tryCount+1, model, parts...)
+			retryCounter.Add(ctx, 1)
+			return GenerateMultiModalResponse(ctx, inputTokenCounter, outputTokenCounter, retryCounter, tryCount+1, model, parts...)
 		} else {
 			return "", err
 		}
 	}
 	value = ""
-	for _, cand := range resp.Candidates {
-		if cand.Content != nil {
-			for _, part := range cand.Content.Parts {
+	for _, candidate := range resp.Candidates {
+		if candidate.Content != nil {
+			for _, part := range candidate.Content.Parts {
 				value += fmt.Sprint(part)
 			}
 		}

@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Grid2, Paper, Typography} from "@mui/material"
+import {Paper, Typography} from "@mui/material"
 import {MediaResult} from "../shared/model"
 import MediaRow from "./MediaRow"
 
@@ -22,9 +22,7 @@ const MediaResults = ({results}: { results: MediaResult[] }) => {
         return (
             <Paper sx={{p: 2, mb: 2}} elevation={5}>
                 <Typography variant="h4" sx={{mb: 2}}>Results</Typography>
-                <Grid2 container spacing={2}>
-                    {mappedResults}
-                </Grid2>
+                {mappedResults}
             </Paper>
         )
     } else {

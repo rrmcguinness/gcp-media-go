@@ -15,7 +15,6 @@
 package commands
 
 import (
-	"fmt"
 	"log"
 
 	"cloud.google.com/go/bigquery"
@@ -44,10 +43,11 @@ func (s *MediaPersistToBigQuery) Execute(context cor.Context) {
 	media := context.Get(s.mediaParam).(*model.Media)
 	i := s.client.Dataset(s.dataset).Table(s.table).Inserter()
 	if err := i.Put(context.GetContext(), media); err != nil {
-		log.Printf("failed to write media to database. title %s error %s", media.Title, err)
-		fmt.Println("Error writing to database", err)
-		context.AddError(err)
+		log.Printf("failed to write media to database. title %s error %s\n", media.Title, err)
+		s.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(s.GetName(), err)
 		return
 	}
+	s.GetSuccessCounter().Add(context.GetContext(), 1)
 	context.Add(cor.CtxOut, media)
 }

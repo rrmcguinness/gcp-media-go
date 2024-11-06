@@ -45,12 +45,14 @@ func (c *GCSToTempFile) Execute(context cor.Context) {
 	obj := readerBucket.Object(msg.Name)
 	reader, err := obj.NewReader(context.GetContext())
 	if err != nil {
-		context.AddError(err)
+		c.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(c.GetName(), err)
 		return
 	}
 	defer func(reader *storage.Reader, context cor.Context) {
 		err := reader.Close()
 		if err != nil {
+			c.GetErrorCounter().Add(context.GetContext(), 1)
 			log.Printf("failed to close reader: %v\n", err)
 		}
 	}(reader, context)
@@ -58,10 +60,12 @@ func (c *GCSToTempFile) Execute(context cor.Context) {
 	tempFile, err := os.CreateTemp("", c.tempFilePrefix)
 	written, err := io.Copy(tempFile, reader)
 	if err != nil {
+		c.GetErrorCounter().Add(context.GetContext(), 1)
 		log.Printf("failed to copy io, %d written: %v\n", written, err)
-		context.AddError(err)
+		context.AddError(c.GetName(), err)
 		return
 	}
+	c.GetSuccessCounter().Add(context.GetContext(), 1)
 	// Add to the temp files to clean up after execution in a chain
 	context.AddTempFile(tempFile.Name())
 	// Make the variable available if needed

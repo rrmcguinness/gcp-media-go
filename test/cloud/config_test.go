@@ -34,4 +34,5 @@ func TestConfig(t *testing.T) {
 	assert.Equal(t, 2, len(config.TopicSubscriptions))
 	assert.Equal(t, 2, len(config.EmbeddingModels))
 	assert.Equal(t, 4, len(config.AgentModels))
+	assert.Equal(t, 5, len(config.Categories))
 }

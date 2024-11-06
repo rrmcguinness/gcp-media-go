@@ -23,7 +23,7 @@ go_library(
         "media_assembly.go",
         "media_cleanup.go",
         "media_persist_to_big_query.go",
-        "media_prompt.go",
+        "media_summary_creator.go",
         "media_summary_json_to_struct.go",
         "media_trigger_reader.go",
         "media_upload.go",
@@ -40,6 +40,7 @@ go_library(
         "@com_google_cloud_go_storage//:storage",
         "@io_opentelemetry_go_otel//attribute",
         "@io_opentelemetry_go_otel//codes",
+        "@io_opentelemetry_go_otel_metric//:metric",
         "@io_opentelemetry_go_otel_trace//:trace",
     ],
 )

@@ -19,9 +19,9 @@ import Cast from "./Cast";
 
 const MediaRow = ({result}: { result: MediaResult }) => {
     return (
-        <>
-            <Grid2 size={4} sx={{textAlign: 'left'}}>
-                <Typography variant="h5" sx={{mb: 1}}>{result.title}</Typography>
+        <Grid2 container spacing={1} sx={{pb: 4}}>
+            <Grid2 size={4} sx={{textAlign: 'left', padding: 1}}>
+                <Typography variant="h5" sx={{mb: 1}} color={"info"}>{result.title}</Typography>
                 <Typography variant="h6">Summary</Typography>
                 <Box sx={{pl: 2, pr: 2}}>
                     <Typography variant="caption">{result.summary}</Typography>
@@ -29,16 +29,13 @@ const MediaRow = ({result}: { result: MediaResult }) => {
                 <Cast cast={result.cast}/>
             </Grid2>
             <Grid2 size={8}>
-                {result.scenes.map((s: Scene) => (
-                    <Grid2 container spacing={2} sx={{p: 1, mb: 3, border: '0.2px dashed #eee'}}>
-                        <Grid2 size={2} sx={{fontWeight: 800}}>Sequence</Grid2>
-                        <Grid2 size={5} sx={{fontWeight: 800}}>Start</Grid2>
-                        <Grid2 size={5} sx={{fontWeight: 800}}>End</Grid2>
-                        <SceneData key={`${result.id}-${s.sequence}`} scene={s}/>
+                {result.scenes.map((s: Scene, j:number) => (
+                    <Grid2 container spacing={2} sx={{p: 1, mb: 3}} key={`result_${result.id}_${j}`}>
+                        <SceneData key={`${result.id}-${s.sequence}`} url={result.media_url}  scene={s}/>
                     </Grid2>
                 ))}
             </Grid2>
-        </>
+        </Grid2>
     );
 };
 

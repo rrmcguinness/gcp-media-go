@@ -50,7 +50,7 @@ func (m *MediaReaderWorkflow) initializeChain() {
 	out := cor.NewBaseChain(m.GetName())
 
 	// Convert the Message to an Object
-	out.AddCommand(&commands.MediaTriggerToGCSObject{})
+	out.AddCommand(commands.NewMediaTriggerToGCSObject("media-trigger-to-gcs-object"))
 
 	// Write a temp file
 	out.AddCommand(commands.NewGCSToTempFile("gcs-to-temp-file", m.storageClient, "media-summary-"))
@@ -59,7 +59,7 @@ func (m *MediaReaderWorkflow) initializeChain() {
 	out.AddCommand(commands.NewMediaUpload("media-upload", m.genaiClient, 300*time.Second))
 
 	// Generate Summary
-	out.AddCommand(commands.NewMediaPrompt("generate-media-summary", m.genaiModel, m.summaryTemplate))
+	out.AddCommand(commands.NewMediaSummaryCreator("generate-media-summary", m.config, m.genaiModel, m.summaryTemplate))
 
 	// Convert the JSON to a struct and save to the summaryOutputParam
 	out.AddCommand(commands.NewMediaSummaryJsonToStruct("convert-media-summary", SummaryOutputParamName))

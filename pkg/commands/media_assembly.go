@@ -59,7 +59,8 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	scenes := make([]*model.Scene, 0)
 	sceneErr := json.Unmarshal([]byte(sceneValues), &scenes)
 	if sceneErr != nil {
-		context.AddError(sceneErr)
+		m.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(m.GetName(), sceneErr)
 		return
 	}
 
@@ -77,13 +78,18 @@ func (m *MediaAssembly) Execute(context cor.Context) {
 	// TODO - Base the
 	media := model.NewMedia(summary.Title)
 	media.Title = summary.Title
+	media.Category = summary.Category
 	media.Summary = summary.Summary
+	media.MediaUrl = summary.MediaUrl
+	media.LengthInSeconds = summary.LengthInSeconds
 	media.Director = summary.Director
 	media.ReleaseYear = summary.ReleaseYear
 	media.Genre = summary.Genre
 	media.Rating = summary.Rating
 	media.Cast = append(media.Cast, summary.Cast...)
 	media.Scenes = append(media.Scenes, scenes...)
+
+	m.GetSuccessCounter().Add(context.GetContext(), 1)
 
 	context.Add(m.mediaObjectParam, media)
 	context.Add(cor.CtxOut, media)

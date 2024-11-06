@@ -19,6 +19,7 @@ import (
 	goctx "context"
 	"encoding/json"
 	"fmt"
+	"go.opentelemetry.io/otel/metric"
 	"strings"
 	"sync"
 	"text/template"
@@ -34,9 +35,12 @@ import (
 
 type SceneExtractor struct {
 	cor.BaseCommand
-	generativeAIModel *cloud.QuotaAwareGenerativeAIModel
-	promptTemplate    *template.Template
-	numberOfWorkers   int
+	generativeAIModel        *cloud.QuotaAwareGenerativeAIModel
+	promptTemplate           *template.Template
+	numberOfWorkers          int
+	geminiInputTokenCounter  metric.Int64Counter
+	geminiOutputTokenCounter metric.Int64Counter
+	geminiRetryCounter       metric.Int64Counter
 }
 
 func NewSceneExtractor(
@@ -44,11 +48,17 @@ func NewSceneExtractor(
 	model *cloud.QuotaAwareGenerativeAIModel,
 	prompt *template.Template,
 	numberOfWorkers int) *SceneExtractor {
-	return &SceneExtractor{
+	out := &SceneExtractor{
 		BaseCommand:       *cor.NewBaseCommand(name),
 		generativeAIModel: model,
 		promptTemplate:    prompt,
 		numberOfWorkers:   numberOfWorkers}
+
+	out.geminiInputTokenCounter, _ = out.GetMeter().Int64Counter(fmt.Sprintf("%s.gemini.token.input", out.GetName()))
+	out.geminiOutputTokenCounter, _ = out.GetMeter().Int64Counter(fmt.Sprintf("%s.gemini.token.ouput", out.GetName()))
+	out.geminiRetryCounter, _ = out.GetMeter().Int64Counter(fmt.Sprintf("%s.gemini.token.retry", out.GetName()))
+
+	return out
 }
 
 func (s *SceneExtractor) IsExecutable(context cor.Context) bool {
@@ -65,7 +75,7 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 	exampleJson, _ := json.Marshal(exampleScene)
 	exampleText := string(exampleJson)
 
-	// Create a human readable cast
+	// Create a human-readable cast
 	castString := ""
 	for _, cast := range summary.Cast {
 		castString += fmt.Sprintf("%s - %s\n", cast.CharacterName, cast.ActorName)
@@ -84,7 +94,7 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 
 	// Execute all scenes against the worker pool
 	for i, ts := range summary.SceneTimeStamps {
-		job := CreateJob(context.GetContext(), s.Tracer, i, s.GetName(), summaryText, exampleText, *s.promptTemplate, videoFile, s.generativeAIModel, ts)
+		job := CreateJob(context.GetContext(), s.Tracer, s.geminiInputTokenCounter, s.geminiOutputTokenCounter, s.geminiRetryCounter, i, s.GetName(), summaryText, exampleText, *s.promptTemplate, videoFile, s.generativeAIModel, ts)
 		jobs <- job
 	}
 
@@ -96,11 +106,18 @@ func (s *SceneExtractor) Execute(context cor.Context) {
 	sceneData := make([]string, 0)
 	for r := range results {
 		if r.err != nil {
-			context.AddError(r.err)
+			s.GetErrorCounter().Add(context.GetContext(), 1)
+			context.AddError(s.GetName(), r.err)
 		} else {
+
 			sceneData = append(sceneData, r.value)
 		}
 	}
+
+	if !context.HasErrors() {
+		s.GetSuccessCounter().Add(context.GetContext(), 1)
+	}
+
 	context.Add(s.GetOutputParam(), sceneData)
 	context.Add(cor.CtxOut, sceneData)
 }
@@ -111,13 +128,16 @@ type SceneResponse struct {
 }
 
 type SceneJob struct {
-	workerId int
-	ctx      goctx.Context
-	timeSpan *model.TimeSpan
-	span     trace.Span
-	parts    []genai.Part
-	model    *cloud.QuotaAwareGenerativeAIModel
-	err      error
+	workerId                 int
+	ctx                      goctx.Context
+	geminiInputTokenCounter  metric.Int64Counter
+	geminiOutputTokenCounter metric.Int64Counter
+	geminiRetryCounter       metric.Int64Counter
+	timeSpan                 *model.TimeSpan
+	span                     trace.Span
+	parts                    []genai.Part
+	model                    *cloud.QuotaAwareGenerativeAIModel
+	err                      error
 }
 
 func (s *SceneJob) Close(status codes.Code, description string) {
@@ -128,6 +148,9 @@ func (s *SceneJob) Close(status codes.Code, description string) {
 func CreateJob(
 	ctx goctx.Context,
 	tracer trace.Tracer,
+	geminiInputTokenCounter metric.Int64Counter,
+	geminiOutputTokenCounter metric.Int64Counter,
+	geminiRetryCounter metric.Int64Counter,
 	workerId int,
 	commandName string,
 	summaryText string,
@@ -143,7 +166,6 @@ func CreateJob(
 		attribute.String("start", timeSpan.Start),
 		attribute.String("end", timeSpan.End),
 	)
-
 	vocabulary := make(map[string]string)
 	vocabulary["SEQUENCE"] = fmt.Sprintf("%d", workerId)
 	vocabulary["SUMMARY_DOCUMENT"] = summaryText
@@ -162,7 +184,12 @@ func CreateJob(
 	parts = append(parts, cloud.NewFileData(videoFile.URI, videoFile.MIMEType))
 	parts = append(parts, cloud.NewTextPart(tsPrompt))
 
-	return &SceneJob{workerId: workerId, ctx: sceneCtx, timeSpan: timeSpan, span: sceneSpan, parts: parts, model: model}
+	return &SceneJob{workerId: workerId,
+		ctx:                      sceneCtx,
+		geminiInputTokenCounter:  geminiInputTokenCounter,
+		geminiOutputTokenCounter: geminiOutputTokenCounter,
+		geminiRetryCounter:       geminiRetryCounter,
+		timeSpan:                 timeSpan, span: sceneSpan, parts: parts, model: model}
 }
 
 // Create a worker function for parallel work streams
@@ -170,7 +197,7 @@ func sceneWorker(jobs <-chan *SceneJob, results chan<- *SceneResponse, wg *sync.
 	defer wg.Done()
 	for j := range jobs {
 		if j.err == nil {
-			out, err := cloud.GenerateMultiModalResponse(j.ctx, 0, j.model, j.parts...)
+			out, err := cloud.GenerateMultiModalResponse(j.ctx, j.geminiInputTokenCounter, j.geminiOutputTokenCounter, j.geminiRetryCounter, 0, j.model, j.parts...)
 			if err != nil {
 				j.Close(codes.Error, "scene extract failed")
 				results <- &SceneResponse{err: err}

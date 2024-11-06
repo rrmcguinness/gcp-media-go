@@ -16,7 +16,6 @@ package workflow_test
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"testing"
 
@@ -61,7 +60,6 @@ func TestMain(m *testing.M) {
 	defer cloudClients.Close()
 
 	logger.Info("completed test setup")
-	fmt.Println("Completed Setup")
 
 	exitCode := m.Run()
 	err = shutdown(ctx)

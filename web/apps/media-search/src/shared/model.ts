@@ -28,7 +28,10 @@ export interface MediaResult {
     id: string;
     create_date: Date;
     title: string;
+    category: string;
     summary: string;
+    media_url: string;
+    length_in_seconds: number;
     director: string;
     release_year: number;
     genre: string;

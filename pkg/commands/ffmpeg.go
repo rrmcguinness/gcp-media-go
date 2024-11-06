@@ -16,6 +16,7 @@ package commands
 
 import (
 	"fmt"
+
 	"os"
 	"os/exec"
 	"strings"
@@ -40,7 +41,10 @@ type FFMpegCommand struct {
 }
 
 func NewFFMpegCommand(name string, commandPath string, targetWidth string) *FFMpegCommand {
-	return &FFMpegCommand{BaseCommand: *cor.NewBaseCommand(name), commandPath: commandPath, targetWidth: targetWidth}
+	return &FFMpegCommand{
+		BaseCommand: *cor.NewBaseCommand(name),
+		commandPath: commandPath,
+		targetWidth: targetWidth}
 }
 
 // Execute executes the business logic of the command
@@ -48,7 +52,8 @@ func (c *FFMpegCommand) Execute(context cor.Context) {
 	inputFileName := context.Get(c.GetInputParam()).(string)
 	file, err := os.Open(inputFileName)
 	if err != nil {
-		context.AddError(err)
+		c.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(c.GetName(), err)
 		return
 	}
 	tempFile, err := os.CreateTemp("", TempFilePrefix)
@@ -58,9 +63,12 @@ func (c *FFMpegCommand) Execute(context cor.Context) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Run(); err != nil {
-		context.AddError(fmt.Errorf("error running ffmpeg: %w", err))
+		c.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(c.GetName(), fmt.Errorf("error running ffmpeg: %w", err))
 		return
 	}
+
+	c.GetSuccessCounter().Add(context.GetContext(), 1)
 	context.AddTempFile(tempFile.Name())
 	context.Add(cor.CtxOut, tempFile.Name())
 }

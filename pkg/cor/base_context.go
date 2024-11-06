@@ -22,7 +22,7 @@ import (
 
 type BaseContext struct {
 	data      map[string]interface{}
-	errors    []error
+	errors    map[string]error
 	tempFiles []string
 	context   context.Context
 }
@@ -30,7 +30,7 @@ type BaseContext struct {
 func NewBaseContext() Context {
 	return &BaseContext{
 		data:      make(map[string]interface{}),
-		errors:    make([]error, 0),
+		errors:    make(map[string]error),
 		tempFiles: make([]string, 0),
 	}
 }
@@ -66,11 +66,11 @@ func (c *BaseContext) GetTempFiles() []string {
 	return c.tempFiles
 }
 
-func (c *BaseContext) AddError(err error) {
-	c.errors = append(c.errors, err)
+func (c *BaseContext) AddError(key string, err error) {
+	c.errors[key] = err
 }
 
-func (c *BaseContext) GetErrors() []error {
+func (c *BaseContext) GetErrors() map[string]error {
 	return c.errors
 }
 

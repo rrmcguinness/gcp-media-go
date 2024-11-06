@@ -7,6 +7,7 @@ import {createBrowserRouter, Navigate, RouterProvider} from 'react-router-dom';
 
 const Search = React.lazy(() => import('./pages/Search'));
 const FileUpload = React.lazy(() => import('./pages/FileUpload'));
+const Dashboard = React.lazy(() => import('./pages/Dashboard'))
 
 const ErrorBoundary = () => {
     return (<Navigate to="/"/>)
@@ -25,6 +26,11 @@ const router = createBrowserRouter([
             {
                 path: "/uploads",
                 element: <FileUpload/>,
+                errorElement: <ErrorBoundary/>,
+            },
+            {
+                path: "/dashboard",
+                element: <Dashboard/>,
                 errorElement: <ErrorBoundary/>,
             }
         ]

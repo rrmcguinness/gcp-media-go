@@ -43,7 +43,7 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 
 	dat, err := os.Open(path)
 	if err != nil {
-		context.AddError(err)
+		context.AddError(c.GetName(), err)
 		return
 	}
 
@@ -67,7 +67,7 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 		written, err := io.Copy(writer, dat)
 		if err != nil {
 			log.Printf("failed to close writer or partial write: %d total bytes, %v\n", written, err)
-			context.AddError(err)
+			context.AddError(c.GetName(), err)
 			return
 		}
 	} else {
@@ -82,7 +82,7 @@ func (c *GCSFileUpload) Execute(context cor.Context) {
 		written, err := io.Copy(writer, dat)
 		if err != nil {
 			log.Printf("failed to close writer or partial write: %d total bytes, %v\n", written, err)
-			context.AddError(err)
+			context.AddError(c.GetName(), err)
 			return
 		}
 	}

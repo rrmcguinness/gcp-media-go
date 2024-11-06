@@ -17,11 +17,12 @@ load("@io_bazel_rules_go//go:def.bzl", "go_library")
 go_library(
     name = "cloud",
     srcs = [
+        "config.go",
         "gcs.go",
-        "model.go",
         "pub_sub_listener.go",
         "state.go",
         "utils.go",
+        "wrappers.go",
     ],
     importpath = "github.com/GoogleCloudPlatform/solutions/media/pkg/cloud",
     visibility = ["//visibility:public"],
@@ -35,6 +36,7 @@ go_library(
         "@io_opentelemetry_go_otel//:otel",
         "@io_opentelemetry_go_otel//attribute",
         "@io_opentelemetry_go_otel//codes",
+        "@io_opentelemetry_go_otel_metric//:metric",
         "@org_golang_google_api//option",
         "@org_golang_x_time//rate",
     ],

@@ -41,7 +41,10 @@ Simon helps River to her feet. They run away together.`}
 func GetExampleSummary() *MediaSummary {
 	s := &MediaSummary{
 		Title:           "Serenity",
+		Category:        "trailer",
 		Summary:         "The crew of the ship Serenity try to evade an assassin sent to recapture telepath River.",
+		LengthInSeconds: 120,
+		MediaUrl:        "https://storage.mtls.cloud.google.com/bucket_name/Serenity.mp4",
 		Director:        "Joss Whedon",
 		ReleaseYear:     2005,
 		Genre:           "Science Fiction",

@@ -12,20 +12,45 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import {Grid2, Typography} from "@mui/material";
+import {Box, Grid2, Typography} from "@mui/material";
 import {Scene} from "../shared/model";
 
-const SceneData = ({scene}: { scene: Scene }) => {
+const SceneData = ({url, scene}: { url: string, scene: Scene }) => {
 
     const formatScript = (val: string): string => {
         return val.replace("\n", "<br/>")
     }
 
+    const GetStartTimeInSeconds = (): number => {
+        const parts = scene.start.split(':');
+        return parseInt(parts[0])*60*60 + parseInt(parts[1])*60 + parseInt(parts[2]);
+    }
+
+    const GetEndTimeInSeconds = (): number => {
+        const parts = scene.end.split(':');
+        return parseInt(parts[0])*60*60 + parseInt(parts[1])*60 + parseInt(parts[2]);
+    }
+
     return (
         <>
-            <Grid2 size={2}>{scene.sequence}</Grid2>
-            <Grid2 size={5}>{scene.start}</Grid2>
-            <Grid2 size={5}>{scene.end}</Grid2>
+            <Grid2 size={6}>
+                <Grid2 container spacing={2}>
+                    <Grid2 size={4} sx={{fontWeight: 800}}>Sequence</Grid2>
+                    <Grid2 size={4} sx={{fontWeight: 800}}>Start</Grid2>
+                    <Grid2 size={4} sx={{fontWeight: 800}}>End</Grid2>
+
+                    <Grid2 size={4}>{scene.sequence}</Grid2>
+                    <Grid2 size={4}>{scene.start}</Grid2>
+                    <Grid2 size={4}>{scene.end}</Grid2>
+                </Grid2>
+            </Grid2>
+            <Grid2 size={6} >
+                <Box sx={{display: 'flex', flex: 1, flexGrow: 1, justifyContent: 'center', justifyItems: 'center', alignItems: 'center', alignContent: 'center', padding: 2}}>
+                <video controls style={{border: '1px solid #4285F4  ', borderRadius: '10px', boxShadow: '1px 1px 6px 1px #666'}}>
+                    <source src={`${url}#t=${GetStartTimeInSeconds()},${GetEndTimeInSeconds()}`} type="video/mp4" />
+                </video>
+                </Box>
+            </Grid2>
             <Grid2 size={12} sx={{textAlign: 'left'}}><Typography component="div" variant="body2">
                 <div dangerouslySetInnerHTML={{__html: formatScript(scene.script)}}/>
             </Typography></Grid2>

@@ -42,7 +42,8 @@ func (v *MediaUpload) Execute(context cor.Context) {
 
 	genFil, err := v.client.UploadFileFromPath(context.GetContext(), fileName, &genai.UploadFileOptions{DisplayName: gcsFile.Name, MIMEType: gcsFile.MIMEType})
 	if err != nil {
-		context.AddError(err)
+		v.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(v.GetName(), err)
 		return
 	}
 
@@ -51,10 +52,13 @@ func (v *MediaUpload) Execute(context cor.Context) {
 		time.Sleep(5 * time.Second)
 		var err error
 		if genFil, err = v.client.GetFile(context.GetContext(), genFil.Name); err != nil {
-			context.AddError(err)
+			v.GetErrorCounter().Add(context.GetContext(), 1)
+			context.AddError(v.GetName(), err)
+			return
 		}
 	}
 
+	v.GetSuccessCounter().Add(context.GetContext(), 1)
 	context.Add(GetVideoUploadFileParameterName(), genFil)
 	context.Add(v.GetOutputParam(), genFil)
 }

@@ -16,6 +16,7 @@ package workflow_test
 
 import (
 	"fmt"
+	"log"
 	"testing"
 
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
@@ -37,8 +38,8 @@ func TestMediaChain(t *testing.T) {
 
 	mediaIngestion.Execute(chainCtx)
 
-	for _, err := range chainCtx.GetErrors() {
-		fmt.Println(err.Error())
+	for k, err := range chainCtx.GetErrors() {
+		fmt.Printf("Error: (%s): %v\n", k, err)
 	}
 
 	if chainCtx.HasErrors() {
@@ -49,5 +50,5 @@ func TestMediaChain(t *testing.T) {
 
 	span.SetStatus(codes.Ok, "passed - media ingestion test")
 
-	fmt.Println(chainCtx.Get("MEDIA"))
+	log.Println(chainCtx.Get("MEDIA"))
 }

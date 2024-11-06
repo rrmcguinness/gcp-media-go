@@ -14,6 +14,9 @@
 package commands
 
 import (
+	"encoding/json"
+	"fmt"
+	"github.com/GoogleCloudPlatform/solutions/media/pkg/cloud"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/cor"
 	"github.com/GoogleCloudPlatform/solutions/media/pkg/model"
 )
@@ -30,11 +33,17 @@ func NewMediaSummaryJsonToStruct(name string, outputParamName string) *MediaSumm
 
 func (s *MediaSummaryJsonToStruct) Execute(context cor.Context) {
 	in := context.Get(s.GetInputParam()).(string)
-	doc, err := model.MediaSummaryFromJSON(in)
+	gcsFile := context.Get(cloud.GetGCSObjectName()).(*cloud.GCSObject)
+
+	doc := &model.MediaSummary{}
+	err := json.Unmarshal([]byte(in), &doc)
 	if err != nil {
-		context.AddError(err)
+		s.GetErrorCounter().Add(context.GetContext(), 1)
+		context.AddError(s.GetName(), err)
 		return
 	}
+	s.GetSuccessCounter().Add(context.GetContext(), 1)
+	doc.MediaUrl = fmt.Sprintf("https://storage.mtls.cloud.google.com/%s/%s", gcsFile.Bucket, gcsFile.Name)
 	context.Add(s.GetOutputParam(), doc)
 	context.Add(cor.CtxOut, doc)
 }
