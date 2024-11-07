@@ -72,6 +72,11 @@ command(
 command(
     name = "services",
     command = "//web/apps/api_server",
+    data = [
+        "//:copy_ffmpeg",
+        "//configs:.env.local.toml",
+        "//configs:.env.toml",
+    ],
 )
 
 multirun(

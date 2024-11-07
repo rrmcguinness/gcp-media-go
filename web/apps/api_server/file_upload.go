@@ -23,6 +23,8 @@ import (
 )
 
 func FileUpload(r *gin.RouterGroup) {
+	config := GetConfig()
+
 	upload := r.Group("/uploads")
 	{
 		upload.POST("", func(c *gin.Context) {
@@ -32,7 +34,7 @@ func FileUpload(r *gin.RouterGroup) {
 				return
 			}
 			files := form.File["files"]
-			bucket := state.cloud.StorageClient.Bucket("media_high_res_resources")
+			bucket := state.cloud.StorageClient.Bucket(config.Storage.HiResInputBucket)
 
 			for _, file := range files {
 				localPath := filepath.Join(os.TempDir(), file.Filename)

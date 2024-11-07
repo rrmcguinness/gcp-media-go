@@ -37,7 +37,7 @@ func SetupOS() (err error) {
 	if err != nil {
 		return err
 	}
-	err = os.Setenv(cloud.EnvConfigRuntime, "test")
+	err = os.Setenv(cloud.EnvConfigRuntime, "local")
 	return err
 }
 
@@ -67,9 +67,9 @@ func InitState(ctx context.Context) {
 
 	state.cloud = cloudClients
 
-	datasetName := "media_ds"
-	mediaTableName := "media"
-	embeddingTableName := "scene_embeddings"
+	datasetName := config.BigQueryDataSource.DatasetName
+	mediaTableName := config.BigQueryDataSource.MediaTable
+	embeddingTableName := config.BigQueryDataSource.EmbeddingTable
 
 	state.searchService = &services.SearchService{
 		BigqueryClient: cloudClients.BiqQueryClient,

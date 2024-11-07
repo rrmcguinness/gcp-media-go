@@ -21,7 +21,6 @@ const Footer = () => {
             bottom: 0,
             height: '3.5em',
             width: '100vw',
-            backgroundColor: '#FFFFFF',
             zIndex: 999,
             borderTop: '0.5px solid #AAA',
             alignContent: 'center'
