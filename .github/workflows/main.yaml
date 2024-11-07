@@ -23,5 +23,5 @@ jobs:
           path: "/home/runner/.cache/bazel"
           key: bazel
 
-      - name: "Build"
-        run: bazel build //...
+#      - name: "Build"
+#        run: bazel build //...

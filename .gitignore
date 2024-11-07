@@ -86,7 +86,8 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-configs/.env.*.toml
+./configs/.env.local.toml
+./configs/.env.test.toml
 
 # Aspect files
 .aspect
