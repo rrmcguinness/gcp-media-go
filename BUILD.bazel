@@ -1,18 +1,9 @@
 load("@bazel_gazelle//:def.bzl", "gazelle")
+load("@rules_multirun//:defs.bzl", "command", "multirun")
 load("//:build/copy_file_groups.bzl", "copy_file_groups")
 
 gazelle(name = "gazelle")
 # gazelle:prefix github.com/GoogleCloudPlatform/solutions/media
-
-gazelle(
-    name = "gazelle-update-repos",
-    args = [
-        "-from_file=go.mod",
-        "-to_macro=deps.bzl%go_dependencies",
-        "-prune",
-    ],
-    command = "update-repos",
-)
 
 config_setting(
     name = "linux_x86_64",
@@ -64,4 +55,30 @@ copy_file_groups(
     }),
     prefix = "bin",
     visibility = ["//visibility:public"],
+)
+
+command(
+    name = "site",
+    arguments = [
+        "preview",
+        "--port",
+        "4000",
+        "--mode",
+        "dev",
+    ],
+    command = "//web/apps/media-search:dev",
+)
+
+command(
+    name = "services",
+    command = "//web/apps/api_server",
+)
+
+multirun(
+    name = "demo",
+    commands = [
+        ":services",
+        ":site",
+    ],
+    jobs = 0,
 )
