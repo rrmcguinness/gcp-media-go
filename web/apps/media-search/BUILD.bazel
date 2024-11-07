@@ -44,7 +44,6 @@ RUNTIME_DEPS = [
     ":node_modules/react-dom",
     ":node_modules/react-drag-drop-files",
     ":node_modules/react-router-dom",
-    ":node_modules/vite",
 ]
 
 ts_project(
@@ -79,7 +78,7 @@ vite_bin.vite_binary(
 
 js_run_binary(
     name = "build",
-    srcs = RUNTIME_DEPS,
+    srcs = RUNTIME_DEPS + [":node_modules/vite"],
     args = ["build"],
     mnemonic = "ViteBuild",
     out_dirs = ["dist"],
