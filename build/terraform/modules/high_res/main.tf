@@ -26,7 +26,7 @@ data "google_storage_project_service_account" "gcs_account" {
 
 # trunk-ignore(checkov/CKV_GCP_83)
 resource "google_pubsub_topic" "media_high_res_events" {
-  name = "media_high_res_events"
+  name = var.high_res_bucket
   message_storage_policy {
     allowed_persistence_regions = [var.region]
   }
@@ -42,7 +42,7 @@ resource "google_pubsub_topic" "media_high_res_events_dead_letter" {
 
 
 resource "google_storage_bucket" "media_high_res_resources" {
-  name          = "media_high_res_resources"
+  name          = "high_res_resources"
   location      = var.region
   uniform_bucket_level_access = true
   force_destroy = true
