@@ -23,7 +23,7 @@ to make it operate well.
 ## Go Lang tool setup
 
 Since this if for IntelliJ Ultimate, you should install a couple of the 
-go tools first and ensure they are on your path. View the [Read Me](../README.md)
+go tools first and ensure they are on your path. View the [Workstation Setup](WorkstationSetup.md)
 file at the root for more information.
 
 ## Plugins

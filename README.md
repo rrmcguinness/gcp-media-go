@@ -21,42 +21,19 @@ and enabling AI interactions with the data. The modular side of the project is b
 Chain of Responsibility (COR) design pattern. Each unit of work is atomic and state is only
 conveyed via Context to each chain and/or command.
 
-## Setting up your Go Lang environment
+## Developer Tools
+
+Use the following instructions to set up a development environment:
+* [Workstation Setup](WorkstationSetup.md]
+* [Setting Up IntelliJ](SettingUpIntelliJ.md]
+* [Setting Up Visual Studio Code](SettingUpVisualStudioCode.md]
+
+## Running the Demo
 
 ```shell
-# Install Buildifier, Buildozer, and Unused Deps
-go install github.com/bazelbuild/buildtools/buildifier@latest
-go install github.com/bazelbuild/buildtools/buildozer@latest
-go install github.com/bazelbuild/buildtools/unused_deps@latest
-
-# Install dlv, the golang debugger
-go install github.com/go-delve/delve/cmd/dlv@latest
-
-# Lastly, add go tooling to your system path
-# vim ~/.zshrc or ~/.bashrc or ~/.bash_profile
-# export PATH=$PATH:$HOME/go/bin
-```
-
-## Tooling
-
-Bazel is a unique build tool in that it supports most modern languages and propagates the
-mono-repo style of development. In addition it's ideal for Go as it builds a hermetic
-environment to run your CI/CD pipelines in.
-
-```shell
-# Add Node JS to your development environment
-
-# Install the version manager
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.0/install.sh | bash
-
-# Reload your profile
-source ~/.zshrc 
-
-# Install Node
-nvm install 22
-
-# Install Bazelisk (used for managing multiple Bazel environments)
-npm install -g bazelisk
+# The following command combines two commands to simplify how the demo can be run
+# bazel run //web/apps/api_server and bazel run //web/apps/media-search:start  
+bazel run //:demo
 ```
 
 ## Building
@@ -84,23 +61,9 @@ bazel clean
 
 # Clean all cache
 bazel clean --expunge
-```
 
-## Dependencies
-
-The process for updating dependencies requires two steps:
-
-1) Add a dependency using go `go get ...`
-2) Make bazel aware of the change: `bazel run //:gazelle-update-repos`
-
-> NOTE: Since bazel builds all go dependencies it's important to keep these in sync.
-
-## Using Gazelle
-
-Gazelle is a go program created to make developing Go for the enterprise a little more seamless.
-
-```shell
-# Update all build scripts: USE with caution as it may break existing builds
+# Update Build Files and Dependencies
+# Used when getting "missing strict dependency errors"
 bazel run //:gazelle
 ```
 
