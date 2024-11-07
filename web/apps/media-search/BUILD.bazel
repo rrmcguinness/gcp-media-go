@@ -3,22 +3,36 @@ load("@aspect_rules_swc//swc:defs.bzl", "swc")
 load("@aspect_rules_ts//ts:defs.bzl", "ts_config", "ts_project")
 load("@bazel_skylib//lib:partial.bzl", "partial")
 load("@npm//:defs.bzl", "npm_link_all_packages")
-load("@npm//web/apps/media-search:tsconfig-to-swcconfig/package_json.bzl", tsconfig_to_swcconfig = "bin")
 load("@npm//web/apps/media-search:vite/package_json.bzl", vite_bin = "bin")
 
 npm_link_all_packages()
 
-CONFIGS = [
-    "tsconfig.app.json",
-    "tsconfig.json",
-    "tsconfig.node.json",
-    "vite.config.mts",
-]
+ts_config(
+    name = "tsconfig",
+    src = "tsconfig.json",
+    visibility = ["//visibility:public"],
+    deps = [
+        "tsconfig.app.json",
+        "tsconfig.node.json",
+    ],
+)
+
+js_library(
+    name = "package_json",
+    srcs = ["package.json"],
+)
+
+js_library(
+    name = "assets",
+    srcs = glob(["src/assets/**/*"]),
+)
 
 RUNTIME_DEPS = [
-    "index.html",
+    ":assets",
     "//web/apps/media-search/public",
     "//web/apps/media-search/src",
+    "index.html",
+    ":package_json",
     ":node_modules/@emotion/react",
     ":node_modules/@emotion/styled",
     ":node_modules/@mui/icons-material",
@@ -32,60 +46,14 @@ RUNTIME_DEPS = [
     ":node_modules/react-router-dom",
 ]
 
-DEV_DEPS = [
-    ":node_modules/tsconfig-to-swcconfig",
-    ":node_modules/@vitejs/plugin-react-swc",
-    ":node_modules/@bazel/ibazel",
-    ":node_modules/@eslint/js",
-    ":node_modules/@types/react",
-    ":node_modules/@types/react-dom",
-    ":node_modules/eslint",
-    ":node_modules/eslint-plugin-react-hooks",
-    ":node_modules/eslint-plugin-react-refresh",
-    ":node_modules/globals",
-    ":node_modules/typescript",
-    ":node_modules/typescript-eslint",
-    ":node_modules/vite",
-]
-
-ts_config(
-    name = "tsconfig",
-    src = "tsconfig.json",
-    visibility = ["//visibility:public"],
-)
-
-# Configure the transpiler
-tsconfig_to_swcconfig.t2s(
-    name = "write_swcrc",
-    srcs = CONFIGS,
-    args = [
-        "--filename",
-        "$(location tsconfig.json)",
-    ],
-    stdout = ".swcrc",
-)
-
-js_library(
-    name = "package_json",
-    srcs = ["package.json"],
-)
-
-js_library(
-    name = "assets",
-    srcs = glob(["src/assets/**/*"]),
-)
-
 ts_project(
     name = "media-search",
     srcs = [
         "index.html",
-        "tsconfig.app.json",
-        "tsconfig.node.json",
         ":assets",
         ":package_json",
     ],
     data = [
-        ":write_swcrc",
         "//web/apps/media-search/public",
         "//web/apps/media-search/src",
     ],
@@ -94,8 +62,10 @@ ts_project(
 
 js_library(
     name = "vite.config",
-    srcs = CONFIGS,
-    data = DEV_DEPS,
+    srcs = ["vite.config.mts"],
+    data = [
+        ":node_modules/@vitejs/plugin-react-swc",
+    ],
 )
 
 vite_bin.vite_binary(
@@ -103,7 +73,7 @@ vite_bin.vite_binary(
     chdir = package_name(),
     data = [
         ":vite.config",
-    ] + DEV_DEPS,
+    ],
 )
 
 js_run_binary(
@@ -115,16 +85,8 @@ js_run_binary(
     tool = ":vite",
 )
 
-# Runs using iBazel
-#js_run_devserver(
-#    name = "start",
-#    args = ["."],
-#    data = RUNTIME_DEPS,
-#    tool = ":vite",
-#)
-
 vite_bin.vite_binary(
-    name = "dev",
+    name = "start",
     args = [
         "preview",
         "--port",

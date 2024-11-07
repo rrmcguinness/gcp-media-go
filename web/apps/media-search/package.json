@@ -4,10 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "start": "ibazel run //web/apps/media-search:start",
+    "build": "bazel build //web/apps/media-search:build",
+    "serve": "bazel run //web/apps/media-search:preview"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
