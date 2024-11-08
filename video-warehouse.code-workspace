@@ -1,31 +1,27 @@
 {
     "folders": [
         {
-            "name": "configs",
+            "name": "Configuration",
             "path": "configs"
         },
         {
-            "name": "api",
-            "path": "api"
+            "name": "Documents",
+            "path": "docs"
         },
         {
-            "name": "cmd",
-            "path": "cmd"
-        },
-        {
-            "name": "pkg",
+            "name": "Packages",
             "path": "pkg"
         },
         {
-            "name": "web",
+            "name": "Web",
             "path": "web"
         },
         {
-            "name": "test",
+            "name": "Testing",
             "path": "test"
         },
         {
-            "name": "third_party",
+            "name": "Third Party Assets",
             "path": "third_party"
         },
         {
