@@ -14,7 +14,7 @@
 
 variable "project_id" {
   type = string
-  default = "rmcguinness"
+  default = ""
 }
 
 variable "region" {
@@ -25,4 +25,12 @@ variable "region" {
 variable "media_low_res_schema_name" {
     type = string
     default = "media_low_res_schema"
+}
+
+variable "low_res_bucket" {
+    type = string
+}
+
+variable "high_res_bucket" {
+    type = string
 }

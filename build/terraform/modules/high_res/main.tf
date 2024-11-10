@@ -42,7 +42,7 @@ resource "google_pubsub_topic" "media_high_res_events_dead_letter" {
 
 
 resource "google_storage_bucket" "media_high_res_resources" {
-  name          = "media_high_res_resources"
+  name          = var.high_res_bucket
   location      = var.region
   uniform_bucket_level_access = true
   force_destroy = true

@@ -30,11 +30,13 @@ provider "google" {
 module "low_res_resources" {
   source = "./modules/low_res"
   region = var.region
+  low_res_bucket = var.low_res_bucket
 }
 
 module "high_res_resources" {
   source = "./modules/high_res"
   region = var.region
+  high_res_bucket = var.high_res_bucket
 }
 
 module "bigquery" {
