@@ -2,13 +2,6 @@ load("@aspect_bazel_lib//lib:copy_to_bin.bzl", "copy_to_bin")
 
 copy_to_bin(
     name = "public",
-    srcs = glob([
-        "favicon.ico",
-        "**/*.css",
-        "**/*.jpg",
-        "**/*.svg",
-        "**/*.png",
-        "**/*.webp",
-    ]),
+    srcs = ["favicon.ico"],
     visibility = ["//web/apps/media-search:__subpackages__"],
 )

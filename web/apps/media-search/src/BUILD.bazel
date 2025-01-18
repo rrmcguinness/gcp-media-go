@@ -19,7 +19,6 @@ copy_to_bin(
     srcs = glob([
         "**/*.css",
         "**/*.svg",
-        "**/*.png",
         "**/*.webp",
         "**/*.ts",
         "**/*.tsx",

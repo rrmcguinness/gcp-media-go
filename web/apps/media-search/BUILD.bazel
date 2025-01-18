@@ -21,13 +21,15 @@ js_library(
     srcs = ["package.json"],
 )
 
-js_library(
-    name = "assets",
-    srcs = glob(["src/assets/**/*"]),
-)
+#js_library(
+#    name = "assets",
+#    srcs = glob([
+#        "src/assets/*.webp",
+#        "src/assets/*.svg",
+#    ]),
+#)
 
 RUNTIME_DEPS = [
-    ":assets",
     "//web/apps/media-search/public",
     "//web/apps/media-search/src",
     "index.html",
@@ -49,7 +51,6 @@ ts_project(
     name = "media-search",
     srcs = [
         "index.html",
-        ":assets",
         ":package_json",
         "//web/apps/media-search/public",
         "//web/apps/media-search/src",
